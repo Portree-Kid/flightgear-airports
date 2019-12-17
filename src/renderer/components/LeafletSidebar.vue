@@ -4,8 +4,7 @@
     <div class="leaflet-sidebar-tabs">
         <ul role="tablist"> <!-- top aligned tabs -->
             <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
-            <li><a href="#messages" role="tab"><i class="fa fa-envelope"></i></a></li>
-            <li><a href="#profile" role="tab"><i class="fa fa-user"></i></a></li>
+            <li><a href="#scan" role="tab"><i class="fa fa-search"></i></a></li>
         </ul>
 
         <ul role="tablist"> <!-- bottom aligned tabs -->
@@ -22,14 +21,11 @@
             </h1>
             <p>A responsive sidebar for mapping libraries</p>
         </div>
-
-        <div class="leaflet-sidebar-pane" id="messages">
-            <h1 class="leaflet-sidebar-header">Messages<div class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
-            <el-select v-model="value" placeholder="Select"><el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">  </el-option>    </el-select>
+        <div class="leaflet-sidebar-pane" id="scan">
+          <RunScan></RunScan>
         </div>
-
-        <div class="leaflet-sidebar-pane" id="profile">
-            <h1 class="leaflet-sidebar-header">Profile<div class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
+        <div class="leaflet-sidebar-pane" id="settings">
+          <SettingsPanel></SettingsPanel>
         </div>
     </div>
 </div>  
@@ -41,10 +37,12 @@
   import {} from 'leaflet-sidebar-v2'
   import L from 'leaflet'
   import SettingsPanel from './SettingsPanel'
+  import RunScan from './RunScan'
+  import FileSelect from './FileSelect'
 
   export default {
     name: 'leaflet-sidebar',
-    components: { SettingsPanel },
+    components: { SettingsPanel, RunScan, FileSelect },
     props: [],
     mounted () {
       this.add()
@@ -54,25 +52,6 @@
     },
     data () {
       return {
-        message: 'BLBL',
-        checkbox: true,
-        options: [{
-          value: 'Option1',
-          label: 'Option1'
-        }, {
-          value: 'Option2',
-          label: 'Option2'
-        }, {
-          value: 'Option3',
-          label: 'Option3'
-        }, {
-          value: 'Option4',
-          label: 'Option4'
-        }, {
-          value: 'Option5',
-          label: 'Option5'
-        }],
-        value: ''
       }
     },
     methods: {
@@ -84,20 +63,6 @@
           position: 'left' // left or right
         })
         parent.addControl(this.sidebar)
-
-        this.sidebar.addPanel({
-          id: 'properties',
-          tab: '<i class="fa fa-road vertical-center"/>',
-          title: 'Properties',
-          pane: '<div id="properties-tab"></div>'
-        })
-
-        this.sidebar.addPanel({
-          id: 'settings',
-          tab: '<i class="fa fa-gear vertical-center"/>',
-          title: 'Settings',
-          pane: '<div id="settings-div"></div>'
-        })
       },
       remove () {
         if (this.sidebar) {
@@ -108,6 +73,8 @@
         if (this.$parent._isMounted) {
           this.deferredMountedTo(this.$parent.mapObject)
         }
+      },
+      scan () {
       }
     },
     computed: {

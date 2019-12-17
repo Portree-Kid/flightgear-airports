@@ -3,6 +3,7 @@
       <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
       <l-marker :lat-lng="marker"></l-marker>
       <LeafletSidebar></LeafletSidebar>
+      <EditLayer></EditLayer>
     </l-map>
 </template>
 
@@ -10,6 +11,7 @@
   import 'leaflet/dist/leaflet.css'
   import { LMap, LTileLayer, LMarker } from 'vue2-leaflet'
   import LeafletSidebar from './LeafletSidebar'
+  import EditLayer from './EditLayer'
   import L from 'leaflet'
 
   // https://github.com/KoRiGaN/Vue2Leaflet/issues/103
@@ -22,7 +24,7 @@
   })
   export default {
     name: 'flightgear-map',
-    components: { LMap, LTileLayer, LMarker, LeafletSidebar },
+    components: { LMap, LTileLayer, LMarker, LeafletSidebar, EditLayer },
     props: [],
     mounted () {
 
