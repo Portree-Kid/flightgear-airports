@@ -73,7 +73,6 @@ async function scanAPT() {
     return initDB().then(features => {
         var d = path.join(homedir, 'Documents/apt.dat');
         scanAPTIntoDB(d, features);
-        features.close();
         console.log("Closed DB");
     });
 }
