@@ -1,25 +1,16 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 // import from 'electron-settings'
-import createPersistedState from 'vuex-persistedstate'
+// import the auto exporter
+import createLogger from 'vuex/dist/logger'
+import modules from './modules'
 
 Vue.use(Vuex)
 
+const debug = process.env.NODE_ENV !== 'production'
+
 export default new Vuex.Store({
-  state: {
-    settings: { flightgearDirectory: '.' }
-  },
-  actions: {
-  },
-  mutations: {
-    'DELETE_INDEXED_DB' () {},
-    'SETTINGS_DIRECTORY' (state, flightgearDirectory) {
-      state.settings.flightgearDirectory = flightgearDirectory
-    }
-  },
-  getters: {
-    hydrated: state => state.hydrated
-  },
-  plugins: [createPersistedState()],
-  strict: true
+  modules,
+  strict: debug,
+  plugins: debug ? [createLogger()] : [] // set logger only for development
 })

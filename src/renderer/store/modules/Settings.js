@@ -1,25 +1,24 @@
+import createPersistedState from 'vuex-persistedstate'
+
 const state = {
-  flightgearPath: ''
+  settings: { flightgearDirectory: '.' }
 }
 
 const mutations = {
-  DECREMENT_MAIN_COUNTER (state) {
-    state.main--
-  },
-  INCREMENT_MAIN_COUNTER (state) {
-    state.main++
+  'DELETE_INDEXED_DB' () { },
+  'SETTINGS_DIRECTORY' (state, flightgearDirectory) {
+    state.settings.flightgearDirectory = flightgearDirectory
   }
 }
 
+const plugins = [createPersistedState()]
+
 const actions = {
-  someAsyncTask ({ commit }) {
-    // do something async
-    commit('INCREMENT_MAIN_COUNTER')
-  }
 }
 
 export default {
   state,
   mutations,
-  actions
+  actions,
+  plugins
 }

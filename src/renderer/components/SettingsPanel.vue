@@ -33,20 +33,14 @@
       }
     },
     methods: {
-      buttonClick: function () {
-        this.$store.commit('TOGGLE_HYDRATED')
-      },
       directorySelect: function (flightgearDirectory) {
         console.log(flightgearDirectory)
         this.$store.commit('SETTINGS_DIRECTORY', flightgearDirectory.path)
       }
     },
     computed: {
-      hydrated: function () {
-        return this.$store.state.hydrated
-      },
       flightgear_directory: function () {
-        return this.$store.state.settings.flightgearDirectory
+        return this.$store.state.Settings.settings.flightgearDirectory
       }
     }
   }
