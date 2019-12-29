@@ -13,7 +13,6 @@ export default new VueIdb({
   },
   apis: {
     bigs: {
-      all: () => axios.get('/dev/data/data.json')
     }
   }
 })

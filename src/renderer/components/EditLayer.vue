@@ -5,30 +5,40 @@
 </template>
 
 <script lang="js">
+  import { LMap, LMarker } from 'vue2-leaflet'
   import L from 'leaflet'
+
   export default {
     name: 'edit-layer',
     props: [],
     mounted () {
-      this.add()
+      console.log(LMap)
+      console.log(LMarker)
+      console.log(L)
+      this.$store.dispatch('getAirports')
+      console.log(this.$store.state.Airports.airports)
+      LMap.on('dragend', function onDragEnd () {
+        var width = L.Map.getBounds().getEast() - L.Map.getBounds().getWest()
+        var height = L.Map.getBounds().getNorth() - L.Map.getBounds().getSouth()
+        console.log(
+          'center:' + L.Map.getCenter() + '\n' +
+          'width:' + width + '\n' +
+          'height:' + height + '\n' +
+          'size in pixels:' + L.Map.getSize()
+        )
+      })
     },
     beforeDestroy () {
       this.remove()
     },
     data () {
       return {
-
       }
     },
     methods: {
       deferredMountedTo (parent) {
-        this.sidebar = L.control.sidebar({
-          autopan: false, // whether to maintain the centered map point when opening the sidebar
-          closeButton: true, // whether t add a close button to the panes
-          container: 'sidebar', // the DOM container or #ID of a predefined sidebar container that should be used
-          position: 'left' // left or right
-        })
-        parent.addControl(this.sidebar)
+        console.log(parent)
+        console.log(L)
       },
       remove () {
         if (this.sidebar) {

@@ -8,15 +8,6 @@ async function initDB() {
         if (features == null) {
             console.log("Loading DB");
             console.log(this.indexedDB);
-//            var deleteRequest = indexedDB.deleteDatabase("flightgear");
-//            deleteRequest.onerror = function (event) {
-//                console.log(event);                
-//                reject(event);
-//            };
-//            deleteRequest.onsuccess = function (event) {
-//                console.log(event);                
-//            };
-
             var request = this.indexedDB.open("flightgear", 2);
             request.onerror = function (event) {
                 reject(event);
@@ -58,25 +49,6 @@ async function initDB() {
                 }
                 
             };
-            // db.loadDatabase({}, function (err) {
-            //     if (err) {
-            //         console.error("Error loading DB");
-            //         console.error(err);
-            //         db.addCollection('features', {
-            //             unique: ["properties.icao"], autoupdate: true
-            //         });
-            //         features = db.getCollection('features');
-            //     }
-            //     features = db.getCollection('features');
-            //     if( features == null ){
-            //         db.addCollection('features', {
-            //             unique: ["properties.icao"], autoupdate: true
-            //         });
-            //         features = db.getCollection('features');
-            //     }
-            //     console.log("Loaded " + features.count() + " features");
-            //     resolve(features);
-            // });
         }
         else {
             resolve(features);

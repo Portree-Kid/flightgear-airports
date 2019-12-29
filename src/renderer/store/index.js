@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-// import from 'electron-settings'
-// import the auto exporter
+import createPersistedState from 'vuex-persistedstate'
+
 import createLogger from 'vuex/dist/logger'
 import modules from './modules'
 
@@ -12,5 +12,5 @@ const debug = process.env.NODE_ENV !== 'production'
 export default new Vuex.Store({
   modules,
   strict: debug,
-  plugins: debug ? [createLogger()] : [] // set logger only for development
+  plugins: debug ? [createLogger(), createPersistedState({paths: ['Settings']})] : [] // set logger only for development
 })

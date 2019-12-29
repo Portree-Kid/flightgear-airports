@@ -8,10 +8,17 @@
     </h1>
     <div id="panel" width="100%">
       <el-row>
+        <el-col :span="7">Airports Directory</el-col>
+        <el-col :span="15">{{ airports_directory }}</el-col>
+        <el-col :span="2">
+          <directory-select @input="airportsDirectorySelect"></directory-select>
+        </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="7">Flightgear Directory</el-col>
         <el-col :span="15">{{ flightgear_directory }}</el-col>
         <el-col :span="2">
-          <directory-select @input="directorySelect"></directory-select>
+          <directory-select @input="flightgearDirectorySelect"></directory-select>
         </el-col>
       </el-row>
     </div>
@@ -33,14 +40,21 @@
       }
     },
     methods: {
-      directorySelect: function (flightgearDirectory) {
+      flightgearDirectorySelect: function (flightgearDirectory) {
         console.log(flightgearDirectory)
-        this.$store.commit('SETTINGS_DIRECTORY', flightgearDirectory.path)
+        this.$store.commit('FLIGHTGEAR_DIRECTORY', flightgearDirectory.path)
+      },
+      airportsDirectorySelect: function (flightgearDirectory) {
+        console.log(flightgearDirectory)
+        this.$store.commit('AIPORTS_DIRECTORY', flightgearDirectory.path)
       }
     },
     computed: {
       flightgear_directory: function () {
         return this.$store.state.Settings.settings.flightgearDirectory
+      },
+      airports_directory: function () {
+        return this.$store.state.Settings.settings.airportsDirectory
       }
     }
   }

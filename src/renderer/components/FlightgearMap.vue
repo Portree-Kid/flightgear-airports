@@ -1,15 +1,31 @@
 <template>
-    <l-map :zoom="zoom" :center="center">
-      <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
-      <l-marker :lat-lng="marker"></l-marker>
-      <LeafletSidebar></LeafletSidebar>
-      <EditLayer></EditLayer>
-    </l-map>
+  <l-map
+    :zoom="zoom"
+    :center="center"
+    @update:zoom="zoomUpdated"
+    @update:center="centerUpdated"
+    @update:bounds="boundsUpdated"
+  >
+    <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
+    <!--<l-marker :lat-lng="marker"></l-marker>-->
+    <LeafletSidebar></LeafletSidebar>
+    <EditLayer></EditLayer>
+    <l-layer-group layerType="overlay" name="Sources">
+      <l-circle
+        v-for="(item, index) in this.$store.state.Airports.airports"
+        :key="index"
+        :lat-lng="[item.geometry.coordinates[1], item.geometry.coordinates[0]]"
+        :radius="((item.properties.flights+5)*20)"
+        :color="item.properties.color"
+        @click="onClick(item)"
+      ></l-circle>
+    </l-layer-group>
+  </l-map>
 </template>
 
 <script lang="js">
   import 'leaflet/dist/leaflet.css'
-  import { LMap, LTileLayer, LMarker } from 'vue2-leaflet'
+  import { LMap, LTileLayer, LMarker, LCircle, LLayerGroup } from 'vue2-leaflet'
   import LeafletSidebar from './LeafletSidebar'
   import EditLayer from './EditLayer'
   import L from 'leaflet'
@@ -24,21 +40,37 @@
   })
   export default {
     name: 'flightgear-map',
-    components: { LMap, LTileLayer, LMarker, LeafletSidebar, EditLayer },
+    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, EditLayer, LLayerGroup },
     props: [],
     mounted () {
 
     },
     data () {
       return {
-        zoom: 13,
-        center: L.latLng(47.413220, -1.219482),
+        zoom: this.$store.state.Settings.zoom,
+        center: this.$store.state.Settings.center,
         url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-        marker: L.latLng(47.413220, -1.219482)
+        marker: L.latLng(47.413220, -1.219482),
+        airports: this.$store.state.Airports.airports
       }
     },
     methods: {
+      onClick (item) {
+        console.log(item)
+        this.$store.commit('SET_EDIT_AIRPORT', item)
+      },
+      zoomUpdated (zoom) {
+        this.zoom = zoom
+        this.$store.commit('ZOOM', this.zoom)
+      },
+      centerUpdated (center) {
+        this.center = center
+        this.$store.commit('CENTER', this.center)
+      },
+      boundsUpdated (bounds) {
+        this.bounds = bounds
+      }
     },
     computed: {
 
@@ -47,13 +79,13 @@
 </script>
 
 <style scoped lang="scss">
-  .vue2leaflet-map {
-    height: 100%;
-  }
-  .l-map{
-    height: 100%;
-  }
-  .flightgear-map {
-     color: aqua
-  }
+.vue2leaflet-map {
+  height: 100%;
+}
+.l-map {
+  height: 100%;
+}
+.flightgear-map {
+  color: aqua;
+}
 </style>

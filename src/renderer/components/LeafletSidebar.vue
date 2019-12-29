@@ -4,6 +4,7 @@
     <div class="leaflet-sidebar-tabs">
         <ul role="tablist"> <!-- top aligned tabs -->
             <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
+            <li><a href="#airports" role="tab"><i class="fa fa-pencil"></i></a></li>
             <li><a href="#scan" role="tab"><i class="fa fa-search"></i></a></li>
         </ul>
 
@@ -21,7 +22,14 @@
             </h1>
             <p>A responsive sidebar for mapping libraries</p>
         </div>
+        <div class="leaflet-sidebar-pane" id="airports">
+          <AirportEdit></AirportEdit>
+        </div>
         <div class="leaflet-sidebar-pane" id="scan">
+            <h1 class="leaflet-sidebar-header">
+                Scanning
+                <div class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></div>
+            </h1>
           <RunScan></RunScan>
         </div>
         <div class="leaflet-sidebar-pane" id="settings">
@@ -36,13 +44,14 @@
   import 'font-awesome/css/font-awesome.css'
   import {} from 'leaflet-sidebar-v2'
   import L from 'leaflet'
+  import AirportEdit from './AirportEdit'
   import SettingsPanel from './SettingsPanel'
   import RunScan from './RunScan'
   import FileSelect from './FileSelect'
 
   export default {
     name: 'leaflet-sidebar',
-    components: { SettingsPanel, RunScan, FileSelect },
+    components: { AirportEdit, SettingsPanel, RunScan, FileSelect },
     props: [],
     mounted () {
       this.add()

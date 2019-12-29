@@ -1,10 +1,10 @@
 <template>
   <div>
-    <el-container direction='vertical'>      
-    <el-button @click="scanAPT()">Scan APT File</el-button>
-    <el-button @click="scanGroundnets()">Scan Groundnet Files</el-button>
-    <el-button @click="scanTraffic()">Scan Traffic Files</el-button>
-    </el-container>      
+    <el-container direction="vertical">
+      <el-button @click="scanAPT()">Scan APT File</el-button>
+      <el-button @click="scanGroundnets()">Scan Groundnet Files</el-button>
+      <el-button @click="scanTraffic()">Scan Traffic Files</el-button>
+    </el-container>
   </div>
 </template>
 
@@ -38,11 +38,14 @@
           console.log(fileUrl('src/renderer/utils/worker.js'))
 
           // var worker = new Worker(fileUrl('src/renderer/utils/worker.js'))
-          worker.postMessage('scanapt')
+          worker.postMessage(['scanapt'])
           // the reply
+          var store = this.$store
           worker.onmessage = function (e) {
             if (e.data === 'DONE') {
               console.log('DONE')
+              store.dispatch('getAirports')
+              worker.terminate()
             }
             console.log(e.data)
           }
@@ -60,12 +63,14 @@
           const worker = new Worker(winURL)
           console.log(fileUrl('src/renderer/utils/worker.js'))
 
-          // var worker = new Worker(fileUrl('src/renderer/utils/worker.js'))
-          worker.postMessage('scan')
+          worker.postMessage(['scan', this.$store.state.Settings.settings.airportsDirectory])
           // the reply
+          var store = this.$store
           worker.onmessage = function (e) {
             if (e.data === 'DONE') {
               console.log('DONE')
+              store.dispatch('getAirports')
+              worker.terminate()
             }
             console.log(e.data)
           }
@@ -83,13 +88,14 @@
 
           const worker = new Worker(winURL)
           console.log(fileUrl('src/renderer/utils/worker.js'))
-
-          // var worker = new Worker(fileUrl('src/renderer/utils/worker.js'))
-          worker.postMessage('scanai')
+          worker.postMessage(['scanai', this.$store.state.Settings.settings.flightgearDirectory])
           // the reply
+          var store = this.$store
           worker.onmessage = function (e) {
             if (e.data === 'DONE') {
               console.log('DONE')
+              store.dispatch('getAirports')
+              worker.terminate()
             }
             console.log(e.data)
           }

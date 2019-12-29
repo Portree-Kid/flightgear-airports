@@ -9,7 +9,7 @@
 // const apt = require('apt.js');
 
 async function asyncForEach(array, callback) {
-  console.log("Len " + array.length);
+  console.log("AsyncForEach Len " + array.length);
   for (let index = 0; index < array.length; index++) {
     try {
       var res = await callback(array[index], index, array);
@@ -31,6 +31,7 @@ function scanAPT_Old(p) {
 async function waitFor(milliseconds) {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
+
 
 async function scanGroundnetFiles(p, features) {
   var promise = new Promise(function (resolve, reject) {
@@ -68,6 +69,50 @@ async function scanGroundnetFiles(p, features) {
   });
 }
 
+async function scanTrafficFiles(p, features) {
+  var promise = new Promise(function (resolve, reject) {
+    try {
+      console.log('Start Groundnets ' + p);
+      var files = traverseDir(p);
+      console.log(files);
+
+      asyncForEach(files, async f => {
+        //await waitFor(5000);
+        try {
+          var text = await readAI(f, features);
+          console.log(text);
+          resolve(text);
+        } catch (error) {
+          console.error(error);
+          reject(error);
+        }
+      }).then(t => {
+        console.log("Finished");
+        features.close();
+        resolve();
+        this.postMessage('DONE');
+      }).catch(reason => {
+        console.log("Crashed");
+        console.log(reason);
+        features.close()
+        this.postMessage('DONE');
+      });
+
+      //walkDir(p, f => { readGroundnet(f, features) });
+
+    } catch (error) {
+      console.log(error);
+      reject(error);
+    }
+  });
+}
+
+/**
+ * 
+ * @param {*} p 
+ * @param {*} features 
+ */
+
 function scanTrafficIntoDB(p, features) {
   try {
     console.log('Start Traffic ' + p + ' ' + features);
@@ -85,9 +130,11 @@ function scanTrafficIntoDB(p, features) {
         console.log("No more entries!");
       }
     };
+
     walkDir(p, f => { readAI(f, features) });
     console.log("Closing");
     features.close();
+    this.postMessage('DONE');
     console.log("End Traffic");
   } catch (error) {
     console.log(error);
@@ -123,56 +170,88 @@ function walkDir(dir, callback) {
   });
 }
 
+/**
+ * 
+ * @param {*} f 
+ * @param {*} apts 
+ */
+
 function readAI(f, apts) {
-  try {
-    console.log(path.basename(f));
-    // Reset
-    var airline = path.basename(f).match('([^.]+)');
-    if (airline == null)
-      return;
-    var xmlSource = fs.readFileSync(f, 'utf8').toString();
-    console.debug("read " + path.basename(f));
-    // var doc = new domParser().parseFromString(xmlSource );
-    // console.log("parsed ");
-    // var flights = xpath.select("/trafficlist/flight", doc);
-    // console.log("selected flight ");
-    // console.log(flights);
-    var dat = tXml(xmlSource);
-    //    console.log(dat);
-    console.log(dat[0].children[0]);
+  var promise = new Promise(function (resolve, reject) {
+    try {
+      console.log(path.basename(f));
+      // Reset
+      var airline = path.basename(f).match('([^.]+)\.xml');
+      if (airline == null){
+        resolve();
+        return;
+      }
+      var xmlSource = fs.readFileSync(f, 'utf8').toString();
+      console.debug("read airline " + path.basename(f));
+      // var doc = new domParser().parseFromString(xmlSource );
+      // console.log("parsed ");
+      // var flights = xpath.select("/trafficlist/flight", doc);
+      // console.log("selected flight ");
+      // console.log(flights);
+      var dat = tXml(xmlSource);
+      //    console.log(dat);
+      if( !dat || !dat[0] || !dat[0].children || !dat[0].children[0] ) {
+        resolve();
+        return;
+      }
 
-    var flightNodes = dat[0].children[0].children.filter(e => e.tagName === 'flight');
-    flightNodes = tXml.simplify(flightNodes);
+      console.log(dat[0].children[0]);
 
-    console.log(flightNodes.flight);
+      var flightNodes = dat[0].children[0].children.filter(e => e.tagName === 'flight');
+      flightNodes = tXml.simplify(flightNodes);
+      if (!flightNodes || !flightNodes.flight) {
+        resolve();
+        return;
+      }
 
-    console.log("Departure flights " + flightNodes.flight.length);
+      console.log(flightNodes.flight);
 
-    var merged = new Array();
+      console.log("Departure flights " + flightNodes.flight.length);
 
-    flightNodes.flight.map(n => {
-      merged.push(n.departure.port);
-      merged.push(n.arrival.port);
-    }).sort();
+      var merged = new Array();
 
-    var counts = {};
-    for (var i = 0; i < merged.length; i++) {
-      counts[merged[i]] = 1 + (counts[merged[i]] || 0);
+      flightNodes.flight.map(n => {
+        merged.push(n.departure.port);
+        merged.push(n.arrival.port);
+      }).sort();
+
+      var counts = {};
+      for (var i = 0; i < merged.length; i++) {
+        counts[merged[i]] = 1 + (counts[merged[i]] || 0);
+      }
+      
+      asyncForEach(Object.keys(counts), async key => {
+        console.log(key);
+        await store(key, airline[0], counts[key]);
+      }).then(t => {
+        console.log("Finished");
+        resolve();
+      }).catch(reason => {
+        console.log("Crashed");
+        console.log(reason);
+        features.close()
+      });
+      //for (var key in counts) {
+      //  store(key, airline[0], counts[key]);
+      //}
+
+      // var flights = xpath.select("/trafficlist/flight/departure/port/text()", doc);
+      // console.log(nodes);
+      // console.log(nodes);
+      // nodes = xpath.select("/trafficlist/flight/arrival/port/text()", doc);
+      // console.log(nodes);
+
+    } catch (error) {
+      console.error(error);
+      reject(error);
     }
-
-    for (var key in counts) {
-      store(key, airline[0], counts[key]);
-    }
-
-    // var flights = xpath.select("/trafficlist/flight/departure/port/text()", doc);
-    // console.log(nodes);
-    // console.log(nodes);
-    // nodes = xpath.select("/trafficlist/flight/arrival/port/text()", doc);
-    // console.log(nodes);
-
-  } catch (error) {
-    console.error(error);
-  }
+  });
+  return promise;
 }
 
 /**
@@ -184,7 +263,7 @@ function readAI(f, apts) {
 
 function store(icao, airline, value) {
   var promise = new Promise(function (resolve, reject) {
-    console.log("Airport " + icao + " has " + value + " flights");
+    console.log("Airport " + icao + " has " + value + " new flights");
     // Make a request to get a record by key from the object store
     var transaction = features.transaction("airports", "readwrite");
     var objectStore = transaction.objectStore("airports");
@@ -313,10 +392,15 @@ async function readGroundnet(f, features) {
                 }
               } else if (filename[2] == 'groundnet') {
                 console.log('groundnet : ' + filename[1]);
-                var nodes = dat['?xml'].groundnet.TaxiNodes;
-                feature['properties']['groundnet'] = nodes ? true : false;
-                var nodes = dat['?xml'].groundnet.Parking;
-                feature['properties']['parking'] = nodes ? true : false;
+                if (dat['?xml'].groundnet) {
+                  var nodes = dat['?xml'].groundnet.TaxiNodes;
+                  if (nodes && nodes.node) {
+                    console.log(nodes);
+                  }
+                  feature['properties']['groundnet'] = nodes && nodes.node ? nodes.node.length : 0;
+                  var nodes = dat['?xml'].groundnet.parkingList;
+                  feature['properties']['parking'] = nodes && nodes.Parking ? nodes.Parking.length : 0;
+                }
               } else if (filename[2] == 'ils') {
                 console.log('ils : ' + filename[1]);
                 if (dat['?xml'].PropertyList.runways) {
@@ -380,7 +464,6 @@ function createFeature(icao) {
 }
 
 function mean(coord1, coord2) {
-
   return (coord1 + coord2) / 2;
 }
 // export default { scanAPT, scanTraffic, scanGroundnet }

@@ -18,8 +18,8 @@ function errorReceiver(event) {
 onmessage = function (event) {
     postMessage('scanStarted');
     console.log(event.data);
-    if (event.data === 'scan') {
-        scanGroundnet().then(result => {
+    if (event.data[0] === 'scan') {
+        scanGroundnet(event.data[1]).then(result => {
             console.log("DONE Scanning");
             postMessage('DONE', 'this');
             // event.origin.webContents.send('scanFinished');
@@ -28,8 +28,8 @@ onmessage = function (event) {
             console.log('Crashed');
             console.log(result);
         });
-    } else if (event.data === 'scanai') {
-        scanai().then(result => {
+    } else if (event.data[0] === 'scanai') {
+        scanai(event.data[1]).then(result => {
             console.log("DONE Scanning");
             postMessage('DONE');
             // event.origin.webContents.send('scanFinished');
@@ -39,8 +39,8 @@ onmessage = function (event) {
             console.log(result);
         });
     }
-    else if (event.data === 'scanapt') {
-        scanAPT().then(result => {
+    else if (event.data[0] === 'scanapt') {
+        scanAPT(event.data[1]).then(result => {
             console.log("DONE Scanning");
             postMessage('DONE');
             // event.origin.webContents.send('scanFinished');
@@ -53,28 +53,34 @@ onmessage = function (event) {
     }
 };
 
-async function scanGroundnet() {
+async function scanGroundnet(fdir) {
     var promise = new Promise(function (resolve, reject) {
         return initDB().then(features => {
-            var d = path.join(homedir, '/Documents/Flightgear/main/Airports/A');
+            var d = path.join(fdir);
             scanGroundnetFiles(d, features);
         });
     });
     return promise;
 }
 
-function scanai() {
-    return initDB().then(features => {
-        scanTrafficIntoDB("C:/GIT/fgmeta/fgdata/AI/Traffic", features);
+async function scanai(fdir) {
+    var promise = new Promise(function (resolve, reject) {
+        return initDB().then(features => {
+            var d = path.join(fdir);
+            scanTrafficFiles(d, features);
+        });
     });
+    return promise;
 }
 
 async function scanAPT() {
-    return initDB().then(features => {
-        var d = path.join(homedir, 'Documents/apt.dat');
-        scanAPTIntoDB(d, features);
-        console.log("Closed DB");
+    var promise = new Promise(function (resolve, reject) {
+        return initDB().then(features => {
+            var d = path.join(homedir, 'Documents/apt.dat');
+            scanAPTIntoDB(d, features);
+        });
     });
+    return promise;
 }
 
 
