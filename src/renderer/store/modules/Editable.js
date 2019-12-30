@@ -1,5 +1,5 @@
 const state = {
-  type: 'airport',
+  type: 'none',
   data: Object
 }
 
