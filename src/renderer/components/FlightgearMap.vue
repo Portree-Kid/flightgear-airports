@@ -47,8 +47,6 @@
     },
     data () {
       return {
-        zoom: this.$store.state.Settings.zoom,
-        center: this.$store.state.Settings.center,
         url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         marker: L.latLng(47.413220, -1.219482),
@@ -61,19 +59,22 @@
         this.$store.commit('SET_EDIT_AIRPORT', item)
       },
       zoomUpdated (zoom) {
-        this.zoom = zoom
-        this.$store.commit('ZOOM', this.zoom)
+        this.$store.commit('ZOOM', zoom)
       },
       centerUpdated (center) {
-        this.center = center
-        this.$store.commit('CENTER', this.center)
+        this.$store.commit('CENTER', center)
       },
       boundsUpdated (bounds) {
         this.bounds = bounds
       }
     },
     computed: {
-
+      zoom: function () {
+        return this.$store.state.Settings.zoom
+      },
+      center: function () {
+        return this.$store.state.Settings.center
+      }
     }
 }
 </script>
