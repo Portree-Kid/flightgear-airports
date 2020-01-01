@@ -1,7 +1,8 @@
 const state = {
   settings: { flightgearDirectory: '.' },
   zoom: 14,
-  center: [47.413220, -1.219482]
+  center: [47.413220, -1.219482],
+  bounds: undefined
 }
 
 const mutations = {
@@ -17,8 +18,10 @@ const mutations = {
   },
   'CENTER' (state, center) {
     state.center = center
+  },
+  'BOUNDS' (state, bounds) {
+    state.bounds = bounds
   }
-
 }
 
 const plugins = []

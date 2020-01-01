@@ -8,6 +8,12 @@
 // const homedir = require('os').homedir();
 // const apt = require('apt.js');
 
+/**
+ * Iterates over an array with a async function and await
+ * @param {*} array The array being iterated over 
+ * @param {*} callback 
+ */
+
 async function asyncForEach(array, callback) {
   console.log("AsyncForEach Len " + array.length);
   for (let index = 0; index < array.length; index++) {
@@ -69,34 +75,66 @@ async function scanGroundnetFiles(p, features) {
   });
 }
 
+async function resetAI() {
+  var promise = new Promise(function (resolve, reject) {
+    try {
+      var objectStore = features.transaction("airports", 'readwrite').objectStore("airports");
+
+      objectStore.openCursor().onsuccess = function (event) {
+        var cursor = event.target.result;
+        if (cursor) {
+          cursor.value.properties.flights = 0
+          cursor.value.properties.airlines = [];
+          console.log("Name for SSN " + cursor.key + " is " + cursor.value.properties.name);
+          cursor.update(cursor.value);
+          cursor.continue();
+        }
+        else {
+          console.log("No more entries!");
+          resolve();
+        }
+      };
+    } catch (error) {
+      console.log(error);
+      reject(error);
+    }
+  });
+  return promise;
+}
+
 async function scanTrafficFiles(p, features) {
   var promise = new Promise(function (resolve, reject) {
     try {
-      console.log('Start Groundnets ' + p);
-      var files = traverseDir(p);
-      console.log(files);
+      console.log('Start Traffic ' + p);
 
-      asyncForEach(files, async f => {
-        //await waitFor(5000);
-        try {
-          var text = await readAI(f, features);
-          console.log(text);
-          resolve(text);
-        } catch (error) {
-          console.error(error);
-          reject(error);
-        }
-      }).then(t => {
-        console.log("Finished");
-        features.close();
-        resolve();
-        this.postMessage('DONE');
-      }).catch(reason => {
-        console.log("Crashed");
-        console.log(reason);
-        features.close()
-        this.postMessage('DONE');
-      });
+      resetAI().then(f => {
+        var files = traverseDir(p);
+        console.log(files);
+  
+        asyncForEach(files, async f => {
+          //await waitFor(5000);
+          try {
+            var text = await readAI(f, features);
+            console.log(text);
+            resolve(text);
+          } catch (error) {
+            console.error(error);
+            reject(error);
+          }
+        }).then(t => {
+          console.log("Finished");
+          features.close();
+          resolve();
+          this.postMessage('DONE');
+        }).catch(reason => {
+          console.log("Crashed");
+          console.log(reason);
+          features.close()
+          this.postMessage('DONE');
+        });  
+      }
+      );
+
 
       //walkDir(p, f => { readGroundnet(f, features) });
 
@@ -131,7 +169,7 @@ function scanTrafficIntoDB(p, features) {
       }
     };
 
-    walkDir(p, f => { readAI(f, features) });
+    //walkDir(p, f => { readAI(f, features) });
     console.log("Closing");
     features.close();
     this.postMessage('DONE');
@@ -182,7 +220,7 @@ function readAI(f, apts) {
       console.log(path.basename(f));
       // Reset
       var airline = path.basename(f).match('([^.]+)\.xml');
-      if (airline == null){
+      if (airline == null) {
         resolve();
         return;
       }
@@ -195,7 +233,7 @@ function readAI(f, apts) {
       // console.log(flights);
       var dat = tXml(xmlSource);
       //    console.log(dat);
-      if( !dat || !dat[0] || !dat[0].children || !dat[0].children[0] ) {
+      if (!dat || !dat[0] || !dat[0].children || !dat[0].children[0]) {
         resolve();
         return;
       }
@@ -224,10 +262,10 @@ function readAI(f, apts) {
       for (var i = 0; i < merged.length; i++) {
         counts[merged[i]] = 1 + (counts[merged[i]] || 0);
       }
-      
+
       asyncForEach(Object.keys(counts), async key => {
         console.log(key);
-        await store(key, airline[0], counts[key]);
+        await store(key, airline[1], counts[key]);
       }).then(t => {
         console.log("Finished");
         resolve();
@@ -277,8 +315,10 @@ function store(icao, airline, value) {
       }
       feature.properties.flights += value;
       console.log("Airline " + airline);
-      feature.properties.airlines.push(airline);
-      feature.properties.airlines.sort();
+      if (!feature.properties.airlines.includes(airline)) {
+        feature.properties.airlines.push(airline);
+        feature.properties.airlines.sort();
+      }
       console.log("ICAO : " + feature.properties.icao + " Flights : " + feature.properties.flights);
       // Create another request that inserts the item back into the database
       var updateAirportRequest = objectStore.put(feature);

@@ -1,32 +1,55 @@
 <template>
   <div>
+    <h1 class="leaflet-sidebar-header">
+      Scanning
+      <div class="leaflet-sidebar-close">
+        <i class="fa fa-caret-left"></i>
+      </div>
+    </h1>
     <el-container direction="vertical">
       <el-button @click="scanAPT()">Scan APT File</el-button>
       <el-button @click="scanGroundnets()">Scan Groundnet Files</el-button>
       <el-button @click="scanTraffic()">Scan Traffic Files</el-button>
+      <el-input placeholder="Search" v-model="searchterm" class="input-with-select">
+      </el-input>
     </el-container>
+    <li v-for="item in searched" v-bind:key="item.icao"><el-link type="primary" @click="goto(item.icao)">{{ item.icao }} {{ item.name }}</el-link></li>
   </div>
 </template>
 
 <script lang="js">
   // import scanner from '../utils/scan'
   import fileUrl from 'file-url'
+  import {Table, TableColumn} from 'element-ui'
 
   const path = require('path')
 
   export default {
     name: 'run-scan',
-    components: {},
+    components: { [Table.name]: Table,
+      [TableColumn.name]: TableColumn},
     props: [],
     mounted () {
     },
     beforeDestroy () {
     },
     data () {
-      return {
-      }
+      // this.$store.dispatch('getAirportsUnfiltered')
+      return {searchterm: this.searchterm}
     },
     methods: {
+      goto (icao) {
+        console.log(icao)
+        let airports = this.$store.state.Airports.airports
+          .filter(a => a.properties.icao.match(icao))
+        if (airports.length > 0) {
+          this.$store.commit('CENTER', [airports[0].geometry.coordinates[1], airports[0].geometry.coordinates[0]])
+        }
+      },
+      formatter (row, column) {
+        console.log('Row ' + row)
+        return row
+      },
       scanAPT () {
         try {
           const winURL = process.env.NODE_ENV === 'development'
@@ -105,6 +128,12 @@
       }
     },
     computed: {
+      searched: function () {
+        return this.$store.state.Airports.airports
+          .filter(a => a.properties.icao.match(this.searchterm) || a.properties.name.match(this.searchterm))
+          // .map(a => console.log(a.properties))
+          .map(a => ({ icao: a.properties.icao, name: a.properties.name }))
+      }
     }
 }
 </script>

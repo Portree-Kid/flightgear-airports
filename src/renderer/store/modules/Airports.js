@@ -3,10 +3,11 @@ import idb from '../api/airports';
 
 const ADD_AIRPORT = 'ADD_AIRPORT';
 const SET_AIRPORTS = 'SET_AIRPORTS';
+const SET_UNFILTERED_AIRPORTS = 'SET_UNFILTERED_AIRPORTS';
 const RESET_AIRPORTS = 'RESET_AIRPORTS';
 
 const state = {
-  airports: []
+  airports: [], unfilteredairports:[]
 }
 
 const mutations = {
@@ -16,6 +17,9 @@ const mutations = {
   },
   SET_AIRPORTS (state, airports) {
     state.airports = airports;
+  },
+  SET_UNFILTERED_AIRPORTS (state, airports) {
+    state.unfilteredairports = airports;
   },
   RESET_AIRPORTS (state) {
     state.airports = [];
@@ -30,11 +34,14 @@ const actions = {
   async getAirports(context) {
     context.commit(RESET_AIRPORTS);
     let airports = await idb.getAirports();
-//    let newAirports = [];
-//    airports.forEach(c => {
-//      newAirports.push(c);
-//    });
     context.commit(SET_AIRPORTS, airports
+      .filter(point => typeof point.geometry.coordinates !== "undefined" )
+      .filter(point => point.properties.flights > 0 ));
+  },
+  async getAirportsUnfiltered(context) {
+    context.commit(RESET_AIRPORTS);
+    let airports = await idb.getAirports();
+    context.commit(SET_UNFILTERED_AIRPORTS, airports
       .filter(point => typeof point.geometry.coordinates !== "undefined" )
       .filter(point => point.properties.flights > 0 ));
   },

@@ -2,6 +2,7 @@
   <l-map
     :zoom="zoom"
     :center="center"
+    :options="options"
     @update:zoom="zoomUpdated"
     @update:center="centerUpdated"
     @update:bounds="boundsUpdated"
@@ -10,7 +11,7 @@
     <!--<l-marker :lat-lng="marker"></l-marker>-->
     <LeafletSidebar></LeafletSidebar>
     <EditLayer></EditLayer>
-    <l-layer-group layerType="overlay" name="Sources">
+    <l-layer-group layerType="overlay" name="airports" ref="airportLayer">
       <l-circle
         v-for="(item, index) in this.$store.state.Airports.airports"
         :key="index"
@@ -43,14 +44,15 @@
     components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, EditLayer, LLayerGroup },
     props: [],
     mounted () {
-
+      this.$store.dispatch('getAirports')
     },
     data () {
       return {
         url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         marker: L.latLng(47.413220, -1.219482),
-        airports: this.$store.state.Airports.airports
+        airports: this.$store.state.Airports.airports,
+        options: {editable: true}
       }
     },
     methods: {
@@ -60,12 +62,13 @@
       },
       zoomUpdated (zoom) {
         this.$store.commit('ZOOM', zoom)
+        console.log(this.$refs.airportLayer.setVisible(zoom < 12))
       },
       centerUpdated (center) {
         this.$store.commit('CENTER', center)
       },
       boundsUpdated (bounds) {
-        this.bounds = bounds
+        this.$store.commit('BOUNDS', bounds)
       }
     },
     computed: {
