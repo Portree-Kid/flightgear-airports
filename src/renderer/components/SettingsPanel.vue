@@ -21,6 +21,18 @@
           <directory-select @input="flightgearDirectorySelect"></directory-select>
         </el-col>
       </el-row>
+      <el-row>
+        <el-col :span="7">AI Directory</el-col>
+        <el-col :span="15">{{ AI_directory }}</el-col>
+        <el-col :span="2">
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="7">APT File</el-col>
+        <el-col :span="15">{{ apt_file }}</el-col>
+        <el-col :span="2">
+        </el-col>
+      </el-row>
     </div>
   </div>
 </template>
@@ -52,6 +64,12 @@
     computed: {
       flightgear_directory: function () {
         return this.$store.state.Settings.settings.flightgearDirectory
+      },
+      AI_directory: function () {
+        return this.$store.state.Settings.settings.flightgearDirectory_ai
+      },
+      apt_file: function () {
+        return this.$store.state.Settings.settings.flightgearDirectory_apt
       },
       airports_directory: function () {
         return this.$store.state.Settings.settings.airportsDirectory

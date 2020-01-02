@@ -11,6 +11,7 @@
     <!--<l-marker :lat-lng="marker"></l-marker>-->
     <LeafletSidebar></LeafletSidebar>
     <EditLayer></EditLayer>
+    <PavementLayer></PavementLayer>
     <l-layer-group layerType="overlay" name="airports" ref="airportLayer">
       <l-circle
         v-for="(item, index) in this.$store.state.Airports.airports"
@@ -29,6 +30,7 @@
   import { LMap, LTileLayer, LMarker, LCircle, LLayerGroup } from 'vue2-leaflet'
   import LeafletSidebar from './LeafletSidebar'
   import EditLayer from './EditLayer'
+  import PavementLayer from './PavementLayer'
   import L from 'leaflet'
 
   // https://github.com/KoRiGaN/Vue2Leaflet/issues/103
@@ -41,7 +43,7 @@
   })
   export default {
     name: 'flightgear-map',
-    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, EditLayer, LLayerGroup },
+    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, EditLayer, PavementLayer, LLayerGroup },
     props: [],
     mounted () {
       this.$store.dispatch('getAirports')
