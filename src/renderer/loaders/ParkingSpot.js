@@ -5,22 +5,26 @@ const turf = require('@turf/turf');
 const util = require('util');
 
 var $ = require('jquery');
-
 L.ParkingSpot = L.Circle.extend({
-    id: String,
-    attributes: Object,
+    options: { 
+        id: 'Custom data!',
+        attributes: {}
+    },
 
     createDirection: function () {
         if (this.direction === undefined ) {
             var start = this._latlng;
             var options = { units: 'kilometers' };
-            var end = turf.destination([start.lat, start.lng], this.attributes.radius / 1000, this.attributes.heading - 180, options);
+            var end = turf.destination([start.lat, start.lng], this.options.attributes.radius / 1000, this.options.attributes.heading - 180, options);
             // Resize, since leaflet is wrong
             var rad2 = start.distanceTo(end.geometry.coordinates);
             this.setRadius(rad2);
-            this.editor._resizeLatLng.__vertex.setLatLng(end.geometry.coordinates);
+            // console.log(util.inspect(this.editor));
+            if(this.editor._resizeLatLng.__vertex !== undefined){
+                this.editor._resizeLatLng.__vertex.setLatLng(end.geometry.coordinates);
+            }
             this.direction = L.polyline([start, end.geometry.coordinates]);
-            this.direction.addTo(map);
+            this.direction.addTo(this.editor.editLayer);
 
 
             this.on('editable:drawing:move', function (event) {
@@ -33,7 +37,7 @@ L.ParkingSpot = L.Circle.extend({
         if (this.editEnabled()) {
             var start = this._latlng;
             var options = { units: 'kilometers' };
-            var end = turf.destination([start.lat, start.lng], this.attributes.radius / 1000, this.attributes.heading - 180, options);
+            var end = turf.destination([start.lat, start.lng], this.options.attributes.radius / 1000, this.options.attributes.heading - 180, options);
             // Resize, since leaflet is wrong
             var rad2 = start.distanceTo(end.geometry.coordinates);
             this.setRadius(rad2);
@@ -48,10 +52,15 @@ L.ParkingSpot = L.Circle.extend({
             var start = this._latlng;
             var end = this.editor._resizeLatLng.__vertex.getLatLng();
             var heading = turf.bearing([start.lat, start.lng], [end.lat, end.lng]);
-            this.attributes.heading = heading + 180;
+            this.options.attributes.heading = heading + 180;
             this.direction.setLatLngs([start, end]);
         }
     },
+
+    extensions: function () {
+       this.createDirection(); 
+    },
+
     _getLatRadius: function () {
         return this._mRadius;
     },
@@ -59,6 +68,7 @@ L.ParkingSpot = L.Circle.extend({
     _getLngRadius: function () {
         return this._mRadius;
     },
+
 });
 
 var parkingSpot = function (n, layerGroup) {
@@ -70,6 +80,9 @@ var parkingSpot = function (n, layerGroup) {
     const circle = new L.ParkingSpot([latlon.decimalLatitude, latlon.decimalLongitude], { radius: n.attr('radius') });
     circle.on('add', function (event) {
         console.log(event);
+    });
+    circle.on('editable:enable', function (event) {
+      // event.target.createDirection();
     });
     circle.id = n.attr('index');
     /*
@@ -90,19 +103,11 @@ airlineCodes="VIR,KAL,DAL,KLM" />
         console.log( key + "\t" + value);
         
         if(isNaN(value))
-          circle.attributes[ key ] = value;
+          circle.options.attributes[ key ] = value;
         else
-          circle.attributes[ key ] = Number( value);
+          circle.options.attributes[ key ] = Number( value);
     }); 
-    
-
     circle.addTo(layerGroup);
-    // circle.enableEdit();
-    circle.on('dblclick', function (event) { L.DomEvent.stop(); circle.toggleEdit(); });
-    circle.on('click', function (event) {
-        console.log("Click : " + event.target);
-    });
-    // circle.createDirection();
     return circle;
 }
 

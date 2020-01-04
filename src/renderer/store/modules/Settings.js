@@ -29,6 +29,15 @@ const mutations = {
 const plugins = []
 
 const actions = {
+  async setZoom (context, zoom) {
+    context.commit('ZOOM', zoom)
+  },
+  async setCenter (context, center) {
+    context.commit('CENTER', center)
+  },
+  async setBounds (context, bounds) {
+    context.commit('BOUNDS', bounds)
+  }
 }
 
 export default {

@@ -2,6 +2,11 @@
 var L = require('leaflet');
 
 L.TaxiwaySegment = L.Polyline.extend({
+    options: { 
+        id: 'Custom data!',
+        attributes: {}
+    },
+
     begin: String,
     end: String,
     bidirectional: Boolean,
@@ -19,6 +24,14 @@ L.TaxiwaySegment = L.Polyline.extend({
                 element.__vertex.middleMarker.updateLatLng();
             }
         });
+    },
+
+    updateStyle() {
+        var style = {};
+        if (this.options.attributes.isPushBackRoute) {
+          style.color = 'magenta';  
+        }
+        this.setStyle(style);
     }
 });
 

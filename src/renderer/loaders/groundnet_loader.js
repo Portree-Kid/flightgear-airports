@@ -8,9 +8,11 @@ const markers = require('./markers');
 
 const parkingSpot = require('./ParkingSpot.js');
 
+const store = require('../store');
+
 const util = require('util');
 
-console.log(convert.formats);
+var $ = require('jquery');
 
 var featureLookup = {};
 
@@ -58,8 +60,12 @@ exports.readGroundnetXML = function (fDir, icao) {
                     if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){
                         follow(event.target.id, event);
                     }
-
                 });
+                circle.on('click', function (event) {
+                    console.log("Click : " + event.target);
+                    store.default.dispatch('setParking', event.target.options.attributes);
+                });
+            
                 nodesLookup[n.attr('index')] = n;
                 featureLookup[n.attr('index')] = new Array();
                 featureLookup[n.attr('index')].push(circle);
@@ -103,14 +109,25 @@ exports.readGroundnetXML = function (fDir, icao) {
                     if (!bidirectional) {
                         var beginlatlon = convert(begin.attr('lat') + " " + begin.attr('lon'));
                         var endlatlon = convert(end.attr('lat') + " " + end.attr('lon'));
-                        const polyline = new L.TaxiwaySegment([[beginlatlon.decimalLatitude, beginlatlon.decimalLongitude], [endlatlon.decimalLatitude, endlatlon.decimalLongitude]], { radius: n.attr('radius') }).addTo(layerGroup);
+                        const polyline = new L.TaxiwaySegment([[beginlatlon.decimalLatitude, beginlatlon.decimalLongitude], [endlatlon.decimalLatitude, endlatlon.decimalLongitude]], {}).addTo(layerGroup);
+                        $.each( n.attrs, function( key, value ) {
+                            console.log( key + "\t" + value);
+                            
+                            if(isNaN(value))
+                              polyline.options.attributes[ key ] = value;
+                            else
+                              polyline.options.attributes[ key ] = Number( value);
+                        }); 
+                        polyline.updateStyle();
+                    
                         polyline.begin = begin.attr('index');
                         polyline.end = end.attr('index');
                         // polyline.enableEdit();
 
-                        polyline.on('dblclick', function (event) { L.DomEvent.stop; polyline.toggleEdit; });
+                        // polyline.on('dblclick', function (event) { L.DomEvent.stop; polyline.toggleEdit; });
                         polyline.on('click', function (event) {
-                            console.log(event);
+                            console.log("Click : " + event.target);
+                            store.default.dispatch('setArc', event.target.options.attributes);
                         });
                         polyline.on('editable:drawing:move', function (event) {
                             console.log(event.target);
@@ -170,7 +187,6 @@ exports.readGroundnetXML = function (fDir, icao) {
                         featureLookup[polyline.end].push(polyline);
                     }
                 }
-
             }).sort();
 
 

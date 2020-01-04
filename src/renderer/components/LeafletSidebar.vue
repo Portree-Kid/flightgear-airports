@@ -24,6 +24,8 @@
         </div>
         <div class="leaflet-sidebar-pane" id="airports">
           <AirportEdit></AirportEdit>
+          <GroundnetEdit></GroundnetEdit>
+          <ArcEdit></ArcEdit>
         </div>
         <div class="leaflet-sidebar-pane" id="scan">
           <RunScan></RunScan>
@@ -41,13 +43,15 @@
   import {} from 'leaflet-sidebar-v2'
   import L from 'leaflet'
   import AirportEdit from './AirportEdit'
+  import GroundnetEdit from './GroundnetEdit'
+  import ArcEdit from './ArcEdit'
   import SettingsPanel from './SettingsPanel'
   import RunScan from './RunScan'
   import FileSelect from './FileSelect'
 
   export default {
     name: 'leaflet-sidebar',
-    components: { AirportEdit, SettingsPanel, RunScan, FileSelect },
+    components: { AirportEdit, ArcEdit, GroundnetEdit, SettingsPanel, RunScan, FileSelect },
     props: [],
     mounted () {
       this.add()

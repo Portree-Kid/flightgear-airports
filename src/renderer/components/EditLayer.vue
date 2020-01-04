@@ -14,27 +14,12 @@
     name: 'edit-layer',
     props: [],
     created () {
-      this.$store.subscribe((mutation, state) => {
-        if (mutation.type === 'BOUNDS') {
-          // console.log(this.$parent)
-          // console.log(this.$store.state.Settings.bounds)
-          let airportsToLoad = this.$store.state.Airports.airports
-            .filter(feature => this.visible(feature))
-            .map(feature => feature.properties.icao)
-          if (airportsToLoad[0] !== this.editingAirport) {
-            this.groundnet = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, airportsToLoad[0])
-            this.groundnet.addTo(this.$parent.mapObject)
-            this.editingAirport = airportsToLoad[0]
-          }
-          // console.log(this.groundnet)
-        }
-      })
-    },
-    mounted () {
       console.log(LMap)
       console.log(LMarker)
       console.log(L)
       console.log(LEdit)
+    },
+    mounted () {
     },
     beforeDestroy () {
       this.remove()
@@ -44,6 +29,17 @@
       }
     },
     methods: {
+      load (icao) {
+        this.groundnet = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao)
+        this.groundnet.addTo(this.$parent.mapObject)
+        this.groundnet.eachLayer(l => {
+          l.enableEdit()
+          if (typeof l.extensions === 'function') {
+            l.extensions()
+          }
+          l.bringToFront()
+        })
+      },
       visible (feature) {
         let bounds = this.$store.state.Settings.bounds
         let coordinates = feature.geometry.coordinates

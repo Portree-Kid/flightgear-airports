@@ -10,8 +10,7 @@
     <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
     <!--<l-marker :lat-lng="marker"></l-marker>-->
     <LeafletSidebar></LeafletSidebar>
-    <EditLayer></EditLayer>
-    <PavementLayer></PavementLayer>
+    <PavementLayer ref="pavementLayer"></PavementLayer>
     <l-layer-group layerType="overlay" name="airports" ref="airportLayer">
       <l-circle
         v-for="(item, index) in this.$store.state.Airports.airports"
@@ -22,6 +21,7 @@
         @click="onClick(item)"
       ></l-circle>
     </l-layer-group>
+    <EditLayer ref="editLayer"></EditLayer>
   </l-map>
 </template>
 
@@ -47,6 +47,21 @@
     props: [],
     mounted () {
       this.$store.dispatch('getAirports')
+      this.$store.subscribe((mutation, state) => {
+        if (mutation.type === 'BOUNDS') {
+          // console.log(this.$parent)
+          // console.log(this.$store.state.Settings.bounds)
+          let airportsToLoad = this.$store.state.Airports.airports
+            .filter(feature => this.visible(feature))
+            .map(feature => feature.properties.icao)
+          if (airportsToLoad[0] !== this.editingAirport) {
+            this.$refs.editLayer.load(airportsToLoad[0])
+            this.$refs.pavementLayer.load(airportsToLoad[0])
+            this.editingAirport = airportsToLoad[0]
+          }
+          // console.log(this.groundnet)
+        }
+      })
     },
     data () {
       return {
@@ -58,19 +73,28 @@
       }
     },
     methods: {
+      visible (feature) {
+        let bounds = this.$store.state.Settings.bounds
+        let coordinates = feature.geometry.coordinates
+        let ret = bounds.getNorthEast().lat > Number(coordinates[1]) &&
+                  bounds.getNorthEast().lng > Number(coordinates[0])
+        let ret2 = bounds.getSouthWest().lat < Number(coordinates[1]) &&
+                  bounds.getSouthWest().lng < Number(coordinates[0])
+        return ret && ret2
+      },
       onClick (item) {
         console.log(item)
         this.$store.commit('SET_EDIT_AIRPORT', item)
       },
       zoomUpdated (zoom) {
-        this.$store.commit('ZOOM', zoom)
+        this.$store.dispatch('setZoom', zoom)
         console.log(this.$refs.airportLayer.setVisible(zoom < 12))
       },
       centerUpdated (center) {
-        this.$store.commit('CENTER', center)
+        this.$store.dispatch('setCenter', center)
       },
       boundsUpdated (bounds) {
-        this.$store.commit('BOUNDS', bounds)
+        this.$store.dispatch('setBounds', bounds)
       }
     },
     computed: {

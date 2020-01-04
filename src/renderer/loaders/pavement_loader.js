@@ -40,8 +40,9 @@ module.exports.isScanning = false;
 
 var scanMethods = {
     1: (line, icao) => {
-        console.log('Airport:', line);
+        // console.log('Airport:', line);
         if (line[4]===icao){
+            console.log('Airport:', line);
             module.exports.isScanning = true;
         } else {
             module.exports.isScanning = false;

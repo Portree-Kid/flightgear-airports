@@ -14,20 +14,6 @@
     name: 'edit-layer',
     props: [],
     created () {
-      this.$store.subscribe((mutation, state) => {
-        if (mutation.type === 'BOUNDS') {
-          // console.log(this.$parent)
-          // console.log(this.$store.state.Settings.bounds)
-          let airportsToLoad = this.$store.state.Airports.airports
-            .filter(feature => this.visible(feature))
-            .map(feature => feature.properties.icao)
-          if (airportsToLoad[0] !== this.editingAirport) {
-            readPavement(this.$store.state.Settings.settings.flightgearDirectory_apt, airportsToLoad[0], this.read)
-            this.editingAirport = airportsToLoad[0]
-          }
-          // console.log(this.groundnet)
-        }
-      })
     },
     mounted () {
       console.log(LMap)
@@ -43,11 +29,18 @@
       }
     },
     methods: {
+      load (icao) {
+        // Callback for add
+        readPavement(this.$store.state.Settings.settings.flightgearDirectory_apt, icao, this.read)
+      },
       read (layer) {
         this.groundnet = layer
         if (this.groundnet) {
           this.groundnet.addTo(this.$parent.mapObject)
         }
+        this.groundnet.eachLayer(l => {
+          l.bringToBack()
+        })
       },
       visible (feature) {
         let bounds = this.$store.state.Settings.bounds
