@@ -63,9 +63,6 @@
           // console.log(this.groundnet)
         }
       })
-      this.$refs.airportLayer.on('add', function (event) {
-        console.log('Add vertex ', event)
-      })
     },
     data () {
       return {
@@ -85,9 +82,6 @@
         let ret2 = bounds.getSouthWest().lat < Number(coordinates[1]) &&
                   bounds.getSouthWest().lng < Number(coordinates[0])
         return ret && ret2
-      },
-      color (item) {
-        console.log(item)
       },
       addEvent (event, item) {
         console.log(event, item)
