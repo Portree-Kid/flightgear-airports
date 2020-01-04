@@ -4,7 +4,8 @@ const path = require('path');
 var xamel = require('xamel');
 const convert = require('geo-coordinates-parser');
 
-const markers = require('./markers');
+const markers = require('./MagneticVertex');
+const TaxiwaySegment = require('./TaxiwaySegment');
 
 const parkingSpot = require('./ParkingSpot.js');
 
