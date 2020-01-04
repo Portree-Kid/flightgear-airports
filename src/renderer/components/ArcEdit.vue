@@ -1,12 +1,12 @@
 <template>
-  <div id="panel" width="100%">
-    <div id="panel" width="100%" v-if="parking">
-      <h1 class="leaflet-sidebar-header">
-        Arc Properties 
-        <div class="leaflet-sidebar-close">
-          <i class="fa fa-caret-left"></i>
-        </div>
-      </h1>
+  <div>
+    <h1 class="leaflet-sidebar-header" v-if="arc">
+      Arc Properties
+      <div class="leaflet-sidebar-close">
+        <i class="fa fa-caret-left"></i>
+      </div>
+    </h1>
+    <div width="100%" v-if="arc">
       <div>
         <!--
           airlineCodes: 0
@@ -20,8 +20,12 @@
           type: "gate"
         -->
         <el-row>
-          <el-col :span="7"><span class="demo-input-label">Name :</span></el-col>          
-          <el-col :span="15"><el-input placeholder="Please input" v-model="name"></el-input></el-col>
+          <el-col :span="7">
+            <span class="demo-input-label">Name :</span>
+          </el-col>
+          <el-col :span="15">
+            <el-input placeholder="Please input" v-model="name"></el-input>
+          </el-col>
         </el-row>
       </div>
     </div>
@@ -31,7 +35,7 @@
 <script lang="js">
   export default {
     computed: {
-      parking: function () {
+      arc: function () {
         return this.$store.state.Editable.type === 'arc'
       },
       name: {

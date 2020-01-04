@@ -54,7 +54,7 @@
           let airportsToLoad = this.$store.state.Airports.airports
             .filter(feature => this.visible(feature))
             .map(feature => feature.properties.icao)
-          if (airportsToLoad[0] !== this.editingAirport) {
+          if (airportsToLoad.length > 0 && airportsToLoad[0] !== this.editingAirport) {
             this.$refs.editLayer.load(airportsToLoad[0])
             this.$refs.pavementLayer.load(airportsToLoad[0])
             this.editingAirport = airportsToLoad[0]

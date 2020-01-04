@@ -1,6 +1,5 @@
 <template>
-  <div id="panel" width="100%">
-    <div id="panel" width="100%" v-if="parking">
+    <div v-if="parking">
       <h1 class="leaflet-sidebar-header">
         Parking 
         <div class="leaflet-sidebar-close">
@@ -25,7 +24,6 @@
         </el-row>
       </div>
     </div>
-  </div>
 </template>
 
 <script lang="js">
