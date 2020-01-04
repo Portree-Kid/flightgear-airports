@@ -17,7 +17,8 @@
         :key="index"
         :lat-lng="[item.geometry.coordinates[1], item.geometry.coordinates[0]]"
         :radius="((item.properties.flights+5)*20)"
-        :color="item.properties.color"
+        :color='item.color'
+        @add="addEvent($event, item)"
         @click="onClick(item)"
       ></l-circle>
     </l-layer-group>
@@ -54,13 +55,16 @@
           let airportsToLoad = this.$store.state.Airports.airports
             .filter(feature => this.visible(feature))
             .map(feature => feature.properties.icao)
-          if (airportsToLoad.length > 0 && airportsToLoad[0] !== this.editingAirport) {
+          if (airportsToLoad.length > 0 && airportsToLoad[0] !== this.editingAirport && this.zoom > 12) {
             this.$refs.editLayer.load(airportsToLoad[0])
             this.$refs.pavementLayer.load(airportsToLoad[0])
             this.editingAirport = airportsToLoad[0]
           }
           // console.log(this.groundnet)
         }
+      })
+      this.$refs.airportLayer.on('add', function (event) {
+        console.log('Add vertex ', event)
       })
     },
     data () {
@@ -81,6 +85,17 @@
         let ret2 = bounds.getSouthWest().lat < Number(coordinates[1]) &&
                   bounds.getSouthWest().lng < Number(coordinates[0])
         return ret && ret2
+      },
+      color (item) {
+        console.log(item)
+      },
+      addEvent (event, item) {
+        console.log(event, item)
+        if (item.properties.groundnet === 0) {
+          event.target.setStyle({color: 'red', fillcolor: 'red'})
+        } else if ((item.properties.flights / item.properties.parking) > 10) {
+          event.target.setStyle({color: 'yellow', fillcolor: 'yellow'})
+        }
       },
       onClick (item) {
         console.log(item)
