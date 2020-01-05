@@ -30,6 +30,9 @@
     },
     methods: {
       load (icao) {
+        if (this.groundnet !== undefined) {
+          this.groundnet.removeFrom(this.$parent.mapObject)
+        }
         this.groundnet = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao)
         this.groundnet.addTo(this.$parent.mapObject)
         this.groundnet.eachLayer(l => {

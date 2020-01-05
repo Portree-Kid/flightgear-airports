@@ -18,6 +18,7 @@
           radius: 18
           type: "gate"
         -->
+        {{this.$store.state.Editable.index}}
         <el-row>
           <el-col :span="7"><span class="demo-input-label">Name :</span></el-col>          
           <el-col :span="15"><el-input placeholder="Please input" v-model="name"></el-input></el-col>
@@ -35,7 +36,7 @@
       name: {
       // getter
         get: function () {
-          return this.$store.state.Editable.data.name
+          return this.$store.state.Editable.data.parking[this.$store.state.Editable.index].name
         },
         // setter
         set: function (newValue) {

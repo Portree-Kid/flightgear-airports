@@ -84,7 +84,7 @@
         return ret && ret2
       },
       addEvent (event, item) {
-        console.log(event, item)
+        // console.log(event, item)
         if (item.properties.groundnet === 0) {
           event.target.setStyle({color: 'red', fillcolor: 'red'})
         } else if ((item.properties.flights / item.properties.parking) > 10) {
@@ -93,7 +93,7 @@
       },
       onClick (item) {
         console.log(item)
-        this.$store.commit('SET_EDIT_AIRPORT', item)
+        this.$store.commit('SET_EDIT_AIRPORT', item.properties)
       },
       zoomUpdated (zoom) {
         this.$store.dispatch('setZoom', zoom)

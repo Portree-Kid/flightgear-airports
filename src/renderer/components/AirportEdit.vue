@@ -11,19 +11,19 @@
       <div>
         <el-row>
           <el-col :span="7">ICAO :</el-col>
-          <el-col :span="15">{{ this.$store.state.Editable.data.properties.icao }}</el-col>
+          <el-col :span="15">{{ this.$store.state.Editable.data.airports[this.$store.state.Editable.index].icao }}</el-col>
         </el-row>
         <el-row>
           <el-col :span="7">Name :</el-col>
-          <el-col :span="15">{{ this.$store.state.Editable.data.properties.name }}</el-col>
+          <el-col :span="15">{{ this.$store.state.Editable.data.airports[this.$store.state.Editable.index].name }}</el-col>
         </el-row>
         <el-row>
           <el-col :span="7">Flights :</el-col>
-          <el-col :span="15">{{ this.$store.state.Editable.data.properties.flights }}</el-col>
+          <el-col :span="15">{{ this.$store.state.Editable.data.airports[this.$store.state.Editable.index].flights }}</el-col>
         </el-row>
         <el-row>
           <el-col :span="7">Airlines :</el-col>
-          <el-col :span="15">{{ this.$store.state.Editable.data.properties.airlines }}</el-col>
+          <el-col :span="15">{{ this.$store.state.Editable.data.airports[this.$store.state.Editable.index].airlines }}</el-col>
         </el-row>
         <el-row>
           <el-col :span="7">Groundnet :</el-col>
@@ -41,10 +41,7 @@
         return this.$store.state.Editable.type === 'airport'
       },
       groundnet: function () {
-        return this.$store.state.Editable.data.properties.groundnet
-      },
-      airports_directory: function () {
-        return this.$store.state.Settings.settings.airportsDirectory
+        return this.$store.state.Editable.data.airports[this.$store.state.Editable.index].groundnet
       }
     }
   }
