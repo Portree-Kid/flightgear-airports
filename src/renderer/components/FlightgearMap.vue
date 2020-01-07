@@ -101,14 +101,20 @@
         this.$store.commit('SET_EDIT_AIRPORT', item.properties)
       },
       zoomUpdated (zoom) {
-        this.$store.dispatch('setZoom', zoom)
-        console.log(this.$refs.airportLayer.setVisible(zoom < 12))
+        if (zoom !== this.$store.state.Settings.zoom) {
+          this.$store.dispatch('setZoom', zoom)
+          this.$refs.airportLayer.setVisible(zoom < 12)
+        }
       },
       centerUpdated (center) {
-        this.$store.dispatch('setCenter', center)
+        if (center !== this.$store.state.Settings.center) {
+          this.$store.dispatch('setCenter', center)
+        }
       },
       boundsUpdated (bounds) {
-        this.$store.dispatch('setBounds', bounds)
+        if (bounds !== this.$store.state.Settings.bounds) {
+          this.$store.dispatch('setBounds', bounds)
+        }
       }
     },
     computed: {
