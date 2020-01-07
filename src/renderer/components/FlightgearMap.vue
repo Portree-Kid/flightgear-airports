@@ -6,10 +6,14 @@
     @update:zoom="zoomUpdated"
     @update:center="centerUpdated"
     @update:bounds="boundsUpdated"
+    ref="map"
   >
-    <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
+    <!--The backgroundmap-->
+    <l-tile-layer :url="url" :attribution="attribution">
+    </l-tile-layer>
     <!--<l-marker :lat-lng="marker"></l-marker>-->
     <LeafletSidebar></LeafletSidebar>
+    <EditBar></EditBar>
     <PavementLayer ref="pavementLayer"></PavementLayer>
     <l-layer-group layerType="overlay" name="airports" ref="airportLayer">
       <l-circle
@@ -30,6 +34,7 @@
   import 'leaflet/dist/leaflet.css'
   import { LMap, LTileLayer, LMarker, LCircle, LLayerGroup } from 'vue2-leaflet'
   import LeafletSidebar from './LeafletSidebar'
+  import EditBar from './EditBar'
   import EditLayer from './EditLayer'
   import PavementLayer from './PavementLayer'
   import L from 'leaflet'
@@ -44,7 +49,7 @@
   })
   export default {
     name: 'flightgear-map',
-    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, EditLayer, PavementLayer, LLayerGroup },
+    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, EditBar, EditLayer, PavementLayer, LLayerGroup },
     props: [],
     mounted () {
       this.$store.dispatch('getAirports')

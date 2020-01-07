@@ -35,13 +35,6 @@
         }
         this.groundnet = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao)
         this.groundnet.addTo(this.$parent.mapObject)
-        this.groundnet.eachLayer(l => {
-          l.enableEdit()
-          if (typeof l.extensions === 'function') {
-            l.extensions()
-          }
-          l.bringToFront()
-        })
       },
       visible (feature) {
         let bounds = this.$store.state.Settings.bounds
@@ -64,7 +57,24 @@
         if (this.$parent._isMounted) {
           this.deferredMountedTo(this.$parent.mapObject)
         }
+      },
+      enableEdit () {
+        this.editable = true
+        this.groundnet.eachLayer(l => {
+          l.enableEdit()
+          if (typeof l.extensions === 'function') {
+            l.extensions()
+          }
+          l.bringToFront()
+        })
+      },
+      disableEdit () {
+        this.editable = false
+        this.groundnet.eachLayer(l => {
+          l.disableEdit()
+        })
       }
+
     },
     computed: {
       edit: function () {

@@ -4,7 +4,7 @@
     <div class="leaflet-sidebar-tabs">
         <ul role="tablist"> <!-- top aligned tabs -->
             <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
-            <li><a href="#airports" role="tab"><i class="fa fa-pencil"></i></a></li>
+            <li><a href="#airports" role="tab"><i class="fas fa-edit"></i></a></li>
             <li><a href="#scan" role="tab"><i class="fa fa-search"></i></a></li>
         </ul>
 
@@ -39,7 +39,7 @@
 
 <script lang="js">
   import 'leaflet-sidebar-v2/css/leaflet-sidebar.css'
-  import 'font-awesome/css/font-awesome.css'
+  import '@fortawesome/fontawesome-free/css/all.css'
   import {} from 'leaflet-sidebar-v2'
   import L from 'leaflet'
   import AirportEdit from './AirportEdit'
