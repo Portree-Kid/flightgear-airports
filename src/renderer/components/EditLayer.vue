@@ -26,7 +26,7 @@
     },
     data () {
       return {
-        maxId: 1
+        maxId: 1, icao: String
       }
     },
     methods: {
@@ -38,6 +38,7 @@
         console.log(this.groundnet.maxId)
 
         this.groundnet.addTo(this.$parent.mapObject)
+        this.icao = icao
       },
       visible (feature) {
         let bounds = this.$store.state.Settings.bounds
@@ -97,8 +98,12 @@
         addFeature(circle)
         // console.log(this.groundnet)
         this.$parent.mapObject.off('click', this.addParking)
+      },
+      reload () {
+        this.load(this.icao)
+      },
+      save () {
       }
-
     },
     computed: {
       edit: function () {

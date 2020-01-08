@@ -26,10 +26,12 @@
       undo () {
         this.editing = false
         this.$parent.$parent.$refs.editLayer.disableEdit()
+        this.$parent.$parent.$refs.editLayer.reload()
       },
       save () {
         this.editing = false
         this.$parent.$parent.$refs.editLayer.disableEdit()
+        this.$parent.$parent.$refs.editLayer.save()
       },
       drawPolyline () {
         this.$parent.$parent.$refs.editLayer.drawPolyline()
