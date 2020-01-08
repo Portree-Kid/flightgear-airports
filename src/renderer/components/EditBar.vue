@@ -4,8 +4,8 @@
     <EditButton icon="fas fa-undo" v-on:click="undo" :show="editing" tooltip="Undo"></EditButton>
     <EditButton icon="fas fa-save" v-on:click="save" :show="editing" tooltip="Save"></EditButton>
 
-    <EditButton icon="fas fa-draw-polygon" :show="editing" tooltip="Draw Taxiline"></EditButton>
-    <EditButton icon="fas fas fa-parking" :show="editing" tooltip="Draw Parking"></EditButton>
+    <EditButton icon="fas fa-draw-polygon" v-on:click="drawPolyline" :show="editing" tooltip="Draw Taxiline"></EditButton>
+    <EditButton icon="fas fas fa-parking" v-on:click="drawParking" :show="editing" tooltip="Draw Parking"></EditButton>
   </div>
 </template>
 
@@ -30,6 +30,12 @@
       save () {
         this.editing = false
         this.$parent.$parent.$refs.editLayer.disableEdit()
+      },
+      drawPolyline () {
+        this.$parent.$parent.$refs.editLayer.drawPolyline()
+      },
+      drawParking () {
+        this.$parent.$parent.$refs.editLayer.drawParking()
       }
     },
     computed: {

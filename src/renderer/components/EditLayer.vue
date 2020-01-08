@@ -8,7 +8,7 @@
   import { LMap, LMarker } from 'vue2-leaflet'
   import L from 'leaflet'
   import LEdit from 'leaflet-editable/src/Leaflet.Editable.js'
-  import {readGroundnetXML} from '../loaders/groundnet_loader'
+  import {readGroundnetXML, addFeature} from '../loaders/groundnet_loader'
 
   export default {
     name: 'edit-layer',
@@ -26,6 +26,7 @@
     },
     data () {
       return {
+        maxId: 1
       }
     },
     methods: {
@@ -34,6 +35,8 @@
           this.groundnet.removeFrom(this.$parent.mapObject)
         }
         this.groundnet = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao)
+        console.log(this.groundnet.maxId)
+
         this.groundnet.addTo(this.$parent.mapObject)
       },
       visible (feature) {
@@ -73,6 +76,27 @@
         this.groundnet.eachLayer(l => {
           l.disableEdit()
         })
+      },
+      drawPolyline () {
+        this.$parent.mapObject.editTools.startPolyline()
+      },
+      drawParking () {
+        this.$parent.mapObject.on('click', this.addParking)
+      },
+      addParking (event) {
+        console.log(event.latlng)
+        if (event.latlng === undefined) {
+          return
+        }
+        const circle = new L.ParkingSpot(event.latlng, {attributes: {radius: 20, heading: 0}})
+        circle.id = (++this.groundnet.maxId)
+        circle.addTo(this.groundnet)
+        circle.enableEdit()
+        circle.extensions()
+        circle.addListeners()
+        addFeature(circle)
+        // console.log(this.groundnet)
+        this.$parent.mapObject.off('click', this.addParking)
       }
 
     },
@@ -88,7 +112,4 @@
 </script>
 
 <style scoped lang="scss">
-  .edit-layer {
-
-  }
 </style>

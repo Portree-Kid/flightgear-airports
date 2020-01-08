@@ -17,9 +17,14 @@ var $ = require('jquery');
 
 var featureLookup = {};
 
+exports.addFeature = function (feature) {
+    featureLookup[feature.id] = new Array();    
+}
+
 exports.readGroundnetXML = function (fDir, icao) {
-    try {
+    try {        
         layerGroup = L.layerGroup();
+        layerGroup.maxId  = 0;
         var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.xml');
 
         if (f == null || !fs.existsSync(f))
@@ -46,31 +51,11 @@ exports.readGroundnetXML = function (fDir, icao) {
             var nodesLookup = {};
 
             parkingNodes.map(n => {
-                var circle = parkingSpot(n, layerGroup);
-                circle.on('editable:drawing:move', function (event) {
-//                    console.log("Follow 1: " + event.sourceTarget );                    
-//                    console.log("Follow 2: " + event.sourceTarget._dragStartTarget );                    
-//                    console.log("Follow 3: " + event.target.editor._resizeLatLng.__vertex );                    
-//                    console.log("Follow 4: " + event.target.editor._resizeLatLng.__vertex._icon );                    
-//                    console.log("Follow 5: " + (event.target.editor._resizeLatLng.__vertex === event.sourceTarget) );                    
-//                    console.log("Follow 6: " + (event.target.editor._resizeLatLng.__vertex._icon === event.sourceTarget._element) );                    
-//                    console.log("Follow 7: " + (event.target.editor._resizeLatLng.__vertex._icon === event.sourceTarget._dragStartTarget) );                    
-//                    console.log("Follow 8: " + (event.target.editor._resizeLatLng.__vertex._icon._leaflet_id === event.sourceTarget._dragStartTarget._leaflet_id) );                    
-
-                    // Is it the edit vertex moving?
-                    if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){
-                        follow(event.target.id, event);
-                    }
-                });
-                circle.on('click', function (event) {
-                    console.log("Click : " + event.target);
-                    store.default.dispatch('setParking', event.target.options.attributes);
-                });
-            
+                var circle = parkingSpot(n, layerGroup);            
                 nodesLookup[n.attr('index')] = n;
                 featureLookup[n.attr('index')] = new Array();
                 featureLookup[n.attr('index')].push(circle);
-
+                layerGroup.maxId = Math.max(layerGroup.maxId, Number(n.attr('index')))
                 features.push(circle);
             }).sort();
             // Get all nodes into the lookup
@@ -81,6 +66,7 @@ exports.readGroundnetXML = function (fDir, icao) {
                 var latlon = convert(n.attr('lat') + " " + n.attr('lon'));
                 //console.log(latlon.decimalLatitude);
 
+                layerGroup.maxId = Math.max(layerGroup.maxId, Number(n.attr('index')))
                 nodesLookup[n.attr('index')] = n;
             }).sort();
 
@@ -207,7 +193,8 @@ follow = function (dragIndex, event) {
             if (element instanceof L.ParkingSpot) {
                 element.disableEdit();
                 element.setLatLng(event.latlng);
-                // element.enableEdit();
+                element.enableEdit();
+                element.extensions();
                 element.updateVertexFromDirection();
             }
             else if (element instanceof L.TaxiwaySegment) {

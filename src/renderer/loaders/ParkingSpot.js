@@ -22,12 +22,10 @@ L.ParkingSpot = L.Circle.extend({
             }
             this.direction = L.polyline([start, this.turfToLatLng(end)]);
             this.direction.addTo(this.editor.editLayer);
-
-
-            this.on('editable:drawing:move', function (event) {
-                this.updateDirectionFromVertex();
-            });
         }
+    },
+    removeDirection: function () {
+        this.direction = undefined;
     },
     //
     updateVertexFromDirection: function () {
@@ -50,8 +48,33 @@ L.ParkingSpot = L.Circle.extend({
             var end = this.editor._resizeLatLng.__vertex.getLatLng();
             var heading = turf.bearing([start.lng, start.lat], [end.lng, end.lat]);
             this.options.attributes.heading = heading + 180;
+            this.options.attributes.radius = this._mRadius;
             this.direction.setLatLngs([start, end]);
         }
+    },
+    addListeners: function () {
+        this.on('editable:drawing:move', function (event) {
+            console.log("Move : ", event);
+            // Is it the edit vertex (Middle) moving?
+            if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){
+                follow(event.target.id, event);                        
+                event.target.updateVertexFromDirection();
+            }
+            else if(event.target.editor._resizeLatLng.__vertex._icon === event.sourceTarget._element) {
+                event.target.updateDirectionFromVertex();            
+                console.log(event);
+            }
+        });
+        this.on('editable:vertex:drag', function (event) {
+            console.log("Drag : ", event);
+        });
+        this.on('click', function (event) {
+            console.log("Click : " + event.target);
+            store.default.dispatch('setParking', event.target.options.attributes);
+        });
+        this.on('editable:disable', function (event) {
+            event.target.removeDirection();
+        });    
     },
     turfToLatLng: function (turfPoint) {
         return {lat: turfPoint.geometry.coordinates[1], lng: turfPoint.geometry.coordinates[0]};
@@ -71,7 +94,6 @@ L.ParkingSpot = L.Circle.extend({
 });
 
 var parkingSpot = function (n, layerGroup) {
-
     //console.log(n.attr('lat') + " " + n.attr('lon'));
     var latlon = convert(n.attr('lat') + " " + n.attr('lon'));
     //console.log(latlon.decimalLatitude);
@@ -102,7 +124,9 @@ airlineCodes="VIR,KAL,DAL,KLM" />
           circle.options.attributes[ key ] = value;
         else
           circle.options.attributes[ key ] = Number( value);
-    }); 
+    });
+    circle.addListeners(); 
+    
     circle.addTo(layerGroup);
     return circle;
 }
