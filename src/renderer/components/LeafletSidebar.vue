@@ -9,7 +9,7 @@
         </ul>
 
         <ul role="tablist"> <!-- bottom aligned tabs -->
-            <li><a href="#settings" role="tab"><i class="fa fa-gear"></i></a></li>
+            <li><a href="#settings" role="tab"><i class="fas fa-cog"></i></a></li>
         </ul>
     </div>
 
