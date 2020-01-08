@@ -29,6 +29,10 @@
           <el-col :span="7">Groundnet :</el-col>
           <el-col :span="15">{{groundnet}}</el-col>
         </el-row>
+        <el-row>
+          <el-col :span="7">Parking Positions :</el-col>
+          <el-col :span="15">{{ this.$store.state.Editable.data.airports[this.$store.state.Editable.index].parking }}</el-col>
+        </el-row>
       </div>
     </div>
   </div>
@@ -46,3 +50,9 @@
     }
   }
 </script>
+
+<style lang="scss" scoped>
+   .el-row {
+     padding: 0em
+   }
+</style>

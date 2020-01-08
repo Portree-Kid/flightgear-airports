@@ -88,12 +88,13 @@
                   bounds.getSouthWest().lng < Number(coordinates[0])
         return ret && ret2
       },
+      // Triggered by adding airports to the map
       addEvent (event, item) {
         // console.log(event, item)
         if (item.properties.groundnet === 0) {
-          event.target.setStyle({color: 'red', fillcolor: 'red'})
-        } else if ((item.properties.flights / item.properties.parking) > 10) {
-          event.target.setStyle({color: 'yellow', fillcolor: 'yellow'})
+          event.target.setStyle({color: 'red', fillColor: 'red'})
+        } else if ((item.properties.flights / item.properties.parking) > 40) {
+          event.target.setStyle({color: 'yellow', fillColor: 'yellow'})
         }
       },
       onClick (item) {
