@@ -3,6 +3,7 @@ const convert = require('geo-coordinates-parser');
 const leaflet = require('leaflet');
 const turf = require('@turf/turf');
 const util = require('util');
+const store = require('../store');
 
 var $ = require('jquery');
 L.ParkingSpot = L.Circle.extend({
@@ -98,7 +99,7 @@ var parkingSpot = function (n, layerGroup) {
     var latlon = convert(n.attr('lat') + " " + n.attr('lon'));
     //console.log(latlon.decimalLatitude);
     //console.log(convert(n.attr('lat') + " " + n.attr('lon')).decimalLongitude);
-    const circle = new L.ParkingSpot([latlon.decimalLatitude, latlon.decimalLongitude], { radius_m: n.attr('radius'), attributes: {}  });
+    const circle = new L.ParkingSpot([latlon.decimalLatitude, latlon.decimalLongitude], { radius: n.attr('radius'), attributes: {}  });
     circle.on('editable:enable', function (event) {
       // event.target.createDirection();
     });
