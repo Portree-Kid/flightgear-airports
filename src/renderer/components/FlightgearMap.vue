@@ -54,7 +54,7 @@
     mounted () {
       this.$store.dispatch('getAirports')
       this.$store.subscribe((mutation, state) => {
-        if (mutation.type === 'BOUNDS') {
+        if (mutation.type === 'BOUNDS' || mutation.type === 'SET_AIRPORTS') {
           // console.log(this.$parent)
           // console.log(this.$store.state.Settings.bounds)
           let airportsToLoad = this.$store.state.Airports.airports
@@ -65,6 +65,8 @@
             this.$refs.pavementLayer.load(airportsToLoad[0])
             this.editingAirport = airportsToLoad[0]
           }
+          this.$refs.airportLayer.setVisible(this.zoom < 12)
+
           // console.log(this.groundnet)
         }
       })
@@ -81,6 +83,9 @@
     methods: {
       visible (feature) {
         let bounds = this.$store.state.Settings.bounds
+        if (!bounds.hasOwnProperty('getNorthEast')) {
+          bounds = this.$refs.map.mapObject.getBounds()
+        }
         let coordinates = feature.geometry.coordinates
         let ret = bounds.getNorthEast().lat > Number(coordinates[1]) &&
                   bounds.getNorthEast().lng > Number(coordinates[0])
@@ -110,11 +115,13 @@
       centerUpdated (center) {
         if (center !== this.$store.state.Settings.center) {
           this.$store.dispatch('setCenter', center)
+          this.$refs.airportLayer.setVisible(this.zoom < 12)
         }
       },
       boundsUpdated (bounds) {
         if (bounds !== this.$store.state.Settings.bounds) {
           this.$store.dispatch('setBounds', bounds)
+          this.$refs.airportLayer.setVisible(this.zoom < 12)
         }
       }
     },

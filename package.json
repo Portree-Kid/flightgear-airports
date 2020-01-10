@@ -63,6 +63,7 @@
     "file-url": "^3.0.0",
     "fs": "0.0.1-security",
     "geo-coordinates-parser": "^1.2.3",
+    "geodesy": "^2.2.0",
     "idb": "^4.0.5",
     "jquery": "^3.4.1",
     "leaflet": "^1.5.1",

@@ -1,7 +1,8 @@
 /* eslint-disable */
 const lineReader = require('readline');
 const zlib = require('zlib');
-const turf = require('@turf/turf');
+// const geodesy = require('geodesy');
+const LatLonEllipsoidal = require( 'geodesy/latlon-ellipsoidal-vincenty.js').default;
 const fs = require('fs');
 
 module.exports.readPavement = function (f, icao, cb) {
@@ -52,34 +53,32 @@ var scanMethods = {
     100: (line, icao, layerGroup) => {
         if (module.exports.isScanning) {
           console.log('Runway ', line );  
-          var point1 = turf.point([line[9], line[10]]);
-          var point2 = turf.point([line[18], line[19]]);
+          var point1 = new LatLonEllipsoidal(Number(line[9]), Number(line[10]));
+          var point2 = new LatLonEllipsoidal(Number(line[18]), Number(line[19]));
 
           var runwayPoints = [];
 
-          var bearing = turf.bearing(point1, point2);
-          var runwayEnd1 = [line[9], line[10]];
-          var runwayEnd2 = [line[18], line[19]];
-          var runwayWidth = Number(line[1])/1000;
-          var destination = turf.destination(point1, runwayWidth/2, bearing, {});
+          var bearing = point1.initialBearingTo(point2);
+          var runwayWidth = Number(line[1]);
+          var destination = point1.destinationPoint( 1000, bearing);
 
-          runwayPoints.push(turf.destination(point1, runwayWidth/2, bearing+90, {}));
-          runwayPoints.push(turf.destination(point2, runwayWidth/2, bearing+90, {}));
-          runwayPoints.push(turf.destination(point2, runwayWidth/2, bearing-90, {}));
-          runwayPoints.push(turf.destination(point1, runwayWidth/2, bearing-90, {}));
+          runwayPoints.push(point1.destinationPoint( runwayWidth/2, (bearing+90)));
+          runwayPoints.push(point2.destinationPoint( runwayWidth/2, (bearing+90)));
+          runwayPoints.push(point2.destinationPoint( runwayWidth/2, (bearing-90)));
+          runwayPoints.push(point1.destinationPoint( runwayWidth/2, (bearing-90)));
           
-          runwayPoints = runwayPoints.map(p => p.geometry.coordinates);
 
           var runwayPoly = new L.Polygon(runwayPoints);
           runwayPoly.setStyle({color: 'grey'});
           runwayPoly.addTo(layerGroup);
 
-          console.log(turf.bearing(point1, point2), turf.bearing(point2, point1));
-          console.log(runwayEnd1, runwayEnd2);
-
-
-          // var end = turf.destination([start.lat, start.lng], this.attributes.radius / 1000, this.attributes.heading - 180, options);
+          var runwayLine = new L.Polyline([point1,point2]);
+          runwayLine.setStyle({color: 'red'});
+          // runwayLine.addTo(layerGroup);          
           
+          var runwayLine1 = new L.Polyline([point1 ,destination]);
+          runwayLine1.setStyle({color: 'red'});
+          // runwayLine1.addTo(layerGroup);          
         }
     },
     // Pavement
