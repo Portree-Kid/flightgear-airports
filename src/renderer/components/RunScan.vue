@@ -129,8 +129,10 @@
     },
     computed: {
       searched: function () {
+        console.log(this.searchterm)
+        let searchRegex = new RegExp(this.searchterm, 'i')
         return this.$store.state.Airports.airports
-          .filter(a => a.properties.icao.match(this.searchterm) || a.properties.name.match(this.searchterm))
+          .filter(a => searchRegex.test(a.properties.icao) || searchRegex.test(a.properties.name))
           // .map(a => console.log(a.properties))
           .map(a => ({ icao: a.properties.icao, name: a.properties.name }))
       }
