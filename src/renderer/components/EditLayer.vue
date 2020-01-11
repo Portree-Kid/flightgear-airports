@@ -9,6 +9,8 @@
   import L from 'leaflet'
   import LEdit from 'leaflet-editable/src/Leaflet.Editable.js'
   import {readGroundnetXML, addFeature} from '../loaders/groundnet_loader'
+  import L2 from 'leaflet-textpath'
+  // import {LSymbol} from 'leaflet-polylinedecorator'
 
   export default {
     name: 'edit-layer',
@@ -18,6 +20,8 @@
       console.log(LMarker)
       console.log(L)
       console.log(LEdit)
+      console.log(L2)
+      // console.log(LSymbol)
     },
     mounted () {
     },
@@ -35,6 +39,20 @@
           this.groundnet.removeFrom(this.$parent.mapObject)
         }
         this.groundnet = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao)
+        /*
+        this.groundnet.eachLayer(l => {
+          if (l instanceof L.TaxiwaySegment) {
+            var decorator = L.polylineDecorator(l, {
+              pattern: [
+              // defines a pattern of 10px-wide dashes, repeated every 20px on the line
+                {offset: 5, repeat: 50, symbol: L.Symbol.arrowHead({pixelSize: 15, pathOptions: {fillOpacity: 1, weight: 0}})}
+              ]
+            })
+            decorator.addTo(this.$parent.mapObject)
+          }
+        })
+        */
+
         console.log(this.groundnet.maxId)
 
         this.groundnet.addTo(this.$parent.mapObject)
