@@ -5,7 +5,7 @@
 </template>
 
 <script lang="js">
-  import { LMap, LMarker } from 'vue2-leaflet'
+  import {LMap, LMarker} from 'vue2-leaflet'
   import L from 'leaflet'
   import LEdit from 'leaflet-editable/src/Leaflet.Editable.js'
   import {readGroundnetXML, addFeature} from '../loaders/groundnet_loader'
@@ -35,12 +35,12 @@
     },
     methods: {
       load (icao) {
-        if (this.groundnet !== undefined) {
-          this.groundnet.removeFrom(this.$parent.mapObject)
+        if (this.groundnetLayerGroup !== undefined) {
+          this.groundnetLayerGroup.removeFrom(this.$parent.mapObject)
         }
-        this.groundnet = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao)
+        this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao)
         /*
-        this.groundnet.eachLayer(l => {
+        this.groundnetLayerGroup.eachLayer(l => {
           if (l instanceof L.TaxiwaySegment) {
             var decorator = L.polylineDecorator(l, {
               pattern: [
@@ -53,9 +53,9 @@
         })
         */
 
-        console.log(this.groundnet.maxId)
+        console.log(this.groundnetLayerGroup.maxId)
 
-        this.groundnet.addTo(this.$parent.mapObject)
+        this.groundnetLayerGroup.addTo(this.$parent.mapObject)
         this.icao = icao
       },
       visible (feature) {
@@ -82,7 +82,7 @@
       },
       enableEdit () {
         this.editable = true
-        this.groundnet.eachLayer(l => {
+        this.groundnetLayerGroup.eachLayer(l => {
           l.enableEdit()
           if (typeof l.extensions === 'function') {
             l.extensions()
@@ -92,12 +92,13 @@
       },
       disableEdit () {
         this.editable = false
-        this.groundnet.eachLayer(l => {
+        this.groundnetLayerGroup.eachLayer(l => {
           l.disableEdit()
         })
       },
       drawPolyline () {
-        this.$parent.mapObject.editTools.startPolyline()
+        var polyLine = this.$parent.mapObject.editTools.startPolyline()
+        polyLine.addTo(this.groundnetLayerGroup)
       },
       drawParking () {
         this.$parent.mapObject.on('click', this.addParking)
@@ -108,19 +109,20 @@
           return
         }
         const circle = new L.ParkingSpot(event.latlng, {attributes: {radius: 20, heading: 0}})
-        circle.id = (++this.groundnet.maxId)
-        circle.addTo(this.groundnet)
+        circle.id = (++this.groundnetLayerGroup.maxId)
+        circle.addTo(this.groundnetLayerGroup)
         circle.enableEdit()
         circle.extensions()
         circle.addListeners()
         addFeature(circle)
-        // console.log(this.groundnet)
+        // console.log(this.groundnetLayerGroup)
         this.$parent.mapObject.off('click', this.addParking)
       },
       reload () {
         this.load(this.icao)
       },
       save () {
+
       }
     },
     computed: {
