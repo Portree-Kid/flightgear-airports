@@ -25,6 +25,36 @@ L.ParkingSpot = L.Circle.extend({
             this.direction.addTo(this.editor.editLayer);
         }
     },
+    updateMiddleMarker: function() {
+      if (this.editEnabled()) {
+          try {
+            console.log("Update Middle ", this.editor.editLayer._layers[0]);
+            var o = this.editor.editLayer._layers;
+    
+            console.log(o);
+            for (var key in o) {
+                if (o.hasOwnProperty(key)) {
+                    console.log(key, o[key]);
+                    console.log(this.editor._resizeLatLng.__vertex==o[key]);
+                    // console.log(this.editor._resizeLatLng.__vertex._icon);
+                    console.log(o[key] == this.direction);
+                    if (this.editor._resizeLatLng.__vertex!=o[key] &&
+                         o[key] != this.direction) {
+                            o[key].setLatLng(this.getLatLng());
+                    }
+                }
+            }
+            //Object.values(o);
+            /*
+            .forEach(vertex => {
+              console.log(this.editor._resizeLatLng.__vertex==vertex);          
+            });
+            */                  
+          } catch (error) {
+            console.log(error);
+          }
+      }
+    },
     removeDirection: function () {
         this.direction = undefined;
     },
@@ -66,9 +96,11 @@ L.ParkingSpot = L.Circle.extend({
                 console.log(event);
             }
         });
+        /*        
         this.on('editable:vertex:drag', function (event) {
             console.log("Drag : ", event);
         });
+        */
         this.on('click', function (event) {
             console.log("Click : " + event.target);
             store.default.dispatch('setParking', event.target.options.attributes);

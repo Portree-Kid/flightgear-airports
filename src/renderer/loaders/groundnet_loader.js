@@ -150,7 +150,7 @@ exports.readGroundnetXML = function (fDir, icao) {
                             }
                         });
                         polyline.on('editable:vertex:dragend', function (event) {
-                            console.log(event.vertex);
+                            console.log("Dragend : ", event.vertex);
                             if (dragIndex > 0) {
                                 featureLookup[dragIndex].forEach(element => {
                                     if (element instanceof L.ParkingSpot) {
@@ -187,14 +187,19 @@ exports.readGroundnetXML = function (fDir, icao) {
     return layerGroup;
 }
 
+/**
+ * 
+ */
+
 follow = function (dragIndex, event) {
     featureLookup[dragIndex].forEach(element => {
         if(element !== event.target){
             if (element instanceof L.ParkingSpot) {
-                element.disableEdit();
+                // element.disableEdit();
                 element.setLatLng(event.latlng);
-                element.enableEdit();
-                element.extensions();
+                // element.enableEdit();
+                // element.extensions();
+                element.updateMiddleMarker();
                 element.updateVertexFromDirection();
             }
             else if (element instanceof L.TaxiwaySegment) {
@@ -210,7 +215,6 @@ follow = function (dragIndex, event) {
                     element.updateEndVertex(event.latlng);
                     element.updateMiddle();
                 }
-    
             }    
         }
     });

@@ -32,5 +32,8 @@ L.TaxiwaySegment = L.Polyline.extend({
           style.color = 'magenta';  
         }
         this.setStyle(style);
+        if (!this.bidirectional) {
+            this.setText('  ►  ', {repeat: true, attributes: {fill: 'red', size: 20}})
+        }
     }
 });
