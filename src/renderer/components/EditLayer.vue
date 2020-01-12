@@ -96,12 +96,21 @@
           l.disableEdit()
         })
       },
+      deleteFeature () {
+        this.groundnetLayerGroup.eachLayer(l => {
+          l.on('click', this.removeLayerClick)
+        })
+      },
       drawPolyline () {
         var polyLine = this.$parent.mapObject.editTools.startPolyline()
         polyLine.addTo(this.groundnetLayerGroup)
       },
       drawParking () {
         this.$parent.mapObject.on('click', this.addParking)
+      },
+      removeLayerClick (event) {
+        console.log(event)
+        this.groundnetLayerGroup.removeLayer(event.target)
       },
       addParking (event) {
         console.log(event.latlng)

@@ -5,7 +5,8 @@
     <EditButton icon="fas fa-save" v-on:click="save" :show="editing" tooltip="Save"></EditButton>
 
     <EditButton icon="fas fa-draw-polygon" v-on:click="drawPolyline" :show="editing" tooltip="Draw Taxiline"></EditButton>
-    <EditButton icon="fas fas fa-parking" v-on:click="drawParking" :show="editing" tooltip="Draw Parking"></EditButton>
+    <EditButton icon="fas fa-parking" v-on:click="drawParking" :show="editing" tooltip="Draw Parking"></EditButton>
+    <EditButton icon="fas fa-trash-alt" v-on:click="deleteFeature" :show="editing" tooltip="Remove"></EditButton>
   </div>
 </template>
 
@@ -38,6 +39,9 @@
       },
       drawParking () {
         this.$parent.$parent.$refs.editLayer.drawParking()
+      },
+      deleteFeature () {
+        this.$parent.$parent.$refs.editLayer.deleteFeature()
       }
     },
     computed: {
