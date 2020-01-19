@@ -86,6 +86,14 @@
         if (!bounds.hasOwnProperty('getNorthEast')) {
           bounds = this.$refs.map.mapObject.getBounds()
         }
+        let width = bounds.getNorthWest().distanceTo(bounds.getSouthEast())
+        // Load all airports in a minimum 5 km box
+        if (width < 5000) {
+          let rest = 5000 - width
+          let padFactor = rest / width
+          bounds = bounds.pad(padFactor)
+        }
+
         let coordinates = feature.geometry.coordinates
         let ret = bounds.getNorthEast().lat > Number(coordinates[1]) &&
                   bounds.getNorthEast().lng > Number(coordinates[0])
