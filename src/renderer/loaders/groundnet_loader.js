@@ -8,6 +8,7 @@ const markers = require('./MagneticVertex');
 const TaxiwaySegment = require('./TaxiwaySegment');
 
 const parkingSpot = require('./ParkingSpot.js');
+const runwayNode = require('./RunwayNode.js');
 
 const store = require('../store');
 
@@ -68,6 +69,13 @@ exports.readGroundnetXML = function (fDir, icao) {
 
                 layerGroup.maxId = Math.max(layerGroup.maxId, Number(n.attr('index')))
                 nodesLookup[n.attr('index')] = n;
+                if (n.attr('isOnRunway') === '1') {
+                    var rNode = runwayNode(n, layerGroup);              
+                    if(featureLookup[rNode.id] === undefined) {
+                        featureLookup[rNode.id] = [];
+                    }
+                    featureLookup[rNode.id].push(rNode);      
+                }
             }).sort();
 
 
@@ -194,7 +202,10 @@ exports.readGroundnetXML = function (fDir, icao) {
 follow = function (dragIndex, event) {
     featureLookup[dragIndex].forEach(element => {
         if(element !== event.target){
-            if (element instanceof L.ParkingSpot) {
+            if (element instanceof L.RunwayNode) {
+                element.setLatLng(event.latlng);
+            }
+            else if (element instanceof L.ParkingSpot) {
                 // element.disableEdit();
                 element.setLatLng(event.latlng);
                 // element.enableEdit();

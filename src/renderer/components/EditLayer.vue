@@ -9,6 +9,7 @@
   import L from 'leaflet'
   import LEdit from 'leaflet-editable/src/Leaflet.Editable.js'
   import {readGroundnetXML, addFeature} from '../loaders/groundnet_loader'
+  import {writeGroundnetXML} from '../loaders/groundnet_writer'
   import L2 from 'leaflet-textpath'
   // import {LSymbol} from 'leaflet-polylinedecorator'
 
@@ -38,7 +39,12 @@
         if (this.groundnetLayerGroup !== undefined) {
           this.groundnetLayerGroup.removeFrom(this.$parent.mapObject)
         }
+        this.icao = icao
         this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao)
+        if (this.groundnetLayerGroup === undefined) {
+          console.console.error('ICAO not loaded ' + icao)
+          return
+        }
         /*
         this.groundnetLayerGroup.eachLayer(l => {
           if (l instanceof L.TaxiwaySegment) {
@@ -60,6 +66,7 @@
       },
       visible (feature) {
         let bounds = this.$store.state.Settings.bounds
+
         let coordinates = feature.geometry.coordinates
         let ret = bounds.getNorthEast().lat > Number(coordinates[1]) &&
                   bounds.getNorthEast().lng > Number(coordinates[0])
@@ -87,7 +94,9 @@
           if (typeof l.extensions === 'function') {
             l.extensions()
           }
-          l.bringToFront()
+          if (typeof l.bringToFront === 'function') {
+            l.bringToFront()
+          }
         })
       },
       disableEdit () {
@@ -104,6 +113,9 @@
       drawPolyline () {
         var polyLine = this.$parent.mapObject.editTools.startPolyline()
         polyLine.addTo(this.groundnetLayerGroup)
+        polyLine.on('editable:drawing:end', event => {
+          console.log(event)
+        })
       },
       drawParking () {
         this.$parent.mapObject.on('click', this.addParking)
@@ -131,7 +143,11 @@
         this.load(this.icao)
       },
       save () {
-
+        var xml = []
+        this.groundnetLayerGroup.eachLayer(l => {
+          xml.push(l)
+        })
+        writeGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, this.icao, xml)
       }
     },
     computed: {
@@ -145,5 +161,5 @@
 }
 </script>
 
-<style scoped lang="scss">
+<style scoped lang="css">
 </style>

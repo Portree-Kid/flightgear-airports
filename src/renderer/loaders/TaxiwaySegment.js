@@ -12,10 +12,14 @@ L.TaxiwaySegment = L.Polyline.extend({
     bidirectional: Boolean,
 
     updateBeginVertex : function (latlng) {
-        this._latlngs[0].__vertex.setLatLng(latlng);
+        if (this._latlngs[0].__vertex) {
+            this._latlngs[0].__vertex.setLatLng(latlng);            
+        }
     },
     updateEndVertex : function (latlng) {
-        this._latlngs[1].__vertex.setLatLng(latlng);        
+        if(this._latlngs[1].__vertex){
+            this._latlngs[1].__vertex.setLatLng(latlng);        
+        }
     },
 
     updateMiddle: function () {

@@ -86,7 +86,8 @@
     "vuex-persist": "^2.2.0",
     "vuex-persistedstate": "^2.7.0",
     "worker-threads": "^1.0.0",
-    "xamel": "^0.3.1"
+    "xamel": "^0.3.1",
+    "xmlbuilder": "^13.0.2"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.12.0",

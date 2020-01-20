@@ -48,7 +48,4 @@
 </script>
 
 <style scoped lang="scss">
-  .edit-layer {
-
-  }
 </style>
