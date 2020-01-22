@@ -69,7 +69,7 @@ var scanMethods = {
           
 
           var runwayPoly = new L.Polygon(runwayPoints);
-          runwayPoly.setStyle({color: 'grey'});
+          runwayPoly.setStyle({color: 'grey', interactive: false});
           runwayPoly.addTo(layerGroup);
 
           var runwayLine = new L.Polyline([point1,point2]);
@@ -88,7 +88,7 @@ var scanMethods = {
         if(typeof currentFeature !== 'undefined')
         {
           var taxiwayPoly = new L.Polygon(currentFeature);
-          taxiwayPoly.setStyle({color: 'grey'});
+          taxiwayPoly.setStyle({color: 'grey', interactive: false});
           taxiwayPoly.addTo(layerGroup);      
         }
         return [[]];
