@@ -31,8 +31,8 @@
       },
       save () {
         this.editing = false
-        this.$parent.$parent.$refs.editLayer.disableEdit()
         this.$parent.$parent.$refs.editLayer.save()
+        this.$parent.$parent.$refs.editLayer.disableEdit()
       },
       drawPolyline () {
         this.$parent.$parent.$refs.editLayer.drawPolyline()
