@@ -28,7 +28,7 @@ var runwayNode = function (n, layerGroup) {
         iconAnchor: [15, 42]
     });
     const node = new L.RunwayNode([latlon.decimalLatitude, latlon.decimalLongitude], { icon: icon });
-    node.id = n.attr('index');
+    node.glueindex = n.attr('index');
     node.addTo(layerGroup);
     node.addListeners();
     return node;

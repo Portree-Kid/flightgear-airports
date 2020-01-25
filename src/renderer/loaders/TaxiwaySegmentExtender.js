@@ -1,36 +1,29 @@
 /* eslint-disable */
 var L = require('leaflet');
 
-
-L.TaxiwaySegment = L.Polyline.extend({
-    options: { 
-        id: 'Custom data!',
-        attributes: {}
-    },
-
-    begin: String,
-    end: String,
-    bidirectional: Boolean,
-
-    updateBeginVertex : function (latlng) {
+exports.extendTaxiSegment = function (taxiwaySegment) {
+    taxiwaySegment.__proto__.begin;
+    taxiwaySegment.__proto__.end;
+    taxiwaySegment.__proto__.bidirectional;
+    taxiwaySegment.__proto__.updateBeginVertex = function (latlng) {
         if (this._latlngs[0].__vertex) {
             this._latlngs[0].__vertex.setLatLng(latlng);            
         }
-    },
-    updateEndVertex : function (latlng) {
+    };
+    taxiwaySegment.__proto__.updateEndVertex = function (latlng) {
         if(this._latlngs[1].__vertex){
             this._latlngs[1].__vertex.setLatLng(latlng);        
         }
-    },
+    };
 
-    updateMiddle: function () {
+    taxiwaySegment.__proto__.updateMiddle = function () {
         this._latlngs.forEach(element => {
             if(element.__vertex.middleMarker){
                 element.__vertex.middleMarker.updateLatLng();
             }
         });
-    },
-    extensions: function () {
+    };
+    taxiwaySegment.__proto__.extensions = function () {
         this._latlngs[0].__vertex.glueindex = this.begin;
         this._latlngs.slice(-1)[0].__vertex.glueindex = this.end;
         if (typeof this.featureLookup[this.begin] === 'undefined') {
@@ -41,8 +34,8 @@ L.TaxiwaySegment = L.Polyline.extend({
         }
         this.featureLookup[this.begin].push(this);
         this.featureLookup[this.end].push(this);
-    },
-    addListeners: function () {
+    };
+    taxiwaySegment.__proto__.addListeners = function () {
         this.on('click', function (event) {
             console.log("Click : " + event.target);
             store.default.dispatch('setArc', event.target.options.attributes);
@@ -74,12 +67,12 @@ L.TaxiwaySegment = L.Polyline.extend({
             }
             dragIndex = -1;
         });
-    }, 
+    };
       /**
        * 
        */
 
-      follow (dragIndex, event) {
+      taxiwaySegment.__proto__.follow = function (dragIndex, event) {
         this.featureLookup[dragIndex].forEach(element => {
             if(element !== event.target){
                 if (element instanceof L.RunwayNode) {
@@ -109,9 +102,9 @@ L.TaxiwaySegment = L.Polyline.extend({
                 }    
             }
         })
-    },
+    };
 
-    updateStyle() {
+    taxiwaySegment.__proto__.updateStyle = function() {
         var style = {};
         if (this.options.attributes.isPushBackRoute) {
           style.color = 'magenta';  
@@ -120,5 +113,5 @@ L.TaxiwaySegment = L.Polyline.extend({
         if (!this.bidirectional) {
             this.setText('  ►  ', {repeat: true, attributes: {fill: 'red', size: 20}})
         }
-    }
-});
+    };
+};

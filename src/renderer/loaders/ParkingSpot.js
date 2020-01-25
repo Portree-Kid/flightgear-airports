@@ -88,7 +88,7 @@ L.ParkingSpot = L.Circle.extend({
             console.log("Move : ", event);
             // Is it the edit vertex (Middle) moving?
             if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){
-                follow(event.target.id, event);                        
+                this.follow(event.target.id, event);                        
                 event.target.updateVertexFromDirection();
             }
             else if(event.target.editor._resizeLatLng.__vertex._icon === event.sourceTarget._element) {
@@ -114,6 +114,45 @@ L.ParkingSpot = L.Circle.extend({
     },
     extensions: function () {
        this.createDirection(); 
+       if (typeof this.featureLookup[this.id] === 'undefined') {
+        this.featureLookup[this.id] = [];
+       }
+       this.featureLookup[this.id].push(this);
+    },
+      /**
+       * 
+       */
+
+      follow (dragIndex, event) {
+        this.featureLookup[dragIndex].forEach(element => {
+            if(element !== event.target){
+                if (element instanceof L.RunwayNode) {
+                    element.setLatLng(event.latlng);
+                }
+                else if (element instanceof L.ParkingSpot) {
+                    // element.disableEdit();
+                    element.setLatLng(event.latlng);
+                    // element.enableEdit();
+                    // element.extensions();
+                    element.updateMiddleMarker();
+                    element.updateVertexFromDirection();
+                }
+                else if (element instanceof L.TaxiwaySegment) {
+                    if (element.begin === dragIndex) {
+                        element.getLatLngs()[0].update(event.latlng);
+                        element.setLatLngs(element.getLatLngs());
+                        element.updateBeginVertex(event.latlng);
+                        element.updateMiddle();
+                    }
+                    if (element.end === dragIndex) {
+                        element.getLatLngs()[element.getLatLngs().length - 1].update(event.latlng);
+                        element.setLatLngs(element.getLatLngs());
+                        element.updateEndVertex(event.latlng);
+                        element.updateMiddle();
+                    }
+                }    
+            }
+        })
     },
 
     _getLatRadius: function () {

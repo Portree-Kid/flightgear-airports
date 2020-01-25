@@ -5,12 +5,15 @@
 </template>
 
 <script lang="js">
+/* eslint-disable */
   import {LMap, LMarker} from 'vue2-leaflet'
   import L from 'leaflet'
   import LEdit from 'leaflet-editable/src/Leaflet.Editable.js'
   import {readGroundnetXML, addFeature} from '../loaders/groundnet_loader'
+  import {extendTaxiSegment} from '../loaders/TaxiwaySegmentExtender'
   import {writeGroundnetXML} from '../loaders/groundnet_writer'
   import L2 from 'leaflet-textpath'
+
   // import {LSymbol} from 'leaflet-polylinedecorator'
 
   export default {
@@ -40,11 +43,16 @@
           this.groundnetLayerGroup.removeFrom(this.$parent.mapObject)
         }
         this.icao = icao
-        this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao)
+        this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao, false)
         if (this.groundnetLayerGroup === undefined) {
           console.console.error('ICAO not loaded ' + icao)
           return
         }
+        this.groundnetLayerGroup.eachLayer(l => {
+          if (l instanceof L.TaxiwaySegment) {
+            l.addListeners()
+          }
+        })
         /*
         this.groundnetLayerGroup.eachLayer(l => {
           if (l instanceof L.TaxiwaySegment) {
@@ -89,8 +97,11 @@
       },
       enableEdit () {
         this.editable = true
+        this.featureLookup = [];
         this.groundnetLayerGroup.eachLayer(l => {
           l.enableEdit()
+          
+          l.featureLookup = this.featureLookup;
           if (typeof l.extensions === 'function') {
             l.extensions()
           }
@@ -98,6 +109,7 @@
             l.bringToFront()
           }
         })
+        
       },
       disableEdit () {
         this.editable = false
@@ -113,9 +125,48 @@
       drawPolyline () {
         var polyLine = this.$parent.mapObject.editTools.startPolyline()
         polyLine.addTo(this.groundnetLayerGroup)
-        polyLine.on('editable:drawing:end', event => {
+        polyLine.groundnetLayerGroup = this.groundnetLayerGroup;
+
+        polyLine.on('editable:vertex:new', event => {
           console.log(event)
+          let closest = this.closestLayerSnap(event.latlng, 10)
+          if (closest) {
+            event.latlng.__vertex.glueindex = closest.vertex.glueindex;     
+            event.latlng.__vertex.setLatLng(closest.vertex.latlng);
+            console.log(closest)
+          }
+          else{
+            event.latlng.__vertex.glueindex = ++this.groundnetLayerGroup.maxId;
+            this.featureLookup[event.latlng.__vertex.glueindex] = [];
+          }
         })
+        polyLine.on('editable:drawing:end', event => {
+          event.target.featureLookup = this.featureLookup;
+          extendTaxiSegment(event.target);
+          event.target.addListeners()
+          console.log(event)
+          event.target.addTo(this.groundnetLayerGroup)
+        })
+      },
+      closestLayerSnap (eventLatlng, snap) {
+        var layers = []
+        this.groundnetLayerGroup.eachLayer((layer) => {
+          if (layer instanceof L.Polyline) {
+            console.log(layer._latlngs)
+            layer._latlngs.forEach(latlng => {
+              if (latlng.__vertex) {
+                let distance = latlng.distanceTo(eventLatlng)
+                if (distance > 0 && distance < snap) {
+                  layers.push({d: latlng.distanceTo(eventLatlng), l: layer, vertex: latlng.__vertex})
+                }
+              }
+            })
+          }
+        })
+        layers.sort((l1, l2) => l1.d - l2.d)
+        if (layers.length > 0) {
+          return layers[0]
+        }
       },
       drawParking () {
         this.$parent.mapObject.on('click', this.addParking)
@@ -148,7 +199,7 @@
           xml.push(l)
         })
         writeGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, this.icao, xml)
-      }
+      },
     },
     computed: {
       edit: function () {

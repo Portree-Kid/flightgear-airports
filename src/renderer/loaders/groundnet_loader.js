@@ -22,14 +22,18 @@ exports.addFeature = function (feature) {
     featureLookup[feature.id] = new Array();    
 }
 
-exports.readGroundnetXML = function (fDir, icao) {
+exports.readGroundnetXML = function (fDir, icao, force) {
     try {        
         layerGroup = L.layerGroup();
-        layerGroup.maxId  = 0;
-        var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.xml');
+        layerGroup.maxId  = 0;        
+        var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.xml');        
+        var fNew = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');        
 
         if (f == null || !fs.existsSync(f))
             return;
+        if(fNew != null && fs.existsSync(fNew) && !force) {
+            f = fNew;
+        }
 
         var features = new Array();
 
@@ -120,66 +124,16 @@ exports.readGroundnetXML = function (fDir, icao) {
                         // polyline.enableEdit();
 
                         // polyline.on('dblclick', function (event) { L.DomEvent.stop; polyline.toggleEdit; });
-                        polyline.on('click', function (event) {
-                            console.log("Click : " + event.target);
-                            store.default.dispatch('setArc', event.target.options.attributes);
-                        });
-                        polyline.on('editable:drawing:move', function (event) {
-                            console.log(event.target);
-                            if (dragIndex >= 0) {
-                                follow(dragIndex, event);
-                            }
-                        });
-                        var dragIndex = -1;
-                        polyline.on('editable:vertex:dragstart', function (event) {
-                            console.log(event.vertex);
-                            console.log(event.target);
-                            if (typeof featureLookup[event.target.begin] !== 'undefined') {
-                                featureLookup[event.target.begin].forEach(element => {
-                                    if (element instanceof L.ParkingSpot) {
-                                        dragIndex = event.target.begin;
-                                    }
-                                    else if (element instanceof L.TaxiwaySegment) {
-                                        if (element.getLatLngs()[0].equals(event.vertex.getLatLng())) {
-                                            dragIndex = element.begin;
-                                        }
-                                        if (element.getLatLngs()[element.getLatLngs().length - 1].equals(event.vertex.getLatLng())) {
-                                            dragIndex = element.end;
-                                        }
-                                    }
-                                });
-                            }
-                            if (typeof featureLookup[event.target.end] !== 'undefined') {
-                                featureLookup[event.target.end].forEach(element => {
-                                    if (element instanceof L.ParkingSpot) {
-                                        dragIndex = event.target.end;
-                                    }
-                                });
-                            }
-                        });
-                        polyline.on('editable:vertex:dragend', function (event) {
-                            console.log("Dragend : ", event.vertex);
-                            if (dragIndex > 0) {
-                                featureLookup[dragIndex].forEach(element => {
-                                    if (element instanceof L.ParkingSpot) {
-                                        //element.setLatLng(event);
-                                        console.log(element);
-                                    }
-                                });
-                            }
-                            dragIndex = -1;
-                        });
 
-
+                        if(featureLookup[n.attr('begin')] == undefined) {
+                          featureLookup[n.attr('begin')] = [];
+                        }
+                        if(featureLookup[n.attr('end')] == undefined) {
+                          featureLookup[n.attr('end')] = [];
+                        }
+                        featureLookup[n.attr('begin')].push(polyline);
+                        featureLookup[n.attr('end')].push(polyline);
                         polyline.addTo(layerGroup);
-                        if (typeof featureLookup[polyline.begin] === 'undefined') {
-                            featureLookup[polyline.begin] = new Array();
-                        }
-                        if (typeof featureLookup[polyline.end] === 'undefined') {
-                            featureLookup[polyline.end] = new Array();
-                        }
-                        featureLookup[polyline.begin].push(polyline);
-                        featureLookup[polyline.end].push(polyline);
                     }
                 }
             }).sort();
@@ -193,41 +147,4 @@ exports.readGroundnetXML = function (fDir, icao) {
         console.error(error);
     }
     return layerGroup;
-}
-
-/**
- * 
- */
-
-follow = function (dragIndex, event) {
-    featureLookup[dragIndex].forEach(element => {
-        if(element !== event.target){
-            if (element instanceof L.RunwayNode) {
-                element.setLatLng(event.latlng);
-            }
-            else if (element instanceof L.ParkingSpot) {
-                // element.disableEdit();
-                element.setLatLng(event.latlng);
-                // element.enableEdit();
-                // element.extensions();
-                element.updateMiddleMarker();
-                element.updateVertexFromDirection();
-            }
-            else if (element instanceof L.TaxiwaySegment) {
-                if (element.begin === dragIndex) {
-                    element.getLatLngs()[0].update(event.latlng);
-                    element.setLatLngs(element.getLatLngs());
-                    element.updateBeginVertex(event.latlng);
-                    element.updateMiddle();
-                }
-                if (element.end === dragIndex) {
-                    element.getLatLngs()[element.getLatLngs().length - 1].update(event.latlng);
-                    element.setLatLngs(element.getLatLngs());
-                    element.updateEndVertex(event.latlng);
-                    element.updateMiddle();
-                }
-            }    
-        }
-    });
-
-}
+};
