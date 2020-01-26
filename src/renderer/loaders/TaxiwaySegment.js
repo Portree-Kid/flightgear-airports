@@ -1,13 +1,9 @@
 /* eslint-disable */
 var L = require('leaflet');
+const store = require('../store');
 
 
 L.TaxiwaySegment = L.Polyline.extend({
-    options: { 
-        id: 'Custom data!',
-        attributes: {}
-    },
-
     begin: String,
     end: String,
     bidirectional: Boolean,
@@ -106,7 +102,19 @@ L.TaxiwaySegment = L.Polyline.extend({
                         element.updateEndVertex(event.latlng);
                         element.updateMiddle();
                     }
+                } else if (element instanceof L.Editable.VertexMarker) {                    
+                    console.log(element);
+                    element.setLatLng(event.latlng);
+                    element.latlngs.forEach((latlng, index) => {
+                        console.log(latlng);                        
+                        if(latlng.__vertex === element) {
+                          latlng.update(event.latlng);
+                        }
+                    });
+                    element.editor.feature.setLatLngs(element.latlngs);
+                    element.editor.feature.updateMiddle();
                 }    
+
             }
         })
     },
@@ -116,6 +124,7 @@ L.TaxiwaySegment = L.Polyline.extend({
         if (this.options.attributes.isPushBackRoute) {
           style.color = 'magenta';  
         }
+        console.log("isPushBackRoute ", this.options.attributes.isPushBackRoute);
         this.setStyle(style);
         if (!this.bidirectional) {
             this.setText('  ►  ', {repeat: true, attributes: {fill: 'red', size: 20}})

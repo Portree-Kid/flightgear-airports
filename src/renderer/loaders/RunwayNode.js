@@ -11,8 +11,60 @@ L.RunwayNode = L.Marker.extend({
         this.on('editable:drawing:move', function (event) {
             console.log("Move : ", event);
             // Is it the edit vertex (Middle) moving?
-            follow(event.target.id, event);
+            this.follow(event.target.glueindex, event);
         });
+    },
+    extensions: function () {
+        if (typeof this.featureLookup[this.glueindex] === 'undefined') {
+            this.featureLookup[this.glueindex] = new Array();
+        }
+        this.featureLookup[this.glueindex].push(this);
+    },
+    /**
+     * 
+     */
+
+    follow(dragIndex, event) {
+        this.featureLookup[dragIndex].forEach(element => {
+            if (element !== event.target) {
+                if (element instanceof L.RunwayNode) {
+                    element.setLatLng(event.latlng);
+                }
+                else if (element instanceof L.ParkingSpot) {
+                    // element.disableEdit();
+                    element.setLatLng(event.latlng);
+                    // element.enableEdit();
+                    // element.extensions();
+                    element.updateMiddleMarker();
+                    element.updateVertexFromDirection();
+                }
+                else if (element instanceof L.TaxiwaySegment) {
+                    if (element.begin === dragIndex) {
+                        element.getLatLngs()[0].update(event.latlng);
+                        element.setLatLngs(element.getLatLngs());
+                        element.updateBeginVertex(event.latlng);
+                        element.updateMiddle();
+                    }
+                    if (element.end === dragIndex) {
+                        element.getLatLngs()[element.getLatLngs().length - 1].update(event.latlng);
+                        element.setLatLngs(element.getLatLngs());
+                        element.updateEndVertex(event.latlng);
+                        element.updateMiddle();
+                    }
+                } else if (element instanceof L.Editable.VertexMarker) {                    
+                    console.log(element);
+                    element.setLatLng(event.latlng);
+                    element.latlngs.forEach((latlng, index) => {
+                        console.log(latlng);                        
+                        if(latlng.__vertex === element) {
+                          latlng.update(event.latlng);
+                        }
+                    });
+                    element.editor.feature.setLatLngs(element.latlngs);
+                    element.editor.feature.updateMiddle();
+                }    
+            }
+        })
     }
 });
 

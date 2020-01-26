@@ -1,7 +1,7 @@
 const state = {
   type: 'none',
   index: 'none',
-  data: {airports: {}, parking: {}, arc: {}}
+  data: {airports: {}, parking: {}, arc: {}, nodes: {}}
 }
 
 const SET_EDIT_AIRPORT = 'SET_EDIT_AIRPORT'
@@ -18,6 +18,11 @@ const mutations = {
     state.data.parking[parking.index] = parking
     state.index = parking.index
     state.type = 'parking'
+  },
+  'SET_EDIT_NODE' (state, node) {
+    state.data.nodes[node.index] = node
+    state.index = node.index
+    state.type = 'node'
   },
   SET_EDIT_ARC (state, arc) {
     state.data.arc = arc
@@ -37,6 +42,9 @@ const actions = {
   },
   async setArc (context, arc) {
     context.commit(SET_EDIT_ARC, arc)
+  },
+  async setNode (context, node) {
+    context.commit('SET_EDIT_NODE', node)
   }
 }
 

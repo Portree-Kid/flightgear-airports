@@ -19,19 +19,19 @@ var $ = require('jquery');
 var featureLookup = {};
 
 exports.addFeature = function (feature) {
-    featureLookup[feature.id] = new Array();    
+    featureLookup[feature.id] = new Array();
 }
 
 exports.readGroundnetXML = function (fDir, icao, force) {
-    try {        
+    try {
         layerGroup = L.layerGroup();
-        layerGroup.maxId  = 0;        
-        var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.xml');        
-        var fNew = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');        
+        layerGroup.maxId = 0;
+        var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.xml');
+        var fNew = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');
 
         if (f == null || !fs.existsSync(f))
             return;
-        if(fNew != null && fs.existsSync(fNew) && !force) {
+        if (fNew != null && fs.existsSync(fNew) && !force) {
             f = fNew;
         }
 
@@ -56,7 +56,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
             var nodesLookup = {};
 
             parkingNodes.map(n => {
-                var circle = parkingSpot(n, layerGroup);            
+                var circle = parkingSpot(n, layerGroup);
                 nodesLookup[n.attr('index')] = n;
                 featureLookup[n.attr('index')] = new Array();
                 featureLookup[n.attr('index')].push(circle);
@@ -74,12 +74,13 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                 layerGroup.maxId = Math.max(layerGroup.maxId, Number(n.attr('index')))
                 nodesLookup[n.attr('index')] = n;
                 if (n.attr('isOnRunway') === '1') {
-                    var rNode = runwayNode(n, layerGroup);              
-                    if(featureLookup[rNode.id] === undefined) {
-                        featureLookup[rNode.id] = [];
+                    var rNode = runwayNode(n, layerGroup);
+                    if (featureLookup[rNode.glueindex] === undefined) {
+                        featureLookup[rNode.glueindex] = [];
                     }
-                    featureLookup[rNode.id].push(rNode);      
+                    featureLookup[rNode.glueindex].push(rNode);
                 }
+                //store.default.dispatch('setNode', n)
             }).sort();
 
 
@@ -108,28 +109,46 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                     if (!bidirectional) {
                         var beginlatlon = convert(begin.attr('lat') + " " + begin.attr('lon'));
                         var endlatlon = convert(end.attr('lat') + " " + end.attr('lon'));
-                        const polyline = new L.TaxiwaySegment([[beginlatlon.decimalLatitude, beginlatlon.decimalLongitude], [endlatlon.decimalLatitude, endlatlon.decimalLongitude]], {}).addTo(layerGroup);
-                        $.each( n.attrs, function( key, value ) {
-                            console.log( key + "\t" + value);
-                            
-                            if(isNaN(value))
-                              polyline.options.attributes[ key ] = value;
+                        var polyline = new L.TaxiwaySegment([[beginlatlon.decimalLatitude, beginlatlon.decimalLongitude], [endlatlon.decimalLatitude, endlatlon.decimalLongitude]], { attributes: {} }).addTo(layerGroup);
+                        polyline._latlngs[0].attributes = {};
+                        $.each(begin.attrs, function (key, value) {
+                            console.log(key + "\t" + value);
+
+                            if (isNaN(value))
+                                polyline._latlngs[0].attributes[key] = value;
                             else
-                              polyline.options.attributes[ key ] = Number( value);
-                        }); 
+                                polyline._latlngs[0].attributes[key] = Number(value);
+                        });
+                        polyline._latlngs[1].attributes = {};
+                        $.each(end.attrs, function (key, value) {
+                            console.log(key + "\t" + value);
+
+                            if (isNaN(value))
+                                polyline._latlngs[1].attributes[key] = value;
+                            else
+                                polyline._latlngs[1].attributes[key] = Number(value);
+                        });
+                        $.each(n.attrs, function (key, value) {
+                            console.log(key + "\t" + value);
+
+                            if (isNaN(value))
+                                polyline.options.attributes[key] = value;
+                            else
+                                polyline.options.attributes[key] = Number(value);
+                        });
                         polyline.updateStyle();
-                    
+
                         polyline.begin = begin.attr('index');
                         polyline.end = end.attr('index');
                         // polyline.enableEdit();
 
                         // polyline.on('dblclick', function (event) { L.DomEvent.stop; polyline.toggleEdit; });
 
-                        if(featureLookup[n.attr('begin')] == undefined) {
-                          featureLookup[n.attr('begin')] = [];
+                        if (featureLookup[n.attr('begin')] == undefined) {
+                            featureLookup[n.attr('begin')] = [];
                         }
-                        if(featureLookup[n.attr('end')] == undefined) {
-                          featureLookup[n.attr('end')] = [];
+                        if (featureLookup[n.attr('end')] == undefined) {
+                            featureLookup[n.attr('end')] = [];
                         }
                         featureLookup[n.attr('begin')].push(polyline);
                         featureLookup[n.attr('end')].push(polyline);

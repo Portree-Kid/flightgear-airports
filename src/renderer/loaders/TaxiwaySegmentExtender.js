@@ -1,5 +1,6 @@
 /* eslint-disable */
 var L = require('leaflet');
+const store = require('../store');
 
 exports.extendTaxiSegment = function (taxiwaySegment) {
     taxiwaySegment.__proto__.begin;

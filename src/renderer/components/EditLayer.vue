@@ -43,7 +43,7 @@
           this.groundnetLayerGroup.removeFrom(this.$parent.mapObject)
         }
         this.icao = icao
-        this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao, false)
+        this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao, true)
         if (this.groundnetLayerGroup === undefined) {
           console.console.error('ICAO not loaded ' + icao)
           return
@@ -126,19 +126,21 @@
         var polyLine = this.$parent.mapObject.editTools.startPolyline()
         polyLine.addTo(this.groundnetLayerGroup)
         polyLine.groundnetLayerGroup = this.groundnetLayerGroup;
+        polyLine.attributes = [];
 
         polyLine.on('editable:vertex:new', event => {
           console.log(event)
           let closest = this.closestLayerSnap(event.latlng, 10)
           if (closest) {
-            event.latlng.__vertex.glueindex = closest.vertex.glueindex;     
-            event.latlng.__vertex.setLatLng(closest.vertex.latlng);
+            event.latlng.__vertex.glueindex = closest.glueindex;     
+            event.latlng.__vertex.setLatLng(closest.latlng);
+            this.featureLookup[event.latlng.__vertex.glueindex].push(event.latlng.__vertex);
             console.log(closest)
-          }
-          else{
+          } else {
             event.latlng.__vertex.glueindex = ++this.groundnetLayerGroup.maxId;
             this.featureLookup[event.latlng.__vertex.glueindex] = [];
           }
+          event.latlng.attributes = [];
         })
         polyLine.on('editable:drawing:end', event => {
           event.target.featureLookup = this.featureLookup;
@@ -152,15 +154,20 @@
         var layers = []
         this.groundnetLayerGroup.eachLayer((layer) => {
           if (layer instanceof L.Polyline) {
-            console.log(layer._latlngs)
+            // console.log(layer._latlngs)
             layer._latlngs.forEach(latlng => {
               if (latlng.__vertex) {
                 let distance = latlng.distanceTo(eventLatlng)
                 if (distance > 0 && distance < snap) {
-                  layers.push({d: latlng.distanceTo(eventLatlng), l: layer, vertex: latlng.__vertex})
+                  layers.push({d: distance, l: layer, latlng: latlng.__vertex.latlng, glueindex: latlng.__vertex.glueindex})
                 }
               }
             })
+          } else if (layer instanceof L.RunwayNode) {
+            let distance = layer._latlng.distanceTo(eventLatlng)
+            if (distance > 0 && distance < snap) {
+              layers.push({d: distance, l: layer, latlng: layer._latlng, glueindex: layer.glueindex})
+            }
           }
         })
         layers.sort((l1, l2) => l1.d - l2.d)
@@ -196,6 +203,7 @@
       save () {
         var xml = []
         this.groundnetLayerGroup.eachLayer(l => {
+          console.log(l)
           xml.push(l)
         })
         writeGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, this.icao, xml)
