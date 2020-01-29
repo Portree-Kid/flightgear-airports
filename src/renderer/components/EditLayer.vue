@@ -38,12 +38,12 @@
       }
     },
     methods: {
-      load (icao) {
+      load (icao, force) {
         if (this.groundnetLayerGroup !== undefined) {
           this.groundnetLayerGroup.removeFrom(this.$parent.mapObject)
         }
         this.icao = icao
-        this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao, true)
+        this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao, force)
         if (this.groundnetLayerGroup === undefined) {
           console.console.error('ICAO not loaded ' + icao)
           return
@@ -197,8 +197,8 @@
         // console.log(this.groundnetLayerGroup)
         this.$parent.mapObject.off('click', this.addParking)
       },
-      reload () {
-        this.load(this.icao)
+      reload (force) {
+        this.load(this.icao, force)
       },
       save () {
         var xml = []
