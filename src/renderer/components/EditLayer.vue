@@ -28,6 +28,25 @@
       // console.log(LSymbol)
     },
     mounted () {
+      this.selectionLayerGroup = L.layerGroup();
+      this.selectionLayerGroup.addTo(this.$parent.mapObject)
+      this.$store.watch(
+        function (state) {
+              return state.Editable.data.node;
+          },
+          () => { this.editedNode() }
+          /*
+          (newValue, oldValue) => {
+              console.log(`Updating from ${oldValue} to ${newValue}`);              
+              //console.log(this.featureLookup[newValue.index]);
+              console.log(this.component('editLayer'));
+              //do something on data change
+          }*/
+          ,
+          {
+            deep: true //add this if u need to watch object properties change etc.
+          }
+        );
     },
     beforeDestroy () {
       this.remove()
@@ -38,10 +57,12 @@
       }
     },
     methods: {
-      load (icao, force) {
+      load (icao, force) {        
         if (this.groundnetLayerGroup !== undefined) {
           this.groundnetLayerGroup.removeFrom(this.$parent.mapObject)
         }
+        
+
         this.icao = icao
         this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao, force)
         if (this.groundnetLayerGroup === undefined) {
@@ -108,8 +129,7 @@
           if (typeof l.bringToFront === 'function') {
             l.bringToFront()
           }
-        })
-        
+        })        
       },
       disableEdit () {
         this.editable = false
@@ -149,6 +169,45 @@
           console.log(event)
           event.target.addTo(this.groundnetLayerGroup)
         })
+      },
+      editedNode() {
+        var isOnRunway = this.$store.state.Editable.data.node.isOnRunway;
+        var nIndex = this.$store.state.Editable.index; 
+        var hasRunwayNode = false;
+        var latlng;
+        this.featureLookup[nIndex].forEach((element,index) => {
+          if (element instanceof L.RunwayNode) {
+            if (isOnRunway === 0) {
+              // We shouldn't have a RunwayNode
+              element.removeFrom(layerGroup);
+              this.featureLookup[nIndex].splice(index,1);              
+            }
+            hasRunwayNode = true;
+          }
+          else if (element instanceof L.ParkingSpot) {
+          }
+          else if (element instanceof L.TaxiwaySegment) {
+              if (Number(element.begin) === nIndex) {
+                latlng = element._latlngs[0];
+              }
+              if (Number(element.end) === nIndex) {
+                latlng = element._latlngs[1];
+              }
+          }    
+        })
+        if (!hasRunwayNode && isOnRunway) {
+          const icon = new L.DivIcon({
+              className: 'custom-div-icon',
+              html: "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-plane-departure'></i>",
+              iconSize: [30, 42],
+              iconAnchor: [15, 42]
+          });
+          const node = new L.RunwayNode(latlng, { icon: icon });
+          node.glueindex = nIndex;
+          node.addTo(layerGroup);
+          this.featureLookup[nIndex].push(node);
+          node.addListeners();
+        }
       },
       closestLayerSnap (eventLatlng, snap) {
         var layers = []

@@ -4,7 +4,7 @@
     <div class="leaflet-sidebar-tabs">
         <ul role="tablist"> <!-- top aligned tabs -->
             <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
-            <li><a href="#airports" role="tab"><i class="fas fa-edit"></i></a></li>
+            <li><a href="#edit" role="tab"><i class="fas fa-edit"></i></a></li>
             <li><a href="#scan" role="tab"><i class="fa fa-search"></i></a></li>
         </ul>
 
@@ -22,10 +22,11 @@
             </h1>
             <p>A responsive sidebar for mapping libraries</p>
         </div>
-        <div class="leaflet-sidebar-pane" id="airports">
+        <div class="leaflet-sidebar-pane" id="edit">
           <AirportEdit></AirportEdit>
           <GroundnetEdit></GroundnetEdit>
           <ArcEdit></ArcEdit>
+          <NodeEdit></NodeEdit>
         </div>
         <div class="leaflet-sidebar-pane" id="scan">
           <RunScan></RunScan>
@@ -45,13 +46,14 @@
   import AirportEdit from './AirportEdit'
   import GroundnetEdit from './GroundnetEdit'
   import ArcEdit from './ArcEdit'
+  import NodeEdit from './NodeEdit'
   import SettingsPanel from './SettingsPanel'
   import RunScan from './RunScan'
   import FileSelect from './FileSelect'
 
   export default {
     name: 'leaflet-sidebar',
-    components: { AirportEdit, ArcEdit, GroundnetEdit, SettingsPanel, RunScan, FileSelect },
+    components: { AirportEdit, ArcEdit, NodeEdit, GroundnetEdit, SettingsPanel, RunScan, FileSelect },
     props: [],
     mounted () {
       this.add()

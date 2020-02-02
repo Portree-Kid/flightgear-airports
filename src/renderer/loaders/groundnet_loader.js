@@ -72,6 +72,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                 //console.log(latlon.decimalLatitude);
 
                 layerGroup.maxId = Math.max(layerGroup.maxId, Number(n.attr('index')))
+
                 nodesLookup[n.attr('index')] = n;
                 if (n.attr('isOnRunway') === '1') {
                     var rNode = runwayNode(n, layerGroup);
@@ -80,15 +81,16 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                     }
                     featureLookup[rNode.glueindex].push(rNode);
                 }
+
                 //store.default.dispatch('setNode', n)
             }).sort();
 
 
             var taxiArcs = xml.find('groundnet/TaxiWaySegments/arc');
             taxiArcs.map(n => {
-                var begin = nodesLookup[n.attr('begin')];
-                var end = nodesLookup[n.attr('end')];
-                if (typeof begin !== 'undefined' && typeof end !== 'undefined') {
+                var beginNode = nodesLookup[n.attr('begin')];
+                var endNode = nodesLookup[n.attr('end')];
+                if (typeof beginNode !== 'undefined' && typeof endNode !== 'undefined') {
                     var bidirectional = false;
                     if (typeof featureLookup[n.attr('begin')] !== 'undefined') {
                         featureLookup[n.attr('begin')].forEach(element => {
@@ -107,11 +109,11 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                         });
                     }
                     if (!bidirectional) {
-                        var beginlatlon = convert(begin.attr('lat') + " " + begin.attr('lon'));
-                        var endlatlon = convert(end.attr('lat') + " " + end.attr('lon'));
+                        var beginlatlon = convert(beginNode.attr('lat') + " " + beginNode.attr('lon'));
+                        var endlatlon = convert(endNode.attr('lat') + " " + endNode.attr('lon'));
                         var polyline = new L.TaxiwaySegment([[beginlatlon.decimalLatitude, beginlatlon.decimalLongitude], [endlatlon.decimalLatitude, endlatlon.decimalLongitude]], { attributes: {} }).addTo(layerGroup);
                         polyline._latlngs[0].attributes = {};
-                        $.each(begin.attrs, function (key, value) {
+                        $.each(beginNode.attrs, function (key, value) {
                             console.log(key + "\t" + value);
 
                             if (isNaN(value))
@@ -120,7 +122,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                                 polyline._latlngs[0].attributes[key] = Number(value);
                         });
                         polyline._latlngs[1].attributes = {};
-                        $.each(end.attrs, function (key, value) {
+                        $.each(endNode.attrs, function (key, value) {
                             console.log(key + "\t" + value);
 
                             if (isNaN(value))
@@ -138,8 +140,8 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                         });
                         polyline.updateStyle();
 
-                        polyline.begin = begin.attr('index');
-                        polyline.end = end.attr('index');
+                        polyline.begin = beginNode.attr('index');
+                        polyline.end = endNode.attr('index');
                         // polyline.enableEdit();
 
                         // polyline.on('dblclick', function (event) { L.DomEvent.stop; polyline.toggleEdit; });

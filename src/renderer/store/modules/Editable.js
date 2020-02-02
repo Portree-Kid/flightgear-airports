@@ -1,7 +1,7 @@
 const state = {
   type: 'none',
   index: 'none',
-  data: {airports: {}, parking: {}, arc: {}, nodes: {}}
+  data: {airports: {}, parking: {}, arc: {}, node: {}}
 }
 
 const SET_EDIT_AIRPORT = 'SET_EDIT_AIRPORT'
@@ -20,7 +20,7 @@ const mutations = {
     state.type = 'parking'
   },
   'SET_EDIT_NODE' (state, node) {
-    state.data.nodes[node.index] = node
+    state.data.node = node
     state.index = node.index
     state.type = 'node'
   },
@@ -30,6 +30,12 @@ const mutations = {
   },
   'SET_EDIT_PARKING_NAME' (state, parkingName) {
     state.data.name = parkingName
+  },
+  'SET_EDIT_HOLDPOINTTYPE' (state, holdPointType) {
+    state.data.node.holdPointType = holdPointType
+  },
+  'SET_EDIT_ISONRUNWAY' (state, isOnRunway) {
+    state.data.node.isOnRunway = isOnRunway
   }
 }
 

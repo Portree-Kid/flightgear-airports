@@ -8,20 +8,20 @@ L.TaxiwaySegment = L.Polyline.extend({
     end: String,
     bidirectional: Boolean,
 
-    updateBeginVertex : function (latlng) {
+    updateBeginVertex: function (latlng) {
         if (this._latlngs[0].__vertex) {
-            this._latlngs[0].__vertex.setLatLng(latlng);            
+            this._latlngs[0].__vertex.setLatLng(latlng);
         }
     },
-    updateEndVertex : function (latlng) {
-        if(this._latlngs[1].__vertex){
-            this._latlngs[1].__vertex.setLatLng(latlng);        
+    updateEndVertex: function (latlng) {
+        if (this._latlngs[1].__vertex) {
+            this._latlngs[1].__vertex.setLatLng(latlng);
         }
     },
 
     updateMiddle: function () {
         this._latlngs.forEach(element => {
-            if(element.__vertex.middleMarker){
+            if (element.__vertex.middleMarker) {
                 element.__vertex.middleMarker.updateLatLng();
             }
         });
@@ -42,6 +42,7 @@ L.TaxiwaySegment = L.Polyline.extend({
         this.on('click', function (event) {
             console.log("Click : " + event.target);
             store.default.dispatch('setArc', event.target.options.attributes);
+
         });
         this.on('editable:drawing:move', function (event) {
             console.log(event.target);
@@ -49,13 +50,19 @@ L.TaxiwaySegment = L.Polyline.extend({
                 this.follow(dragIndex, event);
             }
         });
+        this.on('editable:vertex:clicked', function (event) {
+            console.log(this.featureLookup[event.vertex.glueindex]);
+
+            store.default.dispatch('setNode', event.vertex.latlng.attributes)
+            event.vertex._icon.style['background-color'] = 'red';
+        });
         var dragIndex = -1;
         this.on('editable:vertex:dragstart', function (event) {
-            console.log("Event Target : ", event.target);            
-            console.log("Middle Marker : ", event.vertex == event.vertex.middleMarker);            
-            console.log("Middle Marker : ", event.vertex.glueindex == undefined);            
-            if(event.vertex.glueindex == undefined)
-              return;
+            console.log("Event Target : ", event.target);
+            console.log("Middle Marker : ", event.vertex == event.vertex.middleMarker);
+            console.log("Middle Marker : ", event.vertex.glueindex == undefined);
+            if (event.vertex.glueindex == undefined)
+                return;
             dragIndex = event.vertex.glueindex;
         });
         this.on('editable:vertex:dragend', function (event) {
@@ -70,14 +77,14 @@ L.TaxiwaySegment = L.Polyline.extend({
             }
             dragIndex = -1;
         });
-    }, 
-      /**
-       * 
-       */
+    },
+    /**
+     * 
+     */
 
-      follow (dragIndex, event) {
+    follow(dragIndex, event) {
         this.featureLookup[dragIndex].forEach(element => {
-            if(element !== event.target){
+            if (element !== event.target) {
                 if (element instanceof L.RunwayNode) {
                     element.setLatLng(event.latlng);
                 }
@@ -102,18 +109,18 @@ L.TaxiwaySegment = L.Polyline.extend({
                         element.updateEndVertex(event.latlng);
                         element.updateMiddle();
                     }
-                } else if (element instanceof L.Editable.VertexMarker) {                    
+                } else if (element instanceof L.Editable.VertexMarker) {
                     console.log(element);
                     element.setLatLng(event.latlng);
                     element.latlngs.forEach((latlng, index) => {
-                        console.log(latlng);                        
-                        if(latlng.__vertex === element) {
-                          latlng.update(event.latlng);
+                        console.log(latlng);
+                        if (latlng.__vertex === element) {
+                            latlng.update(event.latlng);
                         }
                     });
                     element.editor.feature.setLatLngs(element.latlngs);
                     element.editor.feature.updateMiddle();
-                }    
+                }
 
             }
         })
@@ -122,12 +129,12 @@ L.TaxiwaySegment = L.Polyline.extend({
     updateStyle() {
         var style = {};
         if (this.options.attributes.isPushBackRoute) {
-          style.color = 'magenta';  
+            style.color = 'magenta';
         }
         console.log("isPushBackRoute ", this.options.attributes.isPushBackRoute);
         this.setStyle(style);
         if (!this.bidirectional) {
-            this.setText('  ►  ', {repeat: true, attributes: {fill: 'red', size: 20}})
+            this.setText('  ►  ', { repeat: true, attributes: { fill: 'red', size: 20 } })
         }
     }
 });
