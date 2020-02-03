@@ -47,6 +47,12 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                 this.follow(dragIndex, event);
             }
         });
+        this.on('editable:vertex:clicked', function (event) {
+            console.log(this.featureLookup[event.vertex.glueindex]);
+
+            store.default.dispatch('setNode', event.vertex.latlng.attributes)
+            event.vertex._icon.style['background-color'] = 'red';
+        });
         var dragIndex = -1;
         this.on('editable:vertex:dragstart', function (event) {
             console.log("Event Target : ", event.target);            

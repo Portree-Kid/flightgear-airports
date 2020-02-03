@@ -39,13 +39,6 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
             var end = mapEndNode(element);
             nodes[end['@index']] = end;
         });
-        runwayNodes.forEach(element => {
-            if (nodes[element['@index']] != undefined) {
-                nodes[element['@index']]['@isOnRunway'] = "1";                
-            } else {
-                nodes[element['@index']] = element;
-            }
-        });
         // New segments 
         featureList.filter(o => o instanceof L.Polyline).filter(n => n).forEach(arcElement => {
             //            element._latlngs.forEach(latlng => { nodes[latlng.__vertex.glueindex] = mapVertexNode(latlng) });    
@@ -74,8 +67,13 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
                     startIndex = latlng.__vertex.glueindex;
                 }
             });
-
         });
+        runwayNodes.forEach(element => {
+            if (nodes[element['@index']] != undefined) {
+                nodes[element['@index']]['@isOnRunway'] = "1";                
+            }
+        });
+
 
         // delete the parkings 
         parkings.forEach(n => {
@@ -87,39 +85,6 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         var uniqueNodes = nodes.filter((v, i, a) => a.indexOf(v) === i);
 
         var maxId = uniqueNodes.slice(-1)[0]['@index'];
-
-        /*
-        featureList.filter(o => o instanceof L.TaxiwaySegment).filter(n => n).forEach(element => {
-
-            if (element.getLatLngs().length > 2) {
-                let middlePoints = element.getLatLngs().slice(1, -1);
-                let startIndex = element.begin;
-                middlePoints.forEach(latlng => {
-                    uniqueNodes.push({ '@index': String(++maxId), '@lat': convertLat(latlng), '@lon': convertLon(latlng) });
-                    arc = { '@begin': startIndex, '@end': String(maxId) };
-                    arcList.push(arc);
-                    arc = { '@begin': String(maxId), '@end': startIndex };
-                    arcList.push(arc);
-                    startIndex = maxId;
-                });
-                arc = { '@begin': String(startIndex), '@end': element.end };
-                arcList.push(arc);
-                arc = { '@begin': element.end, '@end': String(startIndex) };
-                arcList.push(arc);
-                console.log('We have a edited line');
-            }
-            else {
-                arc = { '@begin': element.begin, '@end': element.end };
-                arcList.push(arc);
-                if (element.bidirectional) {
-                    arc = { '@begin': element.end, '@end': element.begin };
-                    arcList.push(arc);
-                }
-            }
-            // <arc begin="0" end="161" isPushBackRoute="1" name="" />            
-        });
-
-        */
 
         var xmlObj = { groundnet: { version: 1, parkingList: { Parking: parkings }, TaxiNodes: { node: uniqueNodes }, TaxiWaySegments: { arc: arcList } } };
 

@@ -138,9 +138,26 @@
         })
       },
       deleteFeature () {
-        this.groundnetLayerGroup.eachLayer(l => {
-          l.on('click', this.removeLayerClick)
-        })
+        switch (this.$store.state.Editable.type) {
+          case 'node':
+            this.removeNode(this.$store.state.Editable.index)
+        }
+      },
+      removeNode (index) {
+        this.featureLookup[index].forEach((element, i) => {
+          if (element instanceof L.Polyline) {
+            // element.latlngs.forEach();
+            element._latlngs.forEach((e1, index1) => {
+              console.log(e1);
+              e1.__vertex.removeFrom(element.editor.editLayer);
+              element._latlngs.splice(index1,1);
+              if (element._latlngs.length==1) {
+                this.featureLookup[index].splice(i,1);
+                element.removeFrom(this.groundnetLayerGroup);
+              }
+            });
+          }
+        });
       },
       drawPolyline () {
         var polyLine = this.$parent.mapObject.editTools.startPolyline()
