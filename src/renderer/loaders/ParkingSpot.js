@@ -79,6 +79,12 @@ L.ParkingSpot = L.Circle.extend({
             var end = this.editor._resizeLatLng.__vertex.getLatLng();
             var heading = turf.bearing([start.lng, start.lat], [end.lng, end.lat]);
             this.options.attributes.heading = heading + 180;
+            const counts = [14, 18, 26, 33, 40];
+
+            const output = counts.reduce((prev, curr) => Math.abs(curr - this._mRadius) < Math.abs(prev - this._mRadius) ? curr : prev);
+
+            console.log(output);
+            this._mRadius = output;
             this.options.attributes.radius = this._mRadius;
             this.direction.setLatLngs([start, end]);
         }
@@ -92,7 +98,9 @@ L.ParkingSpot = L.Circle.extend({
                 event.target.updateVertexFromDirection();
             }
             else if(event.target.editor._resizeLatLng.__vertex._icon === event.sourceTarget._element) {
-                event.target.updateDirectionFromVertex();            
+                event.target.updateDirectionFromVertex();     
+                event.target.updateVertexFromDirection();     
+                       
                 console.log(event);
             }
         });
