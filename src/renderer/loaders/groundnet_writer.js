@@ -103,14 +103,17 @@ var mapParkings = function (o) {
         var lat = convertLat(o.getLatLng());
         var lon = convertLon(o.getLatLng());
         // <Parking index="0" type="gate" name="GA_Parking" lat="S9 25.739923" lon="E160 2.927602" heading="67"  radius="44" airlineCodes="" />
-        return { '@index': String(o['id']), '@type': o.options.attributes.type, '@name': o.options.attributes.name, '@lat': lat, '@lon': lon, '@heading': Number(o.options.attributes.heading), '@radius': String(o.options.radius) };
+        return { '@index': String(o['id']), '@type': o.options.attributes.type, '@name': o.options.attributes.name, '@lat': lat, '@lon': lon, '@heading': Number(o.options.attributes.heading), '@radius': String(o.options.attributes.radius) };
     }
 }
 
 var mapRunwayNodes = function (o) {
     console.log(o);
     if (o instanceof L.RunwayNode) {
-        return { '@index': String(o['glueindex']), '@lat': convertLat(o._latlng), '@lon': convertLon(o._latlng), '@isOnRunway': '1' };
+        return { '@index': String(o['glueindex']), '@lat': convertLat(o._latlng), '@lon': convertLon(o._latlng), '@isOnRunway': '1', '@holdPointType': 'none' };
+    }
+    if (o instanceof L.HoldNode) {
+        return { '@index': String(o['glueindex']), '@lat': convertLat(o._latlng), '@lon': convertLon(o._latlng), '@isOnRunway': '0', '@holdPointType': o['holdPointType'] };
     }
 }
 

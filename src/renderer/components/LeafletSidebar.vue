@@ -17,7 +17,7 @@
     <div class="leaflet-sidebar-content">
         <div class="leaflet-sidebar-pane" id="home">
             <h1 class="leaflet-sidebar-header">
-                sidebar-v2
+                Help
                 <div class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></div>
             </h1>
             <p>A responsive sidebar for mapping libraries</p>

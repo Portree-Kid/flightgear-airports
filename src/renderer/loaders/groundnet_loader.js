@@ -9,6 +9,7 @@ const TaxiwaySegment = require('./TaxiwaySegment');
 
 const parkingSpot = require('./ParkingSpot.js');
 const runwayNode = require('./RunwayNode.js');
+const holdNode = require('./HoldNode.js');
 
 const store = require('../store');
 
@@ -80,6 +81,13 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                         featureLookup[rNode.glueindex] = [];
                     }
                     featureLookup[rNode.glueindex].push(rNode);
+                }
+                if (n.attr('holdPointType') !== 'none' && n.attr('holdPointType') !== null) {
+                    var hNode = holdNode(n, layerGroup);
+                    if (featureLookup[hNode.glueindex] === undefined) {
+                        featureLookup[hNode.glueindex] = [];
+                    }
+                    featureLookup[hNode.glueindex].push(hNode);
                 }
 
                 //store.default.dispatch('setNode', n)

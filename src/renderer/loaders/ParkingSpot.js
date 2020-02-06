@@ -134,7 +134,7 @@ L.ParkingSpot = L.Circle.extend({
       follow (dragIndex, event) {
         this.featureLookup[dragIndex].forEach(element => {
             if(element !== event.target){
-                if (element instanceof L.RunwayNode) {
+                if (element instanceof L.HoldNode) {
                     element.setLatLng(event.latlng);
                 }
                 else if (element instanceof L.ParkingSpot) {

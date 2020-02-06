@@ -88,6 +88,9 @@ L.TaxiwaySegment = L.Polyline.extend({
                 if (element instanceof L.RunwayNode) {
                     element.setLatLng(event.latlng);
                 }
+                else if (element instanceof L.HoldNode) {
+                    element.setLatLng(event.latlng);
+                }
                 else if (element instanceof L.ParkingSpot) {
                     // element.disableEdit();
                     element.setLatLng(event.latlng);

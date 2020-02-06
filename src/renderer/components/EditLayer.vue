@@ -188,9 +188,12 @@
         })
       },
       editedNode() {
-        var isOnRunway = this.$store.state.Editable.data.node.isOnRunway;
+        var isOnRunway = Number(this.$store.state.Editable.data.node.isOnRunway);
+        var isHoldPoint = this.$store.state.Editable.data.node.holdPointType !== 'none' &&
+                          this.$store.state.Editable.data.node.holdPointType !== undefined;
         var nIndex = this.$store.state.Editable.index; 
         var hasRunwayNode = false;
+        var hasHoldPointNode = false;
         var latlng;
         this.featureLookup[nIndex].forEach((element,index) => {
           if (element instanceof L.RunwayNode) {
@@ -200,6 +203,13 @@
               this.featureLookup[nIndex].splice(index,1);              
             }
             hasRunwayNode = true;
+          } else if (element instanceof L.HoldNode) {
+            if (!isHoldPoint) {
+              // We shouldn't have a RunwayNode
+              element.removeFrom(layerGroup);
+              this.featureLookup[nIndex].splice(index,1);              
+            }
+            hasHoldPointNode = true;
           }
           else if (element instanceof L.ParkingSpot) {
           }
@@ -220,6 +230,19 @@
               iconAnchor: [15, 42]
           });
           const node = new L.RunwayNode(latlng, { icon: icon });
+          node.glueindex = nIndex;
+          node.addTo(layerGroup);
+          this.featureLookup[nIndex].push(node);
+          node.addListeners();
+        }
+        if (!hasHoldPointNode && isHoldPoint) {
+          const icon = new L.DivIcon({
+              className: 'custom-div-icon',
+              html: "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-hand-paper'></i>",
+              iconSize: [30, 42],
+              iconAnchor: [15, 42]
+          });
+          const node = new L.HoldNode(latlng, { icon: icon });
           node.glueindex = nIndex;
           node.addTo(layerGroup);
           this.featureLookup[nIndex].push(node);

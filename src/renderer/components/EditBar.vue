@@ -1,5 +1,5 @@
 <template>
-  <div id="BLABLA">
+  <div id="EditBar">
     <EditButton icon="fas fa-edit" v-on:click="edit" :show="!editing" tooltip="Edit"></EditButton>
     <EditButton icon="fas fa-undo" v-on:click="centerDialogVisible = true" :show="editing" tooltip="Undo"></EditButton>
     <el-dialog title="Reload" :visible.sync="centerDialogVisible" width="30%" center>

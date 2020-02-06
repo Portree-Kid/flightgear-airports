@@ -47,7 +47,7 @@
     */
     computed: {
       options: function () {
-        return [{value: 'node', label: 'node'}, {value: 'PushBack', label: 'PushBack'}, {value: 'normal', label: 'normal'}, {value: 'CAT II/III', label: 'CAT II/III'}]
+        return [{value: 'none', label: 'none'}, {value: 'PushBack', label: 'PushBack'}, {value: 'normal', label: 'normal'}, {value: 'CAT II/III', label: 'CAT II/III'}]
       },
       node: function () {
         return this.$store.state.Editable.type === 'node'
