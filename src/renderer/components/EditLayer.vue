@@ -208,6 +208,21 @@
               // We shouldn't have a RunwayNode
               element.removeFrom(layerGroup);
               this.featureLookup[nIndex].splice(index,1);              
+            } else {
+              var fa_icon;
+              if (this.$store.state.Editable.data.node.holdPointType === 'PushBack') {
+                  fa_icon = "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-arrows-alt-h'></i>";
+              } else if (this.$store.state.Editable.data.node.holdPointType === 'normal') {
+                  fa_icon = "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-hand-paper'></i>";
+              }
+              const icon = new L.DivIcon({
+                  className: 'custom-div-icon',
+                  html: fa_icon,
+                  iconSize: [30, 42],
+                  iconAnchor: [15, 42]
+              });
+
+              element.setIcon(icon);
             }
             hasHoldPointNode = true;
           }
@@ -223,6 +238,7 @@
           }    
         })
         if (!hasRunwayNode && isOnRunway) {
+          this.$store.state.Editable.data.node.holdPointType
           const icon = new L.DivIcon({
               className: 'custom-div-icon',
               html: "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-plane-departure'></i>",
@@ -236,9 +252,15 @@
           node.addListeners();
         }
         if (!hasHoldPointNode && isHoldPoint) {
+          var fa_icon = null;
+          if (this.$store.state.Editable.data.node.holdPointType === 'PushBack') {
+              fa_icon = "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-arrows-alt-h'></i>";
+          } else if (this.$store.state.Editable.data.node.holdPointType === 'normal') {
+              fa_icon = "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-hand-paper'></i>";
+          }
           const icon = new L.DivIcon({
               className: 'custom-div-icon',
-              html: "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-hand-paper'></i>",
+              html: fa_icon,
               iconSize: [30, 42],
               iconAnchor: [15, 42]
           });

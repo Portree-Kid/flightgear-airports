@@ -71,9 +71,15 @@ L.HoldNode = L.Marker.extend({
 var holdNode = function (n, layerGroup) {
     //console.log(n.attr('lat') + " " + n.attr('lon'));
     var latlon = convert(n.attr('lat') + " " + n.attr('lon'));    
+    var fa_icon = null;
+    if (n.attr('holdPointType') === 'PushBack') {
+        fa_icon = "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-arrows-alt-h'></i>";
+    } else if (n.attr('holdPointType') === 'normal') {
+        fa_icon = "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-hand-paper'></i>";
+    }
     const icon = new L.DivIcon({
         className: 'custom-div-icon',
-        html: "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-hand-paper'></i>",
+        html: fa_icon,
         iconSize: [30, 42],
         iconAnchor: [15, 42]
     });
