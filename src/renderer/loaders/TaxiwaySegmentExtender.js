@@ -109,6 +109,17 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                         element.updateEndVertex(event.latlng);
                         element.updateMiddle();
                     }
+                } else if (element instanceof L.Editable.VertexMarker) {
+                    console.log(element);
+                    element.setLatLng(event.latlng);
+                    element.latlngs.forEach((latlng, index) => {
+                        console.log(latlng);
+                        if (latlng.__vertex === element) {
+                            latlng.update(event.latlng);
+                        }
+                    });
+                    element.editor.feature.setLatLngs(element.latlngs);
+                    element.editor.feature.updateMiddle();
                 }    
             }
         })
