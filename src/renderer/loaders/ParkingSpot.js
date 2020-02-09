@@ -92,16 +92,16 @@ L.ParkingSpot = L.Circle.extend({
     addListeners: function () {
         this.on('editable:drawing:move', function (event) {
             console.log("Move : ", event);
+            console.log("Move : ", event.latlng);
             // Is it the edit vertex (Middle) moving?
             if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){
-                this.follow(event.target.id, event);                        
+                event.target.setLatLng(event.latlng);
                 event.target.updateVertexFromDirection();
+                this.follow(event.target.id, event);                        
             }
             else if(event.target.editor._resizeLatLng.__vertex._icon === event.sourceTarget._element) {
                 event.target.updateDirectionFromVertex();     
                 event.target.updateVertexFromDirection();     
-                       
-                console.log(event);
             }
         });
         /*        
@@ -134,7 +134,10 @@ L.ParkingSpot = L.Circle.extend({
       follow (dragIndex, event) {
         this.featureLookup[dragIndex].forEach(element => {
             if(element !== event.target){
-                if (element instanceof L.HoldNode) {
+                if (element instanceof L.RunwayNode) {
+                    element.setLatLng(event.latlng);
+                }
+                else if (element instanceof L.HoldNode) {
                     element.setLatLng(event.latlng);
                 }
                 else if (element instanceof L.ParkingSpot) {
@@ -158,6 +161,17 @@ L.ParkingSpot = L.Circle.extend({
                         element.updateEndVertex(event.latlng);
                         element.updateMiddle();
                     }
+                } else if (element instanceof L.Editable.VertexMarker) {
+                    console.log(element);
+                    element.setLatLng(event.latlng);
+                    element.latlngs.forEach((latlng, index) => {
+                        console.log(latlng);
+                        if (latlng.__vertex === element) {
+                            latlng.update(event.latlng);
+                        }
+                    });
+                    element.editor.feature.setLatLngs(element.latlngs);
+                    element.editor.feature.updateMiddle();
                 }    
             }
         })
@@ -183,6 +197,7 @@ var parkingSpot = function (n, layerGroup) {
       // event.target.createDirection();
     });
     circle.id = n.attr('index');
+    circle.glueindex = n.attr('index');
     /*
 <Parking index="2"
 type="gate"

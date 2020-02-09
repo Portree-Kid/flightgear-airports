@@ -289,7 +289,19 @@
             if (distance > 0 && distance < snap) {
               layers.push({d: distance, l: layer, latlng: layer._latlng, glueindex: layer.glueindex})
             }
-          }
+          } else if (layer instanceof L.ParkingSpot) {
+            let distance = layer._latlng.distanceTo(eventLatlng)
+            if (distance > 0 && distance < snap) {
+              layers.push({d: distance, l: layer, latlng: layer._latlng, glueindex: layer.glueindex})
+            }
+          } else if (layer instanceof L.HoldNode) {
+            let distance = layer._latlng.distanceTo(eventLatlng)
+            if (distance > 0 && distance < snap) {
+              layers.push({d: distance, l: layer, latlng: layer._latlng, glueindex: layer.glueindex})
+            }
+          } else {
+            console.log(layer)
+          }          
         })
         layers.sort((l1, l2) => l1.d - l2.d)
         if (layers.length > 0) {
