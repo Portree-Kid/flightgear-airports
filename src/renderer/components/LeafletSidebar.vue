@@ -23,6 +23,10 @@
             <p>A responsive sidebar for mapping libraries</p>
         </div>
         <div class="leaflet-sidebar-pane" id="edit">
+            <h1 class="leaflet-sidebar-header">
+                Properties
+                <div class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></div>
+            </h1>
           <AirportEdit></AirportEdit>
           <GroundnetEdit></GroundnetEdit>
           <ArcEdit></ArcEdit>

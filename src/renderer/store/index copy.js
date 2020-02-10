@@ -8,6 +8,8 @@ import { createPersistedState, createSharedMutations } from 'vuex-electron'
 import modules from './modules'
 
 Vue.use(Vuex)
+//https://a.tile.openstreetmap.de
+//'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
 
 export default new Vuex.Store({
   modules,
@@ -18,7 +20,7 @@ export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
   state: { zoom: 13,
     center: L.latLng(47.413220, -1.219482),
-    url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+    url: 'http://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png',
     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
     marker: L.latLng(47.413220, -1.219482)}
 })

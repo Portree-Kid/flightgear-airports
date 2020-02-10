@@ -1,13 +1,5 @@
 <template>
-  <div>
-    <h1 class="leaflet-sidebar-header" v-if="arc">
-      Arc Properties
-      <div class="leaflet-sidebar-close">
-        <i class="fa fa-caret-left"></i>
-      </div>
-    </h1>
     <div width="100%" v-if="arc">
-      <div>
         <!--
           airlineCodes: 0
           heading: 341.34
@@ -27,9 +19,15 @@
             <el-input placeholder="Please input" v-model="name"></el-input>
           </el-col>
         </el-row>
-      </div>
+        <el-row>
+          <el-col :span="7">
+            <span class="demo-input-label">Pushback :</span>
+          </el-col>
+          <el-col :span="15">
+            <el-switch v-model="isPushback"></el-switch>
+          </el-col>
+        </el-row>
     </div>
-  </div>
 </template>
 
 <script lang="js">
@@ -41,15 +39,22 @@
       name: {
       // getter
         get: function () {
-          return this.$store.state.Editable.data.name
+          return this.$store.state.Editable.data.arc.name
         },
         // setter
         set: function (newValue) {
-          this.$store.commit('SET_EDIT_PARKING_NAME', newValue)
+          this.$store.commit('SET_EDIT_ARC_NAME', newValue)
         }
       },
-      airports_directory: function () {
-        return this.$store.state.Settings.settings.airportsDirectory
+      isPushback: {
+      // getter
+        get: function () {
+          return this.$store.state.Editable.data.arc.isPushBackRoute === '1'
+        },
+        // setter
+        set: function (newValue) {
+          this.$store.commit('SET_EDIT_PUSHBACK', newValue ? '1' : '0')
+        }
       }
     }
   }

@@ -42,7 +42,14 @@ L.TaxiwaySegment = L.Polyline.extend({
         this.on('click', function (event) {
             console.log("Click : " + event.target);
             store.default.dispatch('setArc', event.target.options.attributes);
-
+            store.default.watch( function (state) {
+                return state.Editable.data.arc;
+            },
+            () => { console.log(this) }
+            ,
+            {
+              deep: true //add this if u need to watch object properties change etc.
+            });
         });
         this.on('editable:drawing:move', function (event) {
             console.log(event.target);

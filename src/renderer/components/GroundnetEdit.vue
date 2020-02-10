@@ -1,12 +1,5 @@
 <template>
     <div v-if="parking">
-      <h1 class="leaflet-sidebar-header">
-        Parking 
-        <div class="leaflet-sidebar-close">
-          <i class="fa fa-caret-left"></i>
-        </div>
-      </h1>
-      <div>
         <!--
           airlineCodes: 0
           heading: 341.34
@@ -18,13 +11,11 @@
           radius: 18
           type: "gate"
         -->
-        {{this.$store.state.Editable.index}}
         <el-row>
           <el-col :span="7"><span class="demo-input-label">Name :</span></el-col>          
           <el-col :span="15"><el-input placeholder="Please input" v-model="name"></el-input></el-col>
         </el-row>
       </div>
-    </div>
 </template>
 
 <script lang="js">
@@ -36,17 +27,13 @@
       name: {
       // getter
         get: function () {
-          return this.$store.state.Editable.data.parking[this.$store.state.Editable.index].name
+          return this.$store.state.Editable.data.parking.name
         },
         // setter
         set: function (newValue) {
           this.$store.commit('SET_EDIT_PARKING_NAME', newValue)
         }
-      },
-      airports_directory: function () {
-        return this.$store.state.Settings.settings.airportsDirectory
       }
-
     }
   }
 </script>

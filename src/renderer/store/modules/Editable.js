@@ -26,10 +26,20 @@ const mutations = {
   },
   SET_EDIT_ARC (state, arc) {
     state.data.arc = arc
+    if (state.data.arc.name === undefined) {
+      state.data.arc.name = 'X'
+    }
+    state.index = arc.index
     state.type = 'arc'
   },
   'SET_EDIT_PARKING_NAME' (state, parkingName) {
-    state.data.name = parkingName
+    state.data.arc.name = parkingName
+  },
+  'SET_EDIT_ARC_NAME' (state, arcName) {
+    state.data.arc.name = arcName
+  },
+  'SET_EDIT_PUSHBACK' (state, isPushBackRoute) {
+    state.data.arc.isPushBackRoute = isPushBackRoute
   },
   'SET_EDIT_HOLDPOINTTYPE' (state, holdPointType) {
     state.data.node.holdPointType = holdPointType

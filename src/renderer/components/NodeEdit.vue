@@ -1,11 +1,4 @@
 <template>
-  <div>
-    <h1 class="leaflet-sidebar-header" v-if="node">
-      Node Properties
-      <div class="leaflet-sidebar-close">
-        <i class="fa fa-caret-left"></i>
-      </div>
-    </h1>
     <div width="100%" v-if="node">
       <div>
         <el-row>
@@ -33,7 +26,6 @@
         </el-row>
       </div>
     </div>
-  </div>
 </template>
 
 <script lang="js">

@@ -1,12 +1,4 @@
 <template>
-  <div width="100%">
-    <h1 class="leaflet-sidebar-header" v-if="airport">
-        Airport 
-      <div class="leaflet-sidebar-close">
-          <i class="fa fa-caret-left"></i>
-      </div>
-    </h1>
-
     <div width="100%" v-if="airport">
       <div>
         <el-row>
@@ -35,7 +27,6 @@
         </el-row>
       </div>
     </div>
-  </div>
 </template>
 
 <script lang="js">
