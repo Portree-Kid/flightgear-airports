@@ -65,6 +65,7 @@
             this.$refs.pavementLayer.load(airportsToLoad[0])
             this.editingAirport = airportsToLoad[0]
           }
+          this.$refs.editLayer.setVisible(this.zoom >= 12)
           this.$refs.airportLayer.setVisible(this.zoom < 12)
 
           // console.log(this.groundnet)
@@ -131,6 +132,7 @@
         if (bounds !== this.$store.state.Settings.bounds) {
           this.$store.dispatch('setBounds', bounds)
           this.$refs.airportLayer.setVisible(this.zoom < 12)
+          this.$refs.pavementLayer.setVisible(this.zoom < 12)
         }
       }
     },

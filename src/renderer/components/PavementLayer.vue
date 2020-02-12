@@ -63,6 +63,15 @@
         if (this.$parent._isMounted) {
           this.deferredMountedTo(this.$parent.mapObject)
         }
+      },
+      setVisible (visible) {
+        if (this.layerGroup !== undefined) {
+          if (visible) {
+            this.layerGroup.addTo(this.$parent.mapObject)
+          } else {
+            this.layerGroup.removeFrom(this.$parent.mapObject)
+          }
+        }
       }
     },
     computed: {
