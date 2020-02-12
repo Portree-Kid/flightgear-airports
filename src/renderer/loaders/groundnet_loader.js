@@ -4,12 +4,10 @@ const path = require('path');
 var xamel = require('xamel');
 const convert = require('geo-coordinates-parser');
 
-const markers = require('./MagneticVertex');
-const TaxiwaySegment = require('./TaxiwaySegment');
-
 const parkingSpot = require('./ParkingSpot.js');
 const runwayNode = require('./RunwayNode.js');
 const holdNode = require('./HoldNode.js');
+const extendTaxiSegment = require('./TaxiwaySegmentExtender').extendTaxiSegment;
 
 const store = require('../store');
 
@@ -102,24 +100,28 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                     var bidirectional = false;
                     if (typeof featureLookup[n.attr('begin')] !== 'undefined') {
                         featureLookup[n.attr('begin')].forEach(element => {
-                            if (element instanceof L.TaxiwaySegment && element.end === n.attr('begin') && element.begin === n.attr('end')) {
+                            if (element instanceof L.Polyline && element.end === n.attr('begin') && element.begin === n.attr('end')) {
                                 element.bidirectional = true;
                                 bidirectional = true;
+                                element.updateStyle();
                             }
                         });
                     }
                     if (typeof featureLookup[n.attr('end')] !== 'undefined') {
                         featureLookup[n.attr('end')].forEach(element => {
-                            if (element instanceof L.TaxiwaySegment && element.end === n.attr('begin') && element.begin === n.attr('end')) {
+                            if (element instanceof L.Polyline && element.end === n.attr('begin') && element.begin === n.attr('end')) {
                                 element.bidirectional = true;
                                 bidirectional = true;
+                                element.updateStyle();
                             }
                         });
                     }
                     if (!bidirectional) {
                         var beginlatlon = convert(beginNode.attr('lat') + " " + beginNode.attr('lon'));
                         var endlatlon = convert(endNode.attr('lat') + " " + endNode.attr('lon'));
-                        var polyline = new L.TaxiwaySegment([[beginlatlon.decimalLatitude, beginlatlon.decimalLongitude], [endlatlon.decimalLatitude, endlatlon.decimalLongitude]], { attributes: {} }).addTo(layerGroup);
+                        var polyline = new L.Polyline([[beginlatlon.decimalLatitude, beginlatlon.decimalLongitude], [endlatlon.decimalLatitude, endlatlon.decimalLongitude]], { attributes: {} }).addTo(layerGroup);
+                        extendTaxiSegment(polyline);
+                        polyline.addListeners();
                         polyline._latlngs[0].attributes = {};
                         $.each(beginNode.attrs, function (key, value) {
                             console.log(key + "\t" + value);

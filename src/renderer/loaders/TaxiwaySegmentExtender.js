@@ -96,7 +96,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                     element.updateMiddleMarker();
                     element.updateVertexFromDirection();
                 }
-                else if (element instanceof L.TaxiwaySegment) {
+                else if (element instanceof L.Polyline) {
                     if (element.begin === dragIndex) {
                         element.getLatLngs()[0].update(event.latlng);
                         element.setLatLngs(element.getLatLngs());
@@ -133,6 +133,8 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         this.setStyle(style);
         if (!this.bidirectional) {
             this.setText('  ►  ', {repeat: true, attributes: {fill: 'red', size: 20}})
-        }
+        } else {
+            this.setText('')
+        }        
     };
 };

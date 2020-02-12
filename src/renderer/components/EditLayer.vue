@@ -35,13 +35,16 @@
               return state.Editable.data.node;
           },
           () => { this.editedNode() }
-          /*
-          (newValue, oldValue) => {
-              console.log(`Updating from ${oldValue} to ${newValue}`);              
-              //console.log(this.featureLookup[newValue.index]);
-              console.log(this.component('editLayer'));
-              //do something on data change
-          }*/
+          ,
+          {
+            deep: true //add this if u need to watch object properties change etc.
+          }
+        );
+      this.$store.watch(
+        function (state) {
+              return state.Editable.data.arc;
+          },
+          () => { this.editedArc() }
           ,
           {
             deep: true //add this if u need to watch object properties change etc.
@@ -144,6 +147,10 @@
         }
       },
       removeNode (index) {
+        if(this.featureLookup[index]===undefined) {
+          console.error("Lookup " + index + " failed ");          
+          return;
+        }
         this.featureLookup[index].forEach((element, i) => {
           if (element instanceof L.Polyline) {
             // element.latlngs.forEach();
@@ -152,7 +159,14 @@
               e1.__vertex.removeFrom(element.editor.editLayer);
               element._latlngs.splice(index1,1);
               if (element._latlngs.length==1) {
+
                 this.featureLookup[index].splice(i,1);
+                this.featureLookup[element._latlngs[0].__vertex.glueindex].forEach((otherEnd, j) => {
+                  console.log(j + ' ' + otherEnd);
+                  if(element === otherEnd){
+                    this.featureLookup[element._latlngs[0].__vertex.glueindex].splice(j,1);
+                  }
+                });
                 element.removeFrom(this.groundnetLayerGroup);
               }
             });
@@ -186,6 +200,9 @@
           console.log(event)
           event.target.addTo(this.groundnetLayerGroup)
         })
+      },
+      editedArc() {
+
       },
       editedNode() {
         var isOnRunway = Number(this.$store.state.Editable.data.node.isOnRunway);
@@ -235,7 +252,14 @@
               if (Number(element.end) === nIndex) {
                 latlng = element._latlngs[1];
               }
+          } else if (element instanceof L.Polyline) {
+              element._latlngs.forEach(element => {
+                if(Number(element.__vertex.glueindex) === nIndex){
+                  latlng = element.__vertex.latlng;
+                }
+              });
           }    
+    
         })
         if (!hasRunwayNode && isOnRunway) {
           this.$store.state.Editable.data.node.holdPointType
