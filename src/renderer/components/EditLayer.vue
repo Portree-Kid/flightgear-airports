@@ -148,7 +148,13 @@
           case 'parking':
             this.removeParking(this.$store.state.Editable.index)
             break;
+          case 'arc':
+            this.removeArc(this.$store.state.Editable.data.arc)
+            break;
         }
+      },
+      removeArc (arc) {
+        console.log(arc);
       },
       removeParking (index) {
         if(this.featureLookup[index]===undefined) {
@@ -220,7 +226,8 @@
 
       },
       editedNode() {
-        if (this.$store.state.Editable.data.node===undefined) {
+        if (this.$store.state.Editable.data.node===undefined ||
+        this.featureLookup===undefined) {
           return;
         }
         var isOnRunway = Number(this.$store.state.Editable.data.node.isOnRunway);

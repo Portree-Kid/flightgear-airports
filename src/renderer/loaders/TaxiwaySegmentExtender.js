@@ -38,8 +38,22 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
     };
     taxiwaySegment.__proto__.addListeners = function () {
         this.on('click', function (event) {
+            event.target.setStyle({color : 'red'});
             console.log("Click : " + event.target);
             store.default.dispatch('setArc', event.target.options.attributes);
+            this.unwatch = store.default.watch(
+                function (state) {
+                        return state.Editable.data.arc;
+                },
+                    () => { 
+                        event.target.setStyle({color : '#3388ff'}); 
+                        this.unwatch();
+                    }                    
+                ,
+                {
+                    deep: true //add this if u need to watch object properties change etc.
+                }
+            );
         });
         this.on('editable:drawing:move', function (event) {
             console.log(event.target);
@@ -52,6 +66,19 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
 
             store.default.dispatch('setNode', event.vertex.latlng.attributes)
             event.vertex._icon.style['background-color'] = 'red';
+            this.unwatch = store.default.watch(
+                function (state) {
+                        return state.Editable.data.node;
+                },
+                    () => { 
+                        event.vertex._icon.style['background-color'] = 'white'; 
+                        this.unwatch();
+                    }                    
+                ,
+                {
+                    deep: true //add this if u need to watch object properties change etc.
+                }
+            );
         });
         var dragIndex = -1;
         this.on('editable:vertex:dragstart', function (event) {

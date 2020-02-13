@@ -36,7 +36,7 @@ const mutations = {
     state.type = 'arc'
   },
   'SET_EDIT_PARKING_NAME' (state, parkingName) {
-    state.data.arc.name = parkingName
+    state.data.parking.name = parkingName
   },
   'SET_EDIT_ARC_NAME' (state, arcName) {
     state.data.arc.name = arcName
