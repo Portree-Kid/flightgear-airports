@@ -113,6 +113,15 @@ L.ParkingSpot = L.Circle.extend({
             console.log("Click : " + event.target);
             store.default.dispatch('setParking', event.target.options.attributes);
         });
+        this.on('editable:vertex:clicked', function (event) {
+            console.log(this.featureLookup[event.vertex.glueindex]);
+            if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){
+                event.vertex._icon.style['background-color'] = 'red';
+                store.default.dispatch('setParking', event.target.options.attributes);
+            }
+
+        });
+
         this.on('editable:disable', function (event) {
             event.target.removeDirection();
         });    

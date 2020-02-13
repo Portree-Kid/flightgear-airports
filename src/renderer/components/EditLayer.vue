@@ -144,7 +144,22 @@
         switch (this.$store.state.Editable.type) {
           case 'node':
             this.removeNode(this.$store.state.Editable.index)
+            break;
+          case 'parking':
+            this.removeParking(this.$store.state.Editable.index)
+            break;
         }
+      },
+      removeParking (index) {
+        if(this.featureLookup[index]===undefined) {
+          console.error("Lookup " + index + " failed ");          
+          return;
+        }
+        this.featureLookup[index].forEach((element, i) => {
+          if (element instanceof L.ParkingSpot) {
+            element.removeFrom(this.groundnetLayerGroup);                      
+          }
+        });
       },
       removeNode (index) {
         if(this.featureLookup[index]===undefined) {
@@ -205,6 +220,9 @@
 
       },
       editedNode() {
+        if (this.$store.state.Editable.data.node===undefined) {
+          return;
+        }
         var isOnRunway = Number(this.$store.state.Editable.data.node.isOnRunway);
         var isHoldPoint = this.$store.state.Editable.data.node.holdPointType !== 'none' &&
                           this.$store.state.Editable.data.node.holdPointType !== undefined;

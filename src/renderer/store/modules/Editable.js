@@ -15,19 +15,22 @@ const mutations = {
     state.type = 'airport'
   },
   SET_EDIT_PARKING (state, parking) {
-    state.data.parking[parking.index] = parking
+    state.data = {}
+    state.data.parking = parking
     state.index = parking.index
     state.type = 'parking'
   },
   'SET_EDIT_NODE' (state, node) {
+    state.data = {}
     state.data.node = node
     state.index = node.index
     state.type = 'node'
   },
   SET_EDIT_ARC (state, arc) {
+    state.data = {}
     state.data.arc = arc
     if (state.data.arc.name === undefined) {
-      state.data.arc.name = 'X'
+      state.data.arc.name = ''
     }
     state.index = arc.index
     state.type = 'arc'
