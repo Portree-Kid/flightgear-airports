@@ -12,19 +12,19 @@ const SET_EDIT_ARC = 'SET_EDIT_ARC'
 
 const mutations = {
   SET_EDIT_AIRPORT (state, airport) {
-    state.data.airports[airport.icao] = airport
+    Vue.set(state.data, 'airport', airport)
     state.index = airport.icao
     state.type = 'airport'
   },
   SET_EDIT_PARKING (state, parking) {
     state.data = {}
-    Vue.set(state.data, 'parking', parking)    
+    Vue.set(state.data, 'parking', parking)
     state.index = parking.index
     state.type = 'parking'
   },
   'SET_EDIT_NODE' (state, node) {
     state.data = {}
-    Vue.set(state.data, 'node', node)    
+    Vue.set(state.data, 'node', node)
     state.index = node.index
     state.type = 'node'
   },
@@ -38,10 +38,10 @@ const mutations = {
     state.type = 'arc'
   },
   'SET_EDIT_PARKING_NAME' (state, parkingName) {
-    Vue.set(state.data.parking, 'name', parkingName)    
+    Vue.set(state.data.parking, 'name', parkingName)
   },
   'SET_EDIT_ARC_NAME' (state, arcName) {
-    Vue.set(state.data.arc, 'name', arcName)    
+    Vue.set(state.data.arc, 'name', arcName)
   },
   'SET_EDIT_PUSHBACK' (state, isPushBackRoute) {
     state.data.arc.isPushBackRoute = isPushBackRoute
