@@ -1,3 +1,5 @@
+import Vue from 'vue'
+
 const state = {
   type: 'none',
   index: 'none',
@@ -16,13 +18,13 @@ const mutations = {
   },
   SET_EDIT_PARKING (state, parking) {
     state.data = {}
-    state.data.parking = parking
+    Vue.set(state.data, 'parking', parking)    
     state.index = parking.index
     state.type = 'parking'
   },
   'SET_EDIT_NODE' (state, node) {
     state.data = {}
-    state.data.node = node
+    Vue.set(state.data, 'node', node)    
     state.index = node.index
     state.type = 'node'
   },
@@ -36,10 +38,10 @@ const mutations = {
     state.type = 'arc'
   },
   'SET_EDIT_PARKING_NAME' (state, parkingName) {
-    state.data.parking.name = parkingName
+    Vue.set(state.data.parking, 'name', parkingName)    
   },
   'SET_EDIT_ARC_NAME' (state, arcName) {
-    state.data.arc.name = arcName
+    Vue.set(state.data.arc, 'name', arcName)    
   },
   'SET_EDIT_PUSHBACK' (state, isPushBackRoute) {
     state.data.arc.isPushBackRoute = isPushBackRoute
