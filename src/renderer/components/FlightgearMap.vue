@@ -122,13 +122,13 @@
           this.$refs.airportLayer.setVisible(zoom < 12)
         }
       },
-      centerUpdated (center) {
+      async centerUpdated (center) {
         if (center !== this.$store.state.Settings.center) {
           this.$store.dispatch('setCenter', center)
           this.$refs.airportLayer.setVisible(this.zoom < 12)
         }
       },
-      boundsUpdated (bounds) {
+      async boundsUpdated (bounds) {
         if (bounds !== this.$store.state.Settings.bounds) {
           this.$store.dispatch('setBounds', bounds)
           this.$refs.airportLayer.setVisible(this.zoom < 12)

@@ -391,6 +391,17 @@
         writeGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, this.icao, xml)
       },
       setVisible(visible) {
+        if (this.layerGroup) {
+          if (visible) {
+            this.layerGroup.addTo(this.$parent.mapObject)
+          } else {
+            this.layerGroup.removeFrom(this.$parent.mapObject)
+          }
+        }
+
+        if (this.groundnetLayerGroup === undefined) {
+          return;
+        }
         if (visible) {
           this.groundnetLayerGroup.addTo(this.$parent.mapObject)
         } else {
