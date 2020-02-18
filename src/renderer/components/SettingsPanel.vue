@@ -28,6 +28,12 @@
         </el-col>
       </el-row>
       <el-row>
+        <el-col :span="7">Traffic Directory</el-col>
+        <el-col :span="15">{{ Traffic_directory }}</el-col>
+        <el-col :span="2">
+        </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="7">APT File</el-col>
         <el-col :span="15">{{ apt_file }}</el-col>
         <el-col :span="2">
@@ -67,6 +73,9 @@
       },
       AI_directory: function () {
         return this.$store.state.Settings.settings.flightgearDirectory_ai
+      },
+      Traffic_directory: function () {
+        return this.$store.state.Settings.settings.flightgearDirectory_traffic
       },
       apt_file: function () {
         return this.$store.state.Settings.settings.flightgearDirectory_apt

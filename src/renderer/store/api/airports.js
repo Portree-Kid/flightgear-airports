@@ -70,9 +70,8 @@ export default {
 	},
 
 	async saveAirport(airport) {
-
 		let db = await this.getDb();
-
+		
 		return new Promise(resolve => {
 
 			let trans = db.transaction(['airports'],'readwrite');

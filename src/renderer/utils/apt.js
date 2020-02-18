@@ -1,20 +1,19 @@
 /* eslint-disable */
 const lineReader = require('readline');
-
 var icao;
 
 var scanMethods = {
   1: (l, apts) => {
-    console.log('Airport:', l);
+    logger('info', 'Airport:', l);
     icao = l[4];
     saveName(apts, l[4], l.slice(5).join(' ').replace('\t', ' '));
   },
   14: (l, apts) => {
-    console.log('Viewport:', l);
+    logger('info','Viewport:', l);
     saveCoordinates(apts, icao, l[1], l[2]);
   },
   99: (l) => {
-    console.log('Finished');
+    logger('info','Finished');
   }
 };
 
@@ -23,11 +22,12 @@ async function saveName(features, icao, name) {
 
     var transaction = features.transaction("airports", "readwrite");
     var objectStore = transaction.objectStore("airports");
-    var objectStoreRequest = objectStore.get(icao);
+    var index = objectStore.index('icaoIndex');
+    var objectStoreRequest = index.get(icao);
 
     objectStoreRequest.onsuccess = function (event) {
-      console.log(event);
-      var feature = objectStoreRequest.result;
+      logger('info',event);
+      var feature = event.target.result;
       if (!feature) {
         feature = {
           "type": "Feature",
@@ -39,25 +39,25 @@ async function saveName(features, icao, name) {
       }
       feature.properties.name = name;
       feature.properties.icao = icao;
-      console.log("ICAO : " + feature.properties.icao);
+      logger('info',"ICAO : " + feature.properties.icao + " Name : " + name );
       // Create another request that inserts the item back into the database
       var updateAirportRequest = objectStore.put(feature);
 
       // Log the transaction that originated this request
-      console.log("The transaction that originated this request is " + updateAirportRequest.updateAirportRequest);
+      logger('info',"The transaction that originated this request is " + updateAirportRequest.updateAirportRequest);
 
       // When this new request succeeds, run the displayData() function again to update the display
       updateAirportRequest.onsuccess = function () {
-        console.log("Stored");
+        logger('info',"Stored");
         resolve();
       };
       updateAirportRequest.onerror = function (event) {
-        console.log("Error " + event);
+        logger('info',"Error " + event);
         reject(event);
       };
     };
     objectStoreRequest.onerror = function (event) {
-      console.log("Error " + event);
+      logger('info',"Error " + event);
       reject(event);
     };
   });
@@ -69,11 +69,12 @@ async function saveCoordinates(features, icao, lat, lon) {
 
     var transaction = features.transaction("airports", "readwrite");
     var objectStore = transaction.objectStore("airports");
-    var objectStoreRequest = objectStore.get(icao);
+    var index = objectStore.index('icaoIndex');
+    var objectStoreRequest = index.get(icao);
 
     objectStoreRequest.onsuccess = function (event) {
-      console.log(event);
-      var feature = objectStoreRequest.result;
+      logger('info',event);
+      var feature = event.target.result;
       if (!feature) {
         feature = {
           "type": "Feature",
@@ -84,25 +85,25 @@ async function saveCoordinates(features, icao, lat, lon) {
         };
       }
       feature.geometry.coordinates = [lon, lat];
-      console.log("ICAO : " + feature.properties.icao);
+      logger('info',"ICAO : " + feature.properties.icao);
       // Create another request that inserts the item back into the database
       var updateAirportRequest = objectStore.put(feature);
 
       // Log the transaction that originated this request
-      console.log("The transaction that originated this request is " + updateAirportRequest.updateAirportRequest);
+      logger('info',"The transaction that originated this request is " + updateAirportRequest.updateAirportRequest);
 
       // When this new request succeeds, run the displayData() function again to update the display
-      updateAirportRequest.onsuccess = function () {
-        console.log("Stored");
+      updateAirportRequest.onsuccess = function (event) {
+        logger('info',"Stored", event);
         resolve();
       };
       updateAirportRequest.onerror = function (event) {
-        console.log("Error " + event);
+        logger('info',"Error ", event);
         reject(event);
       };
     };
     objectStoreRequest.onerror = function (event) {
-      console.log("Error " + event);
+      logger('info',"Error ", event);
       reject(event);
     };
   });
@@ -110,36 +111,50 @@ async function saveCoordinates(features, icao, lat, lon) {
 }
 
 async function scanAPTIntoDB(f, features) {
-  var promise = new Promise(function (resolve, reject) {
+    var promise = new Promise(function (resolve, reject) {
     try {
-      lineReader.createInterface({
-        input: fs.createReadStream(f)
-      }).on('line', function (line) {
-        var fields = line.split(/[ ]+/);
-        // var fields = line.match('([0-9]+)');
-        if (fields == null)
-          return;
-        var scanMethod = scanMethods[fields[0]];
-        if (scanMethod != null) {
-          scanMethod(fields, features);
-        }
-        else {
-          if (fields[0] == '99') {
-            lineReader.close();
-          }
-          // console.log('Ignored:', line);
-        }
-      }).on('error', function (err) {
-        console.log(err);
-        lr.close();
-      }).on('close', function () {
-        console.log("End");
-        features.close();
-        this.postMessage('DONE');
+      var i;
+      var count = 0;
+      var postMessage = this.postMessage;
+      require('fs').createReadStream(f)
+        .on('data', function(chunk) {
+          for (i=0; i < chunk.length; ++i)
+            if (chunk[i] == 10) count++;
+        })
+        .on('end', function() {
+          postMessage(['max', count]);
+          console.log('Line Count',count);
+          lineReader.createInterface({
+            input: fs.createReadStream(f)
+          }).on('line', function (line) {
+            postMessage(['progress', 1]);
+            var fields = line.split(/[ ]+/);
+            // var fields = line.match('([0-9]+)');
+            if (fields == null)
+              return;
+            var scanMethod = scanMethods[fields[0]];
+            if (scanMethod != null) {
+              scanMethod(fields, features);
+            }
+            else {
+              if (fields[0] == '99') {
+                lineReader.close();
+              }
+              // logger('info','Ignored:', line);
+            }
+          }).on('error', function (err) {
+            logger('info',err);
+            lr.close();
+          }).on('close', function () {
+            logger('info',"End");
+            features.close();
+            postMessage('DONE');
+          });
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       reject(error);
+      this.postMessage('DONE');
     }
   });
 }

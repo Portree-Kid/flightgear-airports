@@ -1,4 +1,3 @@
-
 /* eslint-disable */
 // const fs = require('fs');
 // const path = require('path');
@@ -15,13 +14,13 @@
  */
 
 async function asyncForEach(array, callback) {
-  console.log("AsyncForEach Len " + array.length);
+  logger('info', "AsyncForEach Len " + array.length);
   for (let index = 0; index < array.length; index++) {
     try {
       var res = await callback(array[index], index, array);
-      console.log("Index " + index + " " + res);
+      logger('info', "Index " + index + " " + res);
     } catch (error) {
-      console.error(error);
+      logger('error', error);
     }
   }
 }
@@ -29,7 +28,7 @@ async function asyncForEach(array, callback) {
 function scanAPT_Old(p) {
   return airports.init().then(features => {
     var d = path.join(homedir, 'Documents/apt.dat');
-    console.log(d);
+    logger('info', d);
     apt.scan(d, features);
   });
 }
@@ -42,34 +41,37 @@ async function waitFor(milliseconds) {
 async function scanGroundnetFiles(p, features) {
   var promise = new Promise(function (resolve, reject) {
     try {
-      console.log('Start Groundnets ' + p);
+      logger('info', 'Start Groundnets ' + p);
       var files = traverseDir(p);
-      console.log(files);
+      this.postMessage(['max', files.length]);
+      logger('info', files);
 
       asyncForEach(files, async f => {
         //await waitFor(5000);
         try {
+          this.postMessage(['progress', 1]);
           var text = await readGroundnet(f, features);
-          console.log(text);
+          logger('info', text);
           resolve(text);
         } catch (error) {
-          console.error(error);
+          logger('error', error);
           reject(error);
         }
       }).then(t => {
-        console.log("Finished");
+        logger('info', "Finished");
         features.close();
+        this.postMessage('DONE');
         resolve();
       }).catch(reason => {
-        console.log("Crashed");
-        console.log(reason);
+        logger('info', "Crashed");
+        logger('info', reason);
         features.close()
       });
 
       //walkDir(p, f => { readGroundnet(f, features) });
 
     } catch (error) {
-      console.log(error);
+      logger('info', error);
       reject(error);
     }
   });
@@ -85,17 +87,17 @@ async function resetAI() {
         if (cursor) {
           cursor.value.properties.flights = 0
           cursor.value.properties.airlines = [];
-          console.log("Name for SSN " + cursor.key + " is " + cursor.value.properties.name);
+          logger('info', "Name for SSN " + cursor.key + " is " + cursor.value.properties.name);
           cursor.update(cursor.value);
           cursor.continue();
         }
         else {
-          console.log("No more entries!");
+          logger('info', "No more entries!");
           resolve();
         }
       };
     } catch (error) {
-      console.log(error);
+      logger('info', error);
       reject(error);
     }
   });
@@ -105,30 +107,32 @@ async function resetAI() {
 async function scanTrafficFiles(p, features) {
   var promise = new Promise(function (resolve, reject) {
     try {
-      console.log('Start Traffic ' + p);
+      logger('info', 'Start Traffic ' + p);
 
       resetAI().then(f => {
         var files = traverseDir(p);
-        console.log(files);
+        this.postMessage(['max', files.length]);
+        logger('info', files);
   
         asyncForEach(files, async f => {
           //await waitFor(5000);
           try {
+            this.postMessage(['progress', 1]);
             var text = await readAI(f, features);
-            console.log(text);
+            logger('info', text);
             resolve(text);
           } catch (error) {
-            console.error(error);
+            logger('error', error);
             reject(error);
           }
         }).then(t => {
-          console.log("Finished");
+          logger('info', "Finished");
           features.close();
           resolve();
           this.postMessage('DONE');
         }).catch(reason => {
-          console.log("Crashed");
-          console.log(reason);
+          logger('info', "Crashed");
+          logger('info', reason);
           features.close()
           this.postMessage('DONE');
         });  
@@ -139,7 +143,7 @@ async function scanTrafficFiles(p, features) {
       //walkDir(p, f => { readGroundnet(f, features) });
 
     } catch (error) {
-      console.log(error);
+      logger('info', error);
       reject(error);
     }
   });
@@ -153,7 +157,7 @@ async function scanTrafficFiles(p, features) {
 
 function scanTrafficIntoDB(p, features) {
   try {
-    console.log('Start Traffic ' + p + ' ' + features);
+    logger('info', 'Start Traffic ' + p + ' ' + features);
     var objectStore = features.transaction("airports").objectStore("airports");
 
     objectStore.openCursor().onsuccess = function (event) {
@@ -161,21 +165,21 @@ function scanTrafficIntoDB(p, features) {
       if (cursor) {
         feature.value.properties.flights = 0
         feature.value.properties.airlines = [];
-        console.log("Name for SSN " + cursor.key + " is " + cursor.value.name);
+        logger('info', "Name for SSN " + cursor.key + " is " + cursor.value.name);
         cursor.continue();
       }
       else {
-        console.log("No more entries!");
+        logger('info', "No more entries!");
       }
     };
 
     //walkDir(p, f => { readAI(f, features) });
-    console.log("Closing");
+    logger('info', "Closing");
     features.close();
     this.postMessage('DONE');
-    console.log("End Traffic");
+    logger('info', "End Traffic");
   } catch (error) {
-    console.log(error);
+    logger('info', error);
   }
 }
 
@@ -184,11 +188,11 @@ function traverseDir(dir) {
   fs.readdirSync(dir).forEach(file => {
     let fullPath = path.join(dir, file);
     if (fs.lstatSync(fullPath).isDirectory()) {
-      console.log(fullPath);
+      logger('info', fullPath);
       var children = traverseDir(fullPath);
       result = result.concat(children);
     } else {
-      console.log(fullPath);
+      logger('info', fullPath);
       result.push(fullPath);
     }
   });
@@ -203,7 +207,7 @@ function walkDir(dir, callback) {
       isDirectory ?
         walkDir(dirPath, callback) : callback(path.join(dir, f));
     } catch (error) {
-      console.error(error);
+      logger('error', error);
     }
   });
 }
@@ -217,7 +221,6 @@ function walkDir(dir, callback) {
 function readAI(f, apts) {
   var promise = new Promise(function (resolve, reject) {
     try {
-      console.log(path.basename(f));
       // Reset
       var airline = path.basename(f).match('([^.]+)\.xml');
       if (airline == null) {
@@ -225,35 +228,26 @@ function readAI(f, apts) {
         return;
       }
       var xmlSource = fs.readFileSync(f, 'utf8').toString();
-      console.debug("read airline " + path.basename(f));
+      logger('info', "read airline ", path.basename(f));
       // var doc = new domParser().parseFromString(xmlSource );
-      // console.log("parsed ");
+      // logger('info', "parsed ");
       // var flights = xpath.select("/trafficlist/flight", doc);
-      // console.log("selected flight ");
-      // console.log(flights);
-      var dat = tXml(xmlSource);
-      //    console.log(dat);
-      if (!dat || !dat[0] || !dat[0].children || !dat[0].children[0]) {
+      // logger('info', "selected flight ");
+      // logger('info', flights);
+      var dat = tXml.simplify(tXml(xmlSource))['?xml'];
+      //    logger('info', dat);
+      if (!dat || !dat.trafficlist || !dat.trafficlist.flight) {
         resolve();
         return;
       }
 
-      console.log(dat[0].children[0]);
+      logger('info', 'Traffic', dat.trafficlist.flight);
 
-      var flightNodes = dat[0].children[0].children.filter(e => e.tagName === 'flight');
-      flightNodes = tXml.simplify(flightNodes);
-      if (!flightNodes || !flightNodes.flight) {
-        resolve();
-        return;
-      }
-
-      console.log(flightNodes.flight);
-
-      console.log("Departure flights " + flightNodes.flight.length);
+      logger('info', "Departure flights " + dat.trafficlist.flight.length);
 
       var merged = new Array();
 
-      flightNodes.flight.map(n => {
+      dat.trafficlist.flight.map(n => {
         merged.push(n.departure.port);
         merged.push(n.arrival.port);
       }).sort();
@@ -264,14 +258,13 @@ function readAI(f, apts) {
       }
 
       asyncForEach(Object.keys(counts), async key => {
-        console.log(key);
+        logger('info', key);
         await store(key, airline[1], counts[key]);
       }).then(t => {
-        console.log("Finished");
+        logger('info', "Finished");
         resolve();
       }).catch(reason => {
-        console.log("Crashed");
-        console.log(reason);
+        logger('error', "Crashed", reason);
         features.close()
       });
       //for (var key in counts) {
@@ -279,13 +272,13 @@ function readAI(f, apts) {
       //}
 
       // var flights = xpath.select("/trafficlist/flight/departure/port/text()", doc);
-      // console.log(nodes);
-      // console.log(nodes);
+      // logger('info', nodes);
+      // logger('info', nodes);
       // nodes = xpath.select("/trafficlist/flight/arrival/port/text()", doc);
-      // console.log(nodes);
+      // logger('info', nodes);
 
     } catch (error) {
-      console.error(error);
+      logger('error', error);
       reject(error);
     }
   });
@@ -301,43 +294,44 @@ function readAI(f, apts) {
 
 function store(icao, airline, value) {
   var promise = new Promise(function (resolve, reject) {
-    console.log("Airport " + icao + " has " + value + " new flights");
+    logger('info', "Airport " + icao + " has " + value + " new flights");
     // Make a request to get a record by key from the object store
     var transaction = features.transaction("airports", "readwrite");
     var objectStore = transaction.objectStore("airports");
-    var objectStoreRequest = objectStore.get(icao);
+    var index = objectStore.index('icaoIndex');
+    var objectStoreRequest = index.get(icao);
 
     objectStoreRequest.onsuccess = function (event) {
-      console.log(event);
+      logger('info', 'Stored ', event);
       var feature = objectStoreRequest.result;
       if (!feature) {
         feature = createFeature(icao);
       }
       feature.properties.flights += value;
-      console.log("Airline " + airline);
+      logger('info', "Airline : ", airline);
       if (!feature.properties.airlines.includes(airline)) {
         feature.properties.airlines.push(airline);
         feature.properties.airlines.sort();
       }
-      console.log("ICAO : " + feature.properties.icao + " Flights : " + feature.properties.flights);
+      logger('info', "ICAO : " + feature.properties.icao + " Flights : " + feature.properties.flights);
       // Create another request that inserts the item back into the database
       var updateAirportRequest = objectStore.put(feature);
 
       // Log the transaction that originated this request
-      console.log("The transaction that originated this request is " + updateAirportRequest);
+      logger('info', "The transaction that originated this request is ", updateAirportRequest);
 
       // When this new request succeeds, run the displayData() function again to update the display
-      updateAirportRequest.onsuccess = function () {
-        console.log("Stored");
+      updateAirportRequest.onsuccess = function (event) {
+        logger('info', "Stored", event);
         resolve();
       };
       updateAirportRequest.onerror = function (event) {
-        console.log("Error storing " + event);
+        logger('info', "Error storing ",  event);
         reject(event);
       };
     };
     objectStoreRequest.onerror = function (event) {
-      console.log("Error " + event);
+      logger('info', "Error " + event);
       reject(event);
     };
   });
@@ -358,68 +352,75 @@ async function readGroundnet(f, features) {
         resolve("File didn't match");
       }
       else {
-        console.log('Parsing ' + f);
+        logger('info', 'Parsing ' + f);
         fs.readFile(f, 'utf8', (err, data) => {
           if (err) {
-            console.log('Error reading file ' + err);
+            logger('info', 'Error reading file ' + err);
             reject(err);
           }
-          console.log(data);
+          logger('info', data);
           var dat = tXml.simplify(tXml(data));
-          console.log('Simplified ' + filename);
+          logger('info', 'Simplified ' + filename);
 
           if (dat['?xml']) {
-            console.log("parsed " + f);
+            logger('info', "parsed " + f);
 
             var transaction = features.transaction("airports", "readonly");
             // report on the success of the transaction completing, when everything is done
             transaction.oncomplete = function (event) {
-              console.log('Read Transaction complete ' + event);
+              logger('info', 'Read Transaction complete ', event);
             };
 
             transaction.onerror = function (event) {
-              console.log('Transaction error ' + event);
+              logger('info', 'Transaction error ', event);
             };
             var objectStore = transaction.objectStore("airports");
-            var objectStoreRequest = objectStore.get(filename[1]);
-
+            var icao = filename[1];
+            var index = objectStore.index('icaoIndex');
+            var objectStoreRequest = index.get(icao);
+            /*
+            var getAllKeysRequest = index.getAllKeys();
+            getAllKeysRequest.onsuccess = function() {
+              logger('AllKeys', getAllKeysRequest.result);
+            } 
+            */       
             objectStoreRequest.onsuccess = function (event) {
-              console.log(dat['?xml'].groundnet);
-              var feature = event.result;
-              console.log("Got Airport : " + feature);
+              logger('info', dat['?xml'].groundnet);
+              var feature = event.target.result;
+              logger('info', "Got Airport : ", feature);
               if (!feature) {
                 feature = createFeature(filename[1]);
               }
 
               if (filename[2] == 'threshold') {
                 try {
-                  console.log('threshold : ' + filename[1]);
+                  logger('info', 'threshold : ' + filename[1]);
                   var nodes = dat['?xml'].PropertyList.runway;
                   if (nodes.threshold == 0) {
-                    console.log("No Runway");
+                    logger('info', "No Runway");
                     resolve();
                   }
-                  nodes.forEach(r => {
+                  nodes.threshold.forEach(r => {
                     var lat1 = parseFloat(r.threshold[0].lat);
                     var lon1 = parseFloat(r.threshold[0].lon);
                     var lat2 = parseFloat(r.threshold[1].lat);
                     var lon2 = parseFloat(r.threshold[1].lon);
                     if (!feature.geometry.coordinates) {
                       feature.geometry.coordinates = [mean(lon1, lon2), mean(lat1, lat2)];
-                      console.log(feature.geometry.coordinates);
+                      logger('info', feature.geometry.coordinates);
                     }
                   });
                   feature.properties['threshold'] = true;
 
                 } catch (error) {
-                  console.log(error);
+                  logger('info', error);
                 }
               } else if (filename[2] == 'twr') {
                 try {
-                  console.log('twr : ' + filename[1]);
+                  logger('info', 'twr : ' + filename[1]);
                   var nodes = dat['?xml'].PropertyList.tower.twr;
                   if (nodes.length == 0) {
-                    console.log("No Tower");
+                    logger('info', "No Tower");
                     resolve();
                   }
                   var lat = parseFloat(nodes.lat);
@@ -428,21 +429,21 @@ async function readGroundnet(f, features) {
                   feature.geometry.coordinates = [lon, lat];
 
                 } catch (error) {
-                  console.log(error);
+                  logger('info', error);
                 }
               } else if (filename[2] == 'groundnet') {
-                console.log('groundnet : ' + filename[1]);
+                logger('info', 'groundnet : ' + filename[1]);
                 if (dat['?xml'].groundnet) {
                   var nodes = dat['?xml'].groundnet.TaxiNodes;
                   if (nodes && nodes.node) {
-                    console.log(nodes);
+                    logger('info', nodes);
                   }
                   feature['properties']['groundnet'] = nodes && nodes.node ? nodes.node.length : 0;
                   var nodes = dat['?xml'].groundnet.parkingList;
                   feature['properties']['parking'] = nodes && nodes.Parking ? nodes.Parking.length : 0;
                 }
               } else if (filename[2] == 'ils') {
-                console.log('ils : ' + filename[1]);
+                logger('info', 'ils : ' + filename[1]);
                 if (dat['?xml'].PropertyList.runways) {
                   var nodes = dat['?xml'].PropertyList.runways.ils;
                   feature.properties['ils'] = nodes !== undefined;
@@ -451,30 +452,30 @@ async function readGroundnet(f, features) {
               var transaction = features.transaction("airports", "readwrite");
               // report on the success of the transaction completing, when everything is done
               transaction.oncomplete = function (event) {
-                console.log('Write Transaction complete ' + event);
+                logger('info', 'Write Transaction complete ' + event);
                 resolve("Stored " + filename[1]);
               };
 
               transaction.onerror = function (event) {
-                console.log('Transaction error ' + event);
+                logger('info', 'Transaction error ' + event);
               };
               var objectStore = transaction.objectStore("airports");
               var updateAirportRequest = objectStore.put(feature);
 
               // Log the transaction that originated this request
-              console.log("The transaction that originated this request is " + updateAirportRequest.transaction);
+              logger('info', "The transaction that originated this request is ", updateAirportRequest.transaction);
 
               // When this new request succeeds, run the displayData() function again to update the display
               updateAirportRequest.onsuccess = function () {
-                console.log("Stored");
+                logger('info', "Stored");
               };
               updateAirportRequest.onerror = function (event) {
-                console.log("Error storing " + event);
+                logger('info', "Error storing " + event);
                 reject(event);
               };
             }
             objectStoreRequest.onerror = function (event) {
-              console.log("Read Errpr : " + event);
+              logger('info', "Read Errpr : " + event);
               resolve(event);
             }
           }
@@ -486,7 +487,7 @@ async function readGroundnet(f, features) {
       }
 
     } catch (error) {
-      console.error(error);
+      logger('error', error);
       reject(error);
     }
   });

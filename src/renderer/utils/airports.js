@@ -21,10 +21,6 @@ async function initDB() {
             request.onupgradeneeded = function (event) {
                 var db = event.target.result;
                 console.log("Migrate " + event);
-
-                // Create an objectStore to hold information about our customers. We're
-                // going to use "ssn" as our key path because it's guaranteed to be
-                // unique.
                 if (event.oldVersion < 1) {
                     // Version 1 is the first version of the database.
                     var objectStore = db.createObjectStore("airports", { keyPath: "properties.icao" });
@@ -36,15 +32,15 @@ async function initDB() {
                     var desiredKeyPathForMyIndex = "properties.icao";
                     console.log(indexNames);
                   
-                    if(indexNames.contains('myIndexName')) {
-                      var myIndex = objectStore.index('myIndexName');
+                    if(indexNames.contains('icaoIndex')) {
+                      var myIndex = objectStore.index('icaoIndex');
                       var currentKeyPath = myIndex.keyPath;
                       if(currentKeyPath != desiredKeyPathForMyIndex) {
-                        objectStore.deleteIndex('myIndexName');
-                        objectStore.createIndex('myIndexName', desiredKeyPathForMyIndex);
+                        objectStore.deleteIndex('icaoIndex');
+                        objectStore.createIndex('icaoIndex', desiredKeyPathForMyIndex);
                       }
                     } else {
-                        objectStore.createIndex('myIndexName', desiredKeyPathForMyIndex);
+                        objectStore.createIndex('icaoIndex', desiredKeyPathForMyIndex);
                     }                    
                 }
                 

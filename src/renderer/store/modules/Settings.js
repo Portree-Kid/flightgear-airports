@@ -10,6 +10,7 @@ const mutations = {
   'FLIGHTGEAR_DIRECTORY' (state, flightgearDirectory) {
     state.settings.flightgearDirectory = flightgearDirectory
     state.settings.flightgearDirectory_ai = flightgearDirectory + '/data/AI'
+    state.settings.flightgearDirectory_traffic = flightgearDirectory + '/data/AI/Traffic'
     state.settings.flightgearDirectory_apt = flightgearDirectory + '/data/Airports/apt.dat.gz'
   },
   'AIPORTS_DIRECTORY' (state, airportsDirectory) {

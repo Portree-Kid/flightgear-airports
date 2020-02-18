@@ -11,17 +11,20 @@ const homedir = require('os').homedir();
 var airports = importScripts(`${winURL}airports.js`);
 importScripts('../txml/tXml.min.js');
 
+importScripts('logger.js');
+
 function errorReceiver(event) {
     throw event.data;
 }
 
 onmessage = function (event) {
     postMessage('scanStarted');
+    logger('info', 'Scan Started');      
     console.log(event.data);
     if (event.data[0] === 'scan') {
         scanGroundnet(event.data[1]).then(result => {
             console.log("DONE Scanning");
-            postMessage('DONE', 'this');
+            postMessage('DONE');
             // event.origin.webContents.send('scanFinished');
         }
         ).catch(result => {

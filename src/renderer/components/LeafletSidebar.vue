@@ -5,7 +5,8 @@
         <ul role="tablist"> <!-- top aligned tabs -->
             <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
             <li><a href="#edit" role="tab"><i class="fas fa-edit"></i></a></li>
-            <li><a href="#scan" role="tab"><i class="fa fa-search"></i></a></li>
+            <li><a href="#search" role="tab"><i class="fa fa-search"></i></a></li>
+            <li><a href="#scan" role="tab"><i class="fa fa-sync"></i></a></li>
         </ul>
 
         <ul role="tablist"> <!-- bottom aligned tabs -->
@@ -32,6 +33,9 @@
           <ArcEdit></ArcEdit>
           <NodeEdit></NodeEdit>
         </div>
+        <div class="leaflet-sidebar-pane" id="search">
+          <Search></Search>
+        </div>
         <div class="leaflet-sidebar-pane" id="scan">
           <RunScan></RunScan>
         </div>
@@ -53,11 +57,12 @@
   import NodeEdit from './NodeEdit'
   import SettingsPanel from './SettingsPanel'
   import RunScan from './RunScan'
+  import Search from './Search'
   import FileSelect from './FileSelect'
 
   export default {
     name: 'leaflet-sidebar',
-    components: { AirportEdit, ArcEdit, NodeEdit, GroundnetEdit, SettingsPanel, RunScan, FileSelect },
+    components: { AirportEdit, ArcEdit, NodeEdit, GroundnetEdit, SettingsPanel, RunScan, FileSelect, Search },
     props: [],
     mounted () {
       this.add()

@@ -1,20 +1,16 @@
 <template>
   <div>
     <h1 class="leaflet-sidebar-header">
-      Scanning
+      Search
       <div class="leaflet-sidebar-close">
         <i class="fa fa-caret-left"></i>
       </div>
     </h1>
     <el-container direction="vertical">
-      <el-progress :percentage="Number(((progress / max)*100).toPrecision(3))" v-if="max > 0"></el-progress>
-      <!--<el-progress :percentage="progress / max"></el-progress>-->
-      <!--{{max}}&nbsp;{{progress}}-->
-
-      <el-button @click="scanAPT()" :disabled="scanning">Scan APT File</el-button>
-      <el-button @click="scanGroundnets()" :disabled="scanning">Scan Groundnet Files</el-button>
-      <el-button @click="scanTraffic()" :disabled="scanning">Scan Traffic Files</el-button>
+      <el-input placeholder="Search" v-model="searchterm" class="input-with-select">
+      </el-input>
     </el-container>
+    <li v-for="item in searched" v-bind:key="item.icao"><el-link type="primary" @click="goto(item.icao)">{{ item.icao }} {{ item.name }}</el-link></li>
   </div>
 </template>
 
@@ -22,47 +18,37 @@
   // import scanner from '../utils/scan'
   import fileUrl from 'file-url'
   import {Table, TableColumn} from 'element-ui'
-  // import Vue from 'vue'
 
   const path = require('path')
 
   export default {
-    name: 'run-scan',
+    name: 'search',
     components: { [Table.name]: Table,
       [TableColumn.name]: TableColumn},
     props: [],
     mounted () {
     },
     beforeDestroy () {
-      if (this.polling != null) {
-        clearInterval(this.polling)
-      }
     },
     data () {
       // this.$store.dispatch('getAirportsUnfiltered')
-      return {
-        max: 0,
-        progress: 0,
-        scanning: false,
-        polling: null,
-        worker: null
-      }
+      return {searchterm: this.searchterm}
     },
     methods: {
-      pollData () {
-        var workery = this.worker
-        var view = this
-        this.polling = setInterval(() => {
-          if (workery != null) {
-            view.max = Number(workery.max)
-            view.progress = Number(workery.progress)
-            view.scanning = Boolean(workery.scanning)
-          }
-        }, 1000)
+      goto (icao) {
+        console.log(icao)
+        let airports = this.$store.state.Airports.airports
+          .filter(a => a.properties.icao.match(icao))
+        if (airports.length > 0) {
+          this.$store.commit('CENTER', [airports[0].geometry.coordinates[1], airports[0].geometry.coordinates[0]])
+        }
+      },
+      formatter (row, column) {
+        console.log('Row ' + row)
+        return row
       },
       scanAPT () {
         try {
-          this.scanning = true
           const winURL = process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/src/renderer/utils/worker.js`
             : `file://${__dirname}/worker.js`
@@ -71,13 +57,8 @@
           const worker = new Worker(winURL)
           console.log(fileUrl('src/renderer/utils/worker.js'))
 
-          worker.scanning = this.scanning
-          worker.max = this.max
-          worker.progress = 0
           // var worker = new Worker(fileUrl('src/renderer/utils/worker.js'))
-          this.worker = worker
           worker.postMessage(['scanapt'])
-          this.pollData()
           // the reply
           var store = this.$store
           worker.onmessage = function (e) {
@@ -85,17 +66,8 @@
               console.log('DONE')
               store.dispatch('getAirports')
               worker.terminate()
-              clearInterval(this.polling)
-              this.scanning = false
-            } else if (e.data.length > 0) {
-              if (e.data[0] === 'max') {
-                this.max = e.data[1]
-              }
-              if (e.data[0] === 'progress') {
-                this.progress = e.data[1]
-              }
             }
-            // console.log(e.data)
+            console.log(e.data)
           }
         } catch (err) {
           console.error(err)
@@ -103,7 +75,6 @@
       },
       scanGroundnets () {
         try {
-          this.scanning = true
           const winURL = process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/src/renderer/utils/worker.js`
             : `file://${__dirname}/worker.js`
@@ -112,13 +83,7 @@
           const worker = new Worker(winURL)
           console.log(fileUrl('src/renderer/utils/worker.js'))
 
-          worker.scanning = this.scanning
-          worker.max = this.max
-          worker.progress = 0
-
-          this.worker = worker
           worker.postMessage(['scan', this.$store.state.Settings.settings.airportsDirectory])
-          this.pollData()
           // the reply
           var store = this.$store
           worker.onmessage = function (e) {
@@ -126,18 +91,8 @@
               console.log('DONE')
               store.dispatch('getAirports')
               worker.terminate()
-              clearInterval(this.polling)
-              this.scanning = false
-            } else if (e.data.length > 0) {
-              if (e.data[0] === 'max') {
-                this.max = e.data[1]
-              }
-              if (e.data[0] === 'progress') {
-                this.scanning = false
-                this.progress += e.data[1]
-              }
             }
-            // console.log(e.data)
+            console.log(e.data)
           }
         } catch (err) {
           console.error(err)
@@ -146,7 +101,6 @@
       scanTraffic () {
         // let flightgearDirectory = this.$store.state.settings.flightgearDirectory
         try {
-          this.scanning = true
           const winURL = process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/src/renderer/utils/worker.js`
             : `file://${__dirname}/worker.js`
@@ -154,31 +108,16 @@
 
           const worker = new Worker(winURL)
           console.log(fileUrl('src/renderer/utils/worker.js'))
-          this.scanning = true
-          worker.scanning = this.scanning
-          worker.max = this.max
-          worker.progress = this.progress
-          this.worker = worker
-          worker.postMessage(['scanai', this.$store.state.Settings.settings.flightgearDirectory_traffic])
-          this.pollData()
+          worker.postMessage(['scanai', this.$store.state.Settings.settings.flightgearDirectory])
           // the reply
           var store = this.$store
           worker.onmessage = function (e) {
             if (e.data === 'DONE') {
-              this.scanning = false
               console.log('DONE')
-              clearInterval(this.polling)
               store.dispatch('getAirports')
               worker.terminate()
-            } else if (e.data.length > 0) {
-              if (e.data[0] === 'max') {
-                this.max = e.data[1]
-              }
-              if (e.data[0] === 'progress') {
-                this.progress += e.data[1]
-              }
             }
-            // console.log(e)
+            console.log(e.data)
           }
         } catch (err) {
           console.error(err)
@@ -186,11 +125,14 @@
       }
     },
     computed: {
+      searched: function () {
+        console.log(this.searchterm)
+        let searchRegex = new RegExp(this.searchterm, 'i')
+        return this.$store.state.Airports.airports
+          .filter(a => searchRegex.test(a.properties.icao) || searchRegex.test(a.properties.name))
+          // .map(a => console.log(a.properties))
+          .map(a => ({ icao: a.properties.icao, name: a.properties.name }))
+      }
     }
 }
 </script>
-<style>
-.el-button+.el-button {
-    margin-left: 0px;
-}
-</style>
