@@ -7,7 +7,7 @@
       </div>
     </h1>
     <el-container direction="vertical">
-      <el-progress :percentage="Number(((progress / max)*100).toPrecision(3))" v-if="max > 0"></el-progress>
+      <el-progress :percentage="Number(((progress / max)*100).toPrecision(3))" v-if="max>0"></el-progress>
       <!--<el-progress :percentage="progress / max"></el-progress>-->
       <!--{{max}}&nbsp;{{progress}}-->
 
@@ -52,11 +52,12 @@
       pollData () {
         var workery = this.worker
         var view = this
-        this.polling = setInterval(() => {
+        workery.polling = setInterval(() => {
           if (workery != null) {
             view.max = Number(workery.max)
             view.progress = Number(workery.progress)
             view.scanning = Boolean(workery.scanning)
+            workery.view = view
           }
         }, 1000)
       },
@@ -76,15 +77,20 @@
           worker.progress = 0
           // var worker = new Worker(fileUrl('src/renderer/utils/worker.js'))
           this.worker = worker
-          worker.postMessage(['scanapt'])
+          worker.postMessage(['scanapt', this.$store.state.Settings.settings.flightgearDirectory_apt])
           this.pollData()
           // the reply
           var store = this.$store
           worker.onmessage = function (e) {
-            if (e.data === 'DONE') {
+            if (e.data === 'scanStarted') {
+              this.progress = 0
+              this.max = 0
+            } else if (e.data === 'DONE') {
               console.log('DONE')
               store.dispatch('getAirports')
               worker.terminate()
+              worker.view.max = 0
+              worker.view.scanning = false
               clearInterval(this.polling)
               this.scanning = false
             } else if (e.data.length > 0) {
@@ -92,7 +98,7 @@
                 this.max = e.data[1]
               }
               if (e.data[0] === 'progress') {
-                this.progress = e.data[1]
+                this.progress += e.data[1]
               }
             }
             // console.log(e.data)
@@ -122,10 +128,15 @@
           // the reply
           var store = this.$store
           worker.onmessage = function (e) {
-            if (e.data === 'DONE') {
+            if (e.data === 'scanStarted') {
+              this.progress = 0
+              this.max = 0
+            } else if (e.data === 'DONE') {
               console.log('DONE')
               store.dispatch('getAirports')
               worker.terminate()
+              worker.view.max = 0
+              worker.view.scanning = false
               clearInterval(this.polling)
               this.scanning = false
             } else if (e.data.length > 0) {
@@ -164,12 +175,17 @@
           // the reply
           var store = this.$store
           worker.onmessage = function (e) {
-            if (e.data === 'DONE') {
+            if (e.data === 'scanStarted') {
+              this.progress = 0
+              this.max = 0
+            } else if (e.data === 'DONE') {
               this.scanning = false
               console.log('DONE')
-              clearInterval(this.polling)
               store.dispatch('getAirports')
+              worker.view.max = 0
+              worker.view.scanning = false
               worker.terminate()
+              clearInterval(this.polling)
             } else if (e.data.length > 0) {
               if (e.data[0] === 'max') {
                 this.max = e.data[1]

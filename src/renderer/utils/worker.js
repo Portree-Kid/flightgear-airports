@@ -76,10 +76,10 @@ async function scanai(fdir) {
     return promise;
 }
 
-async function scanAPT() {
+async function scanAPT(fdir) {
     var promise = new Promise(function (resolve, reject) {
         return initDB().then(features => {
-            var d = path.join(homedir, 'Documents/apt.dat');
+            var d = path.join(fdir);
             scanAPTIntoDB(d, features);
         });
     });

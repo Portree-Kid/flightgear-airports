@@ -59,13 +59,11 @@ async function scanGroundnetFiles(p, features) {
         }
       }).then(t => {
         logger('info', "Finished");
-        features.close();
         this.postMessage('DONE');
         resolve();
       }).catch(reason => {
         logger('info', "Crashed");
         logger('info', reason);
-        features.close()
       });
 
       //walkDir(p, f => { readGroundnet(f, features) });
@@ -127,13 +125,11 @@ async function scanTrafficFiles(p, features) {
           }
         }).then(t => {
           logger('info', "Finished");
-          features.close();
           resolve();
           this.postMessage('DONE');
         }).catch(reason => {
           logger('info', "Crashed");
           logger('info', reason);
-          features.close()
           this.postMessage('DONE');
         });  
       }
@@ -175,7 +171,6 @@ function scanTrafficIntoDB(p, features) {
 
     //walkDir(p, f => { readAI(f, features) });
     logger('info', "Closing");
-    features.close();
     this.postMessage('DONE');
     logger('info', "End Traffic");
   } catch (error) {
@@ -265,7 +260,6 @@ function readAI(f, apts) {
         resolve();
       }).catch(reason => {
         logger('error', "Crashed", reason);
-        features.close()
       });
       //for (var key in counts) {
       //  store(key, airline[0], counts[key]);
@@ -497,7 +491,7 @@ async function readGroundnet(f, features) {
 function createFeature(icao) {
   return {
     "type": "Feature",
-    'properties': { 'icao': icao, 'twr': false, 'threshold': false, 'flights': 0, airlines: [] },
+    'properties': { 'icao': icao, 'name': '', 'twr': false, 'threshold': false, 'flights': 0, airlines: [] },
     'geometry': {
       "type": "Point"
     }
