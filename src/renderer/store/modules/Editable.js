@@ -43,6 +43,9 @@ const mutations = {
   'SET_EDIT_PARKING_NAME' (state, parkingName) {
     Vue.set(state.data.parking, 'name', parkingName)
   },
+  'SET_EDIT_PARKING_RADIUS' (state, radius) {
+    Vue.set(state.data.parking, 'radius', radius)
+  },
   'SET_EDIT_ARC_NAME' (state, arcName) {
     Vue.set(state.data.arc, 'name', arcName)
   },

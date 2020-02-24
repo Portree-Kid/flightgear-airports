@@ -29,7 +29,7 @@
                 <div class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></div>
             </h1>
           <AirportEdit></AirportEdit>
-          <GroundnetEdit></GroundnetEdit>
+          <ParkingEdit></ParkingEdit>
           <ArcEdit></ArcEdit>
           <NodeEdit></NodeEdit>
         </div>
@@ -52,7 +52,7 @@
   import {} from 'leaflet-sidebar-v2'
   import L from 'leaflet'
   import AirportEdit from './AirportEdit'
-  import GroundnetEdit from './GroundnetEdit'
+  import ParkingEdit from './ParkingEdit'
   import ArcEdit from './ArcEdit'
   import NodeEdit from './NodeEdit'
   import SettingsPanel from './SettingsPanel'
@@ -62,7 +62,7 @@
 
   export default {
     name: 'leaflet-sidebar',
-    components: { AirportEdit, ArcEdit, NodeEdit, GroundnetEdit, SettingsPanel, RunScan, FileSelect, Search },
+    components: { AirportEdit, ArcEdit, NodeEdit, ParkingEdit, SettingsPanel, RunScan, FileSelect, Search },
     props: [],
     mounted () {
       this.add()
