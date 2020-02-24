@@ -14,7 +14,7 @@ L.RunwayNode = L.Marker.extend({
             this.follow(event.target.glueindex, event);
         });
     },
-    extensions: function () {
+    extensions: function (editLayer) {
         if (typeof this.featureLookup[this.glueindex] === 'undefined') {
             this.featureLookup[this.glueindex] = new Array();
         }

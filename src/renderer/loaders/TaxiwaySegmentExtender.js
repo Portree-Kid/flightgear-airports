@@ -24,7 +24,11 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
             }
         });
     };
-    taxiwaySegment.__proto__.extensions = function () {
+    taxiwaySegment.__proto__.setEditlayer = function (editLayer) {
+        this.editLayer = editLayer;
+    };
+    taxiwaySegment.__proto__.extensions = function (editLayer) {
+        this.editLayer = editLayer;
         this._latlngs[0].__vertex.glueindex = this.begin;
         this._latlngs.slice(-1)[0].__vertex.glueindex = this.end;
         if (typeof this.featureLookup[this.begin] === 'undefined') {
@@ -40,18 +44,22 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         this.on('click', function (event) {
             event.target.setStyle({color : 'red'});
             console.log("Click : " + event.target);
-            store.default.dispatch('setArc', event.target.options.attributes);
+            if (store.default.state.Editable.data.arc !== event.target.options.attributes) {
+                store.default.dispatch('setArc', event.target.options.attributes);
+            }
             this.unwatch = store.default.watch(
                 function (state) {
                         return state.Editable.data.arc;
                 },
                     () => { 
-                        event.target.setStyle({color : '#3388ff'}); 
+                        // Reset colour
+                        event.target.setStyle({color : '#3388ff'});
                         this.unwatch();
                     }                    
                 ,
                 {
                     deep: true //add this if u need to watch object properties change etc.
+
                 }
             );
         });
@@ -61,17 +69,60 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                 this.follow(dragIndex, event);
             }
         });
+        this.on('editable:vertex:new', event => {
+            console.log(event)
+            let closest = this.editLayer.closestLayerSnap(event.latlng, 10)
+            if (closest) {
+              event.latlng.__vertex['glueindex'] = Number(closest.glueindex);     
+              event.latlng.__vertex.setLatLng(closest.latlng);
+              this.editLayer.featureLookup[event.latlng.__vertex.glueindex].push(event.latlng.__vertex);
+              console.log(closest)
+            } else {
+              event.latlng.__vertex['glueindex'] = ++this.editLayer.groundnetLayerGroup.maxId;
+              this.editLayer.featureLookup[event.latlng.__vertex.glueindex] = [];
+              this.editLayer.featureLookup[event.latlng.__vertex.glueindex].push(event.latlng.__vertex);
+            }
+            event.latlng.attributes = {index: event.latlng.__vertex.glueindex, isOnRunway: 0};
+          })
         this.on('editable:vertex:clicked', function (event) {
             console.log(this.featureLookup[event.vertex.glueindex]);
 
             store.default.dispatch('setNode', event.vertex.latlng.attributes)
-            event.vertex._icon.style['background-color'] = 'red';
+            if(event.vertex._icon!=null) {
+                event.vertex._icon.style['background-color'] = 'red';
+            } else if(event.vertex.icon!=null ) {
+                if(event.vertex.icon.style!=null) {
+                    event.vertex.icon.style['background-color'] = 'red';
+                } else {
+                    event.vertex.setStyle({color : 'red'})
+                }
+            } else if(event.vertex.options.icon!=null ) {
+                if(event.vertex.options.icon.style!=null) {
+                    event.vertex.options.icon.style['background-color'] = 'red';
+                } else {
+                    event.vertex.options.icon._setIconStyles({color : 'red'})
+                }
+            } 
             this.unwatch = store.default.watch(
                 function (state) {
                         return state.Editable.data.node;
                 },
                     () => { 
-                        event.vertex._icon.style['background-color'] = 'white'; 
+                        if(event.vertex._icon!=null) {
+                            event.vertex._icon.style['background-color'] = 'white';
+                        } else if(event.vertex.icon!=null ) {
+                            if(event.vertex.icon.style!=null) {
+                                event.vertex.icon.style['background-color'] = 'white';
+                            } else {
+                                event.vertex.setStyle({color : 'white'})
+                            }
+                        } else if(event.vertex.options.icon!=null ) {
+                            if(event.vertex.options.icon.style!=null) {
+                                event.vertex.options.icon.style['background-color'] = 'white';
+                            } else {
+                                event.vertex.options.icon._setIconStyles({color : 'white'})
+                            }
+                        } 
                         this.unwatch();
                     }                    
                 ,
@@ -124,13 +175,13 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                     element.updateVertexFromDirection();
                 }
                 else if (element instanceof L.Polyline) {
-                    if (element.begin === dragIndex) {
+                    if (Number(element.begin) === Number(dragIndex)) {
                         element.getLatLngs()[0].update(event.latlng);
                         element.setLatLngs(element.getLatLngs());
                         element.updateBeginVertex(event.latlng);
                         element.updateMiddle();
                     }
-                    if (element.end === dragIndex) {
+                    if (Number(element.end) === Number(dragIndex)) {
                         element.getLatLngs()[element.getLatLngs().length - 1].update(event.latlng);
                         element.setLatLngs(element.getLatLngs());
                         element.updateEndVertex(event.latlng);

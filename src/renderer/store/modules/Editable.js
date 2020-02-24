@@ -17,25 +17,28 @@ const mutations = {
     state.type = 'airport'
   },
   SET_EDIT_PARKING (state, parking) {
-    state.data = {}
+    Vue.set(state, 'data', {})
     Vue.set(state.data, 'parking', parking)
-    state.index = parking.index
-    state.type = 'parking'
+    Vue.set(state, 'index', parking.index)
+    Vue.set(state, 'type', 'parking')
   },
   'SET_EDIT_NODE' (state, node) {
-    state.data = {}
+    if (node === undefined) {
+      return
+    }
+    Vue.set(state, 'data', {})
     Vue.set(state.data, 'node', node)
-    state.index = node.index
-    state.type = 'node'
+    Vue.set(state, 'index', node.index)
+    Vue.set(state, 'type', 'node')
   },
   SET_EDIT_ARC (state, arc) {
-    state.data = {}
-    state.data.arc = arc
+    Vue.set(state, 'data', {})
+    Vue.set(state.data, 'arc', arc)
     if (state.data.arc.name === undefined) {
-      state.data.arc.name = ''
+      Vue.set(state.data.arc, 'name', '')
     }
-    state.index = arc.index
-    state.type = 'arc'
+    Vue.set(state, 'index', arc.index)
+    Vue.set(state, 'type', 'arc')
   },
   'SET_EDIT_PARKING_NAME' (state, parkingName) {
     Vue.set(state.data.parking, 'name', parkingName)
@@ -44,13 +47,13 @@ const mutations = {
     Vue.set(state.data.arc, 'name', arcName)
   },
   'SET_EDIT_PUSHBACK' (state, isPushBackRoute) {
-    state.data.arc.isPushBackRoute = isPushBackRoute
+    Vue.set(state.data.arc, 'isPushBackRoute', isPushBackRoute)
   },
   'SET_EDIT_HOLDPOINTTYPE' (state, holdPointType) {
-    state.data.node.holdPointType = holdPointType
+    Vue.set(state.data.node, 'holdPointType', holdPointType)
   },
   'SET_EDIT_ISONRUNWAY' (state, isOnRunway) {
-    state.data.node.isOnRunway = isOnRunway
+    Vue.set(state.data.node, 'isOnRunway', isOnRunway)
   }
 }
 

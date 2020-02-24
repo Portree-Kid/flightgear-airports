@@ -6,7 +6,7 @@
         <i class="fa fa-caret-left"></i>
       </div>
     </h1>
-    <div id="panel" width="100%">
+    <div id="panel" width="100%">      
       <el-row>
         <el-col :span="7">Airports Directory</el-col>
         <el-col :span="15">{{ airports_directory }}</el-col>

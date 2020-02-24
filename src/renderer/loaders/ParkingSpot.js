@@ -157,7 +157,7 @@ L.ParkingSpot = L.Circle.extend({
     turfToLatLng: function (turfPoint) {
         return {lat: turfPoint.geometry.coordinates[1], lng: turfPoint.geometry.coordinates[0]};
     },
-    extensions: function () {
+    extensions: function (editLayer) {
        this.createDirection(); 
        if (typeof this.featureLookup[this.id] === 'undefined') {
         this.featureLookup[this.id] = [];

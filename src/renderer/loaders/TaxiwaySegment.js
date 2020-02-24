@@ -26,7 +26,7 @@ L.TaxiwaySegment = L.Polyline.extend({
             }
         });
     },
-    extensions: function () {
+    extensions: function (editLayer) {
         this._latlngs[0].__vertex.glueindex = this.begin;
         this._latlngs.slice(-1)[0].__vertex.glueindex = this.end;
         if (typeof this.featureLookup[this.begin] === 'undefined') {
@@ -45,7 +45,9 @@ L.TaxiwaySegment = L.Polyline.extend({
             store.default.watch( function (state) {
                 return state.Editable.data.arc;
             },
-            () => { console.log(this) }
+            () => { 
+                console.log(this) 
+            }
             ,
             {
               deep: true //add this if u need to watch object properties change etc.

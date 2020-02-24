@@ -37,13 +37,12 @@ const actions = {
     context.commit(SET_AIRPORTS, airports
       .filter(point => typeof point.geometry.coordinates !== "undefined" )
       .filter(point => point.properties.flights > 0 ));
-  },
+    },
   async getAirportsUnfiltered(context) {
     context.commit(RESET_AIRPORTS);
     let airports = await idb.getAirports();
     context.commit(SET_UNFILTERED_AIRPORTS, airports
-      .filter(point => typeof point.geometry.coordinates !== "undefined" )
-      .filter(point => point.properties.flights > 0 ));
+      .filter(point => typeof point.geometry.coordinates !== "undefined" ));
   },
   async saveAirport(context, airport) {
     await idb.saveAirport(airport);

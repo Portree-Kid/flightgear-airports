@@ -127,7 +127,7 @@
           
           l.featureLookup = this.featureLookup;
           if (typeof l.extensions === 'function') {
-            l.extensions()
+            l.extensions(this)
           }
           if (typeof l.bringToFront === 'function') {
             l.bringToFront()
@@ -199,34 +199,23 @@
         polyLine.addTo(this.groundnetLayerGroup)
         polyLine.groundnetLayerGroup = this.groundnetLayerGroup;
         polyLine.attributes = [];
+        polyLine.featureLookup = this.featureLookup;
+        extendTaxiSegment(polyLine);
+        polyLine.setEditlayer(this);
+        //polyLine.extensions(this);
+        polyLine.addListeners()
 
-        polyLine.on('editable:vertex:new', event => {
-          console.log(event)
-          let closest = this.closestLayerSnap(event.latlng, 10)
-          if (closest) {
-            event.latlng.__vertex.glueindex = closest.glueindex;     
-            event.latlng.__vertex.setLatLng(closest.latlng);
-            this.featureLookup[event.latlng.__vertex.glueindex].push(event.latlng.__vertex);
-            console.log(closest)
-          } else {
-            event.latlng.__vertex.glueindex = ++this.groundnetLayerGroup.maxId;
-            this.featureLookup[event.latlng.__vertex.glueindex] = [];
-          }
-          event.latlng.attributes = [];
-        })
         polyLine.on('editable:drawing:end', event => {
-          event.target.featureLookup = this.featureLookup;
-          extendTaxiSegment(event.target);
-          event.target.addListeners()
           console.log(event)
           event.target.addTo(this.groundnetLayerGroup)
         })
       },
       editedArc() {
-
+        console.log('Edited Arc');
       },
       editedNode() {
-        if (this.$store.state.Editable.data.node===undefined ||
+        if (this.$store.state.Editable.index === undefined ||
+            this.$store.state.Editable.data.node === undefined ||
         this.featureLookup===undefined) {
           return;
         }
@@ -270,8 +259,11 @@
           }
           else if (element instanceof L.ParkingSpot) {
           }
+          else if (element instanceof L.Editable.VertexMarker) {
+            latlng = element.latlng;
+          }
           else if (element instanceof L.TaxiwaySegment) {
-              if (Number(element.begin) === nIndex) {
+              if (Number(element.begin) === Number(nIndex)) {
                 latlng = element._latlngs[0];
               }
               if (Number(element.end) === nIndex) {
@@ -279,14 +271,14 @@
               }
           } else if (element instanceof L.Polyline) {
               element._latlngs.forEach(element => {
-                if(Number(element.__vertex.glueindex) === nIndex){
+                if(Number(element.__vertex.glueindex) === Number(nIndex)){
                   latlng = element.__vertex.latlng;
                 }
               });
           }    
     
         })
-        if (!hasRunwayNode && isOnRunway) {
+        if (!hasRunwayNode && isOnRunway && latlng !== undefined) {
           this.$store.state.Editable.data.node.holdPointType
           const icon = new L.DivIcon({
               className: 'custom-div-icon',
@@ -389,6 +381,7 @@
           xml.push(l)
         })
         writeGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, this.icao, xml)
+        this.load(this.icao, false)
       },
       setVisible(visible) {
         if (this.layerGroup) {
