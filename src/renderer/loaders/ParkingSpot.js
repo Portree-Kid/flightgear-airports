@@ -79,7 +79,7 @@ L.ParkingSpot = L.Circle.extend({
             var end = this.editor._resizeLatLng.__vertex.getLatLng();
             var heading = turf.bearing([start.lng, start.lat], [end.lng, end.lat]);
             this.options.attributes.heading = heading + 180;
-            const counts = [15, 24, 36, 52, 65, 80];
+            const counts = [7.5, 12, 18, 26, 32.5, 40];
 
             const output = counts.reduce((prev, curr) => Math.abs(curr - this._mRadius) < Math.abs(prev - this._mRadius) ? curr : prev);
 

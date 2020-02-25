@@ -50,6 +50,16 @@
             deep: true //add this if u need to watch object properties change etc.
           }
         );
+      this.$store.watch(
+        function (state) {
+              return state.Editable.data.parking;
+          },
+          () => { this.editedParking() }
+          ,
+          {
+            deep: true //add this if u need to watch object properties change etc.
+          }
+        );
     },
     beforeDestroy () {
       this.remove()
@@ -210,13 +220,27 @@
           event.target.addTo(this.groundnetLayerGroup)
         })
       },
+      editedParking() {
+        console.log(this.$store.state.Editable.data.parking)
+        if (this.$store.state.Editable.index === undefined ||
+            this.$store.state.Editable.data.parking === undefined ||
+            this.featureLookup===undefined) {
+          return
+        }
+        this.featureLookup[this.$store.state.Editable.index].forEach((element,index) => {
+          if (element instanceof L.ParkingSpot) {
+            element.options.attributes = Object.assign({}, this.$store.state.Editable.data.parking)
+            element.updateVertexFromDirection();           
+          }
+        })
+      },
       editedArc() {
         console.log('Edited Arc');
       },
       editedNode() {
         if (this.$store.state.Editable.index === undefined ||
             this.$store.state.Editable.data.node === undefined ||
-        this.featureLookup===undefined) {
+            this.featureLookup===undefined) {
           return;
         }
         var isOnRunway = Number(this.$store.state.Editable.data.node.isOnRunway);
