@@ -45,6 +45,8 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
             event.target.setStyle({color : 'red'});
             console.log("Click : " + event.target);
             if (store.default.state.Editable.data.arc !== event.target.options.attributes) {
+                event.target.options.attributes.index = event.target._leaflet_id;
+                event.target.options.attributes.selected = true;
                 store.default.dispatch('setArc', event.target.options.attributes);
             }
             this.unwatch = store.default.watch(
@@ -53,7 +55,8 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                 },
                     () => { 
                         // Reset colour
-                        event.target.setStyle({color : '#3388ff'});
+                        event.target.options.attributes.selected = false;
+                        event.target.updateStyle();
                         this.unwatch();
                     }                    
                 ,
@@ -205,8 +208,13 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
 
     taxiwaySegment.__proto__.updateStyle = function() {
         var style = {};
-        if (this.options.attributes.isPushBackRoute) {
+        if(this.options.attributes.selected){
+            style.color = 'red';  
+        } else  if (this.options.attributes.isPushBackRoute) {
           style.color = 'magenta';  
+        }
+        else {
+          style.color = '#3388ff';  
         }
         this.setStyle(style);
         if (!this.bidirectional) {

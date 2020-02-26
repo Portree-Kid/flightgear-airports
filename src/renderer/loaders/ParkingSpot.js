@@ -118,7 +118,7 @@ L.ParkingSpot = L.Circle.extend({
                         return state.Editable.data.parking;
                 },
                     () => { 
-                        event.target.setStyle({color : '#3388ff'}); 
+                        event.target.updateStyle(); 
                         this.unwatch();
                     }                    
                 ,

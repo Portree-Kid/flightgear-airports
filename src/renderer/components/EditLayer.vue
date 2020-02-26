@@ -235,7 +235,12 @@
         })
       },
       editedArc() {
-        console.log('Edited Arc');
+        console.log('Edited Arc : ' + this.$store.state.Editable.index);
+        var arc = this.groundnetLayerGroup.getLayer(this.$store.state.Editable.index);
+        if (arc) {
+          arc.options.attributes = Object.assign({}, this.$store.state.Editable.data.arc)
+          arc.updateStyle();
+        }        
       },
       editedNode() {
         if (this.$store.state.Editable.index === undefined ||
