@@ -9,6 +9,9 @@
         <el-button type="primary" @click="undoLast">Last save</el-button>
       </span>
     </el-dialog>
+    <el-dialog title="Saving" :visible.sync="saveDialogVisible" width="30%" center>
+      <span style="center">Saving..</span>
+    </el-dialog>
 
     <EditButton icon="fas fa-save" v-on:click="save" :show="editing" tooltip="Save"></EditButton>
     <EditButton icon="fas fa-draw-polygon" v-on:click="drawPolyline" :show="editing" tooltip="Draw Taxiline"></EditButton>
@@ -18,11 +21,13 @@
 </template>
 
 <script lang="js">
+/* eslint-disable */
   import EditButton from './EditButton'
+  import Vue from 'vue'
   export default {
     components: { EditButton },
     data () {
-      return {isEditing: false, centerDialogVisible: false}
+      return {isEditing: false, centerDialogVisible: false, saveDialogVisible: false}
     },
     created () {
     },
@@ -45,8 +50,13 @@
       },
       save () {
         this.editing = false
-        this.$parent.$parent.$refs.editLayer.save()
-        this.$parent.$parent.$refs.editLayer.disableEdit()
+        Vue.set(this, 'saveDialogVisible', true)
+        this.editing = false
+        Vue.nextTick( () => {
+            this.$parent.$parent.$refs.editLayer.save()
+            this.$parent.$parent.$refs.editLayer.disableEdit()
+            Vue.set(this, 'saveDialogVisible', false)
+          }, this)
       },
       drawPolyline () {
         this.$parent.$parent.$refs.editLayer.drawPolyline()

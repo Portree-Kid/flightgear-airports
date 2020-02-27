@@ -39,7 +39,9 @@
           this.groundnet.addTo(this.$parent.mapObject)
         }
         this.groundnet.eachLayer(l => {
-          l.bringToBack()
+          if (l) {
+            l.bringToBack()
+          }
         })
       },
       visible (feature) {

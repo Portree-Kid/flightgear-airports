@@ -55,9 +55,13 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                 },
                     () => { 
                         // Reset colour
-                        event.target.options.attributes.selected = false;
-                        event.target.updateStyle();
-                        this.unwatch();
+                        if(event.target instanceof L.Polyline &&
+                            event.target.options.attributes && 
+                            event.target.options.attributes.selected) {
+                            event.target.options.attributes.selected = false;
+                            event.target.updateStyle();
+                            this.unwatch();    
+                        }
                     }                    
                 ,
                 {
