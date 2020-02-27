@@ -118,8 +118,10 @@ L.ParkingSpot = L.Circle.extend({
                         return state.Editable.data.parking;
                 },
                     () => { 
-                        event.target.updateStyle(); 
-                        this.unwatch();
+                        if (event.target instanceof L.ParkingSpot) {
+                            event.target.setStyle({color : '#3388ff'}); 
+                            this.unwatch();    
+                        }
                     }                    
                 ,
                 {
@@ -153,6 +155,9 @@ L.ParkingSpot = L.Circle.extend({
         this.on('editable:disable', function (event) {
             event.target.removeDirection();
         });    
+    },
+    updateStyle: function () {
+
     },
     turfToLatLng: function (turfPoint) {
         return {lat: turfPoint.geometry.coordinates[1], lng: turfPoint.geometry.coordinates[0]};

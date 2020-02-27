@@ -1,5 +1,6 @@
 /* eslint-disable */
 import idb from '../api/airports';
+import Vue from 'vue';
 
 const ADD_AIRPORT = 'ADD_AIRPORT';
 const SET_AIRPORTS = 'SET_AIRPORTS';
@@ -16,7 +17,7 @@ const mutations = {
     state.airports.push(airports);
   },
   SET_AIRPORTS (state, airports) {
-    state.airports = airports;
+    Vue.set(state, 'airports', airports);
   },
   SET_UNFILTERED_AIRPORTS (state, airports) {
     state.unfilteredairports = airports;
