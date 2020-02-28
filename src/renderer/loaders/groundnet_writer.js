@@ -152,7 +152,7 @@ var convertLat = function (latlng) {
 
 var convertLon = function (latlng) {
     console.log(latlng.lng);
-    var NS = latlng.lat > 0 ? 'E' : 'W';
+    var NS = latlng.lng > 0 ? 'E' : 'W';
     var deg = mathjs.floor(mathjs.abs(latlng.lng));
     var min = (mathjs.abs(latlng.lng) - deg) * 60;
     // console.log(NS + deg + " " + min);
