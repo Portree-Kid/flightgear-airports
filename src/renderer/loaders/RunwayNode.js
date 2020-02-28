@@ -13,6 +13,34 @@ L.RunwayNode = L.Marker.extend({
             // Is it the edit vertex (Middle) moving?
             this.follow(event.target.glueindex, event);
         });
+        this.on('click', function (event) {
+            console.log("Click Runway : ", event);
+            event.target.options.attributes.selected = true;
+            if (store.default.state.Editable.index !== event.target.options.attributes.index) {
+                store.default.dispatch('setRunway', event.target.options.attributes);
+            }
+            this.unwatch = store.default.watch(
+                function (state) {
+                        return state.Editable.data.runway;
+                },
+                    () => { 
+                        // Reset colour
+                        if(event.target instanceof L.RunwayNode &&
+                            event.target.options.attributes && 
+                            event.target.options.attributes.selected) {
+                            event.target.options.attributes.selected = false;
+                            event.target.updateStyle();
+                            this.unwatch();    
+                        }
+                    }                    
+                ,
+                {
+                    deep: true //add this if u need to watch object properties change etc.
+
+                }
+            );
+
+        });
     },
     extensions: function (editLayer) {
         if (typeof this.featureLookup[this.glueindex] === 'undefined') {
@@ -76,8 +104,15 @@ var runwayNode = function (n, layerGroup) {
         iconSize: [30, 42],
         iconAnchor: [15, 42]
     });
-    const node = new L.RunwayNode([latlon.decimalLatitude, latlon.decimalLongitude], { icon: icon });
+    var node = new L.RunwayNode([latlon.decimalLatitude, latlon.decimalLongitude], { icon: icon, attributes: {} });
     node.glueindex = n.attr('index');
+    $.each( n.attrs, function( key, value ) {        
+        if(isNaN(value))
+          node.options.attributes[ key ] = value;
+        else
+        node.options.attributes[ key ] = Number( value);
+    });
+
     node.addTo(layerGroup);
     node.addListeners();
     return node;

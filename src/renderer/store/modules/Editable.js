@@ -3,12 +3,13 @@ import Vue from 'vue'
 const state = {
   type: 'none',
   index: 'none',
-  data: {airports: {}, parking: {}, arc: {}, node: {}}
+  data: {airports: {}, parking: {}, arc: {}, node: {}, runway: {}}
 }
 
 const SET_EDIT_AIRPORT = 'SET_EDIT_AIRPORT'
 const SET_EDIT_PARKING = 'SET_EDIT_PARKING'
 const SET_EDIT_ARC = 'SET_EDIT_ARC'
+const SET_EDIT_RUNWAY = 'SET_EDIT_RUNWAY'
 
 const mutations = {
   SET_EDIT_AIRPORT (state, airport) {
@@ -31,6 +32,12 @@ const mutations = {
     Vue.set(state.data, 'node', node)
     Vue.set(state, 'index', node.index)
     Vue.set(state, 'type', 'node')
+  },
+  SET_EDIT_RUNWAY (state, runway) {
+    Vue.set(state, 'data', {})
+    Vue.set(state.data, 'runway', runway)
+    Vue.set(state, 'index', runway.index)
+    Vue.set(state, 'type', 'runway')
   },
   SET_EDIT_ARC (state, arc) {
     Vue.set(state, 'data', {})
@@ -67,6 +74,9 @@ const mutations = {
 const actions = {
   async setAirport (context, airport) {
     context.commit(SET_EDIT_AIRPORT, airport)
+  },
+  async setRunway (context, runway) {
+    context.commit(SET_EDIT_RUNWAY, runway)
   },
   async setParking (context, parking) {
     context.commit(SET_EDIT_PARKING, parking)

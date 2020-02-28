@@ -155,6 +155,9 @@
           case 'node':
             this.removeNode(this.$store.state.Editable.index)
             break;
+          case 'runway':
+            this.removeNode(this.$store.state.Editable.index)
+            break;
           case 'parking':
             this.removeParking(this.$store.state.Editable.index)
             break;
@@ -190,7 +193,6 @@
               e1.__vertex.removeFrom(element.editor.editLayer);
               element._latlngs.splice(index1,1);
               if (element._latlngs.length==1) {
-
                 this.featureLookup[index].splice(i,1);
                 this.featureLookup[element._latlngs[0].__vertex.glueindex].forEach((otherEnd, j) => {
                   console.log(j + ' ' + otherEnd);
@@ -201,6 +203,9 @@
                 element.removeFrom(this.groundnetLayerGroup);
               }
             });
+          } else if (element instanceof L.RunwayNode) {
+            this.featureLookup[index] = this.featureLookup[index].filter(item => item !== element);
+            element.removeFrom(this.groundnetLayerGroup);
           }
         });
       },
