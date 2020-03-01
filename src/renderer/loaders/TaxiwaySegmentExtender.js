@@ -44,7 +44,11 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         this.on('click', function (event) {
             event.target.setStyle({color : 'red'});
             console.log("Click : " + event.target);
-            if (store.default.state.Editable.data.arc !== event.target.options.attributes) {
+            if (store.default.state.Editable.data.arc === undefined ||
+                store.default.state.Editable.data.arc !== event.target.options.attributes) {
+                if(event.target.options.attributes === undefined) {
+                    event.target.options.attributes = {};  
+                }
                 event.target.options.attributes.index = event.target._leaflet_id;
                 event.target.options.attributes.selected = true;
                 store.default.dispatch('setArc', event.target.options.attributes);
