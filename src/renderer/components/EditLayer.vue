@@ -1,7 +1,4 @@
 <template>
-  <section class="edit-layer">
-    <h1>edit-layer Component</h1>
-  </section>
 </template>
 
 <script lang="js">
@@ -13,11 +10,13 @@
   import {extendTaxiSegment} from '../loaders/TaxiwaySegmentExtender'
   import {writeGroundnetXML} from '../loaders/groundnet_writer'
   import L2 from 'leaflet-textpath'
+  import Vue from 'vue'
 
   // import {LSymbol} from 'leaflet-polylinedecorator'
 
   export default {
     name: 'edit-layer',
+    components: {},
     props: [],
     created () {
       console.log(LMap)
@@ -66,15 +65,14 @@
     },
     data () {
       return {
-        maxId: 1, icao: String
+        maxId: 1, icao: String, checking: false
       }
     },
     methods: {
       load (icao, force) {        
         if (this.groundnetLayerGroup !== undefined) {
           this.groundnetLayerGroup.removeFrom(this.$parent.mapObject)
-        }
-        
+        }        
 
         this.icao = icao
         this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao, force)
@@ -128,6 +126,9 @@
         if (this.$parent._isMounted) {
           this.deferredMountedTo(this.$parent.mapObject)
         }
+      },
+      showCheck() {
+        Vue.set(this, 'checking', true)
       },
       enableEdit () {
         this.editable = true
@@ -264,14 +265,14 @@
           if (element instanceof L.RunwayNode) {
             if (isOnRunway === 0) {
               // We shouldn't have a RunwayNode
-              element.removeFrom(layerGroup);
+              element.removeFrom(this.groundnetLayerGroup);
               this.featureLookup[nIndex].splice(index,1);              
             }
             hasRunwayNode = true;
           } else if (element instanceof L.HoldNode) {
             if (!isHoldPoint) {
               // We shouldn't have a RunwayNode
-              element.removeFrom(layerGroup);
+              element.removeFrom(this.groundnetLayerGroup);
               this.featureLookup[nIndex].splice(index,1);              
             } else {
               var fa_icon;
@@ -322,9 +323,11 @@
           });
           const node = new L.RunwayNode(latlng, { icon: icon });
           node.glueindex = nIndex;
-          node.addTo(layerGroup);
+          node.addTo(this.groundnetLayerGroup);
           this.featureLookup[nIndex].push(node);
+          node.featureLookup = this.featureLookup;
           node.addListeners();
+          node.extensions();
         }
         if (!hasHoldPointNode && isHoldPoint) {
           var fa_icon = null;
@@ -341,9 +344,11 @@
           });
           const node = new L.HoldNode(latlng, { icon: icon });
           node.glueindex = nIndex;
-          node.addTo(layerGroup);
+          node.addTo(this.groundnetLayerGroup);
+          node.featureLookup = this.featureLookup;
           this.featureLookup[nIndex].push(node);
           node.addListeners();
+          node.extensions();
         }
       },
       closestLayerSnap (eventLatlng, snap) {
@@ -398,6 +403,7 @@
         const circle = new L.ParkingSpot(event.latlng, {attributes: {radius: 20, heading: 0}})
         circle.id = (++this.groundnetLayerGroup.maxId)
         circle.addTo(this.groundnetLayerGroup)
+        circle.featureLookup = this.featureLookup
         circle.enableEdit()
         circle.extensions()
         circle.addListeners()

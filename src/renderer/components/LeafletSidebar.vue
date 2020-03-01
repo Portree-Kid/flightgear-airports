@@ -7,6 +7,7 @@
             <li><a href="#edit" role="tab"><i class="fas fa-edit"></i></a></li>
             <li><a href="#search" role="tab"><i class="fa fa-search"></i></a></li>
             <li><a href="#scan" role="tab"><i class="fa fa-sync"></i></a></li>
+            <li><a href="#check" role="tab"><i class="far fa-check-square"></i></a></li>
         </ul>
 
         <ul role="tablist"> <!-- bottom aligned tabs -->
@@ -42,6 +43,9 @@
         <div class="leaflet-sidebar-pane" id="settings">
           <SettingsPanel></SettingsPanel>
         </div>
+        <div class="leaflet-sidebar-pane" id="check">
+          <CheckPanel></CheckPanel>
+        </div>
     </div>
 </div>  
 </template>
@@ -52,17 +56,18 @@
   import {} from 'leaflet-sidebar-v2'
   import L from 'leaflet'
   import AirportEdit from './AirportEdit'
+  import CheckPanel from './CheckPanel'
   import ParkingEdit from './ParkingEdit'
   import ArcEdit from './ArcEdit'
-  import NodeEdit from './NodeEdit'
-  import SettingsPanel from './SettingsPanel'
-  import RunScan from './RunScan'
-  import Search from './Search'
   import FileSelect from './FileSelect'
+  import NodeEdit from './NodeEdit'
+  import RunScan from './RunScan'
+  import SettingsPanel from './SettingsPanel'
+  import Search from './Search'
 
   export default {
     name: 'leaflet-sidebar',
-    components: { AirportEdit, ArcEdit, NodeEdit, ParkingEdit, SettingsPanel, RunScan, FileSelect, Search },
+    components: { AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, SettingsPanel, RunScan, FileSelect, Search },
     props: [],
     mounted () {
       this.add()

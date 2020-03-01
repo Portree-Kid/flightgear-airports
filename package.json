@@ -58,6 +58,7 @@
   "dependencies": {
     "@turf/turf": "^5.1.6",
     "axios": "^0.18.0",
+    "dijkstrajs": "^1.0.1",
     "electron-debug": "^3.0.1",
     "element-ui": "^2.12.0",
     "file-url": "^3.0.0",

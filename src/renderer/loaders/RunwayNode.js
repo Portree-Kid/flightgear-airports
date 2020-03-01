@@ -43,6 +43,7 @@ L.RunwayNode = L.Marker.extend({
         });
     },
     extensions: function (editLayer) {
+        this.options.attributes = {};
         if (typeof this.featureLookup[this.glueindex] === 'undefined') {
             this.featureLookup[this.glueindex] = new Array();
         }
