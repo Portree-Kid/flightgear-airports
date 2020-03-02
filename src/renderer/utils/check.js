@@ -36,55 +36,72 @@ onmessage = function (event) {
 
 async function checkGroundnet(data) {
     var promise = new Promise(function (resolve, reject) {
-        this.max = 4;
-        debugger;
-        var parkings = data.map(mapParkings).filter(n => n !== undefined);
-        var runwayNodes = data.map(mapRunwayNodes).filter(n => n !== undefined);
-        var edges = data.map(mapEdges).filter(n => n !== undefined);
-
-        var graph = {};
-        parkings.forEach(element => {
-            graph[element] = {};
-        });
-        runwayNodes.forEach(element => {
-            graph[element] = {};
-        });
-        edges.forEach(element => {
-            graph[element.start] = {};
-            graph[element.end] = {};
-        });
-        edges.forEach(element => {
-            var node1 = graph[element.start];
-            node1[element.end] = 1;
-            var node2 = graph[element.end];
-            node2[element.start] = 1;
-        });
-        var okNodes = [];
-        logger('info', graph);
-        parkings.forEach(parkingNode => {
-            runwayNodes.forEach(runwayNode => {
-               var ok = checkRoute(graph, parkingNode, runwayNode); 
-               if(ok) {
-                 okNodes.push(parkingNode);
-                 okNodes.push(runwayNode);
-               }
-               this.progress += 1;
+        try {
+            this.max = 4;
+            debugger;
+            var parkings = data.map(mapParkings).filter(n => n !== undefined);
+            var runwayNodes = data.map(mapRunwayNodes).filter(n => n !== undefined);
+            var edges = data.map(mapEdges).filter(n => n !== undefined);
+    
+            var graph = {};
+            parkings.forEach(element => {
+                graph[element] = {};
             });
-        });
-        okNodes = okNodes.filter((v,i) => okNodes.indexOf(v) === i);
-        var allNodes = parkings.concat(runwayNodes);
-        var notOkNodes = allNodes.filter((v,i) => okNodes.indexOf(v) < 0).map(id => {return {id:id, message:'Node not connected'}});
-        if (parkings.length === 0) {
-            notOkNodes.push({id:0, message:'No parkings'});
+            runwayNodes.forEach(element => {
+                graph[element] = {};
+            });
+            edges.forEach(element => {
+                graph[element.start] = {};
+                graph[element.end] = {};
+            });
+            edges.forEach(element => {
+                var node1 = graph[element.start];
+                node1[Number(element.end)] = 1;
+                var node2 = graph[element.end];
+                node2[Number(element.start)] = 1;
+            });
+            var okNodes = [];
+            logger('info', graph);
+            parkings.forEach(parkingNode => {
+                runwayNodes.forEach(runwayNode => {
+                   var ok = checkRoute(graph, parkingNode, runwayNode); 
+                   if(ok) {
+                     okNodes.push(parkingNode);
+                     okNodes.push(runwayNode);
+                   }
+                   this.progress += 1;
+                });
+            });
+            okNodes = okNodes.filter((v,i) => okNodes.indexOf(v) === i);
+            var allLegitimateEndNodes = parkings.concat(runwayNodes);
+            var notOkNodes = allLegitimateEndNodes.filter(
+                (v,i) => okNodes.indexOf(v) < 0
+                ).map(
+                    id => {return {id:id, message:'Node not connected'}}
+                    );
+            if (parkings.length === 0) {
+                notOkNodes.push({id:0, message:'No parkings'});
+            }
+            if (runwayNodes.length === 0) {
+                notOkNodes.push({id:0, message:'No Runwaynodes'});
+            }
+            var danglingEnds = Object.entries(graph).filter(
+                (v,i) => Object.keys(v[1]).length <= 1
+                ).filter(
+                    (v,i) => allLegitimateEndNodes.indexOf(Number(v[0])) < 0
+                    ).map(
+                        v => {return {id:Number(v[0]), message:'Node not a legimate end'}}
+                        );
+            notOkNodes = notOkNodes.concat(danglingEnds);
+    
+    //        check1(graph);
+    //        check2();
+    //        this.progress += 1;
+            resolve(notOkNodes);
+                
+        } catch (error) {
+            reject(error);
         }
-        if (runwayNodes.length === 0) {
-            notOkNodes.push({id:0, message:'No Runwaynodes'});
-        }
-
-//        check1(graph);
-//        check2();
-//        this.progress += 1;
-        resolve(notOkNodes);
     });
     return promise;
 }

@@ -39,6 +39,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         }
         this.featureLookup[this.begin].push(this);
         this.featureLookup[this.end].push(this);
+        this.bidirectional = true;
     };
     taxiwaySegment.__proto__.addListeners = function () {
         this.on('click', function (event) {
