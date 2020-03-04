@@ -37,12 +37,13 @@ onmessage = function (event) {
 async function checkGroundnet(data) {
     var promise = new Promise(function (resolve, reject) {
         try {
-            this.max = 4;
-            debugger;
+//            debugger;
             var parkings = data.map(mapParkings).filter(n => n !== undefined);
             var runwayNodes = data.map(mapRunwayNodes).filter(n => n !== undefined);
             var edges = data.map(mapEdges).filter(n => n !== undefined);
-    
+            this.max = parkings.length * runwayNodes.length;
+            this.postMessage(['max', this.max]);
+
             var graph = {};
             parkings.forEach(element => {
                 graph[element] = {};
@@ -69,7 +70,7 @@ async function checkGroundnet(data) {
                      okNodes.push(parkingNode);
                      okNodes.push(runwayNode);
                    }
-                   this.progress += 1;
+                   this.postMessage(['progress', 1]);
                 });
             });
             okNodes = okNodes.filter((v,i) => okNodes.indexOf(v) === i);
@@ -96,7 +97,7 @@ async function checkGroundnet(data) {
     
     //        check1(graph);
     //        check2();
-    //        this.progress += 1;
+    //        this.postMessage(['progress', 1]);
             resolve(notOkNodes);
                 
         } catch (error) {

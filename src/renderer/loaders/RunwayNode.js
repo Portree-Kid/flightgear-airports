@@ -42,6 +42,11 @@ L.RunwayNode = L.Marker.extend({
 
         });
     },
+    highlight() {
+        var style = {};
+        style['color'] = 'red';
+        this.setStyle(style);
+    },    
     extensions: function (editLayer) {
         this.options.attributes = {};
         if (typeof this.featureLookup[this.glueindex] === 'undefined') {

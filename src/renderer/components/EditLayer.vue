@@ -181,6 +181,41 @@
           }
         });
       },
+      show (index) {
+        if(this.featureLookup[index]===undefined) {
+          console.error("Lookup " + index + " failed ");          
+          return;
+        }
+        this.featureLookup[index].forEach((element, i) => {
+          if (element instanceof L.Polyline) {
+            element._latlngs.forEach((e1, index1) => {
+              console.log(e1);
+              if (e1.attributes.index===index) {
+                var latlng = {};
+                latlng.lat =  e1.lat;
+                latlng.lng =  e1.lng;
+                this.$store.dispatch('setCenter', latlng);
+                if(e1.__vertex._icon.style!=null) {
+                    e1.__vertex._icon.style['background-color'] = 'red';
+                }
+              }
+            });
+          } else if (element instanceof L.RunwayNode) {
+            var latlng = {};
+            latlng.lat =  element._latlng.lat;
+            latlng.lng =  element._latlng.lng;
+            element.highlight();
+            this.$store.dispatch('setCenter', latlng);
+          } else if (element instanceof L.ParkingSpot) {
+            console.log(element);
+            var latlng = {};
+            latlng.lat =  element._latlng.lat;
+            latlng.lng =  element._latlng.lng;
+            element.highlight();
+            this.$store.dispatch('setCenter', latlng);
+          }
+        });
+      },
       removeNode (index) {
         if(this.featureLookup[index]===undefined) {
           console.error("Lookup " + index + " failed ");          

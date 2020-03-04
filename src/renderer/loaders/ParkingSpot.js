@@ -89,6 +89,11 @@ L.ParkingSpot = L.Circle.extend({
             this.direction.setLatLngs([start, end]);
         }
     },
+    highlight() {
+        var style = {};
+        style['color'] = 'red';
+        this.setStyle(style);
+    },    
     addListeners: function () {
         this.on('editable:drawing:move', function (event) {
             console.log("Move : ", event);
@@ -112,7 +117,7 @@ L.ParkingSpot = L.Circle.extend({
         this.on('click', function (event) {
             console.log("Click : " + event.target);
             store.default.dispatch('setParking', event.target.options.attributes);
-            this.setStyle({color : 'red'}); 
+            this.highlight(); 
             this.unwatch = store.default.watch(
                 function (state) {
                         return state.Editable.data.parking;
@@ -128,7 +133,7 @@ L.ParkingSpot = L.Circle.extend({
                     deep: true //add this if u need to watch object properties change etc.
                 }
             );
-    });
+        });        
         this.on('editable:vertex:clicked', function (event) {
             console.log(this.featureLookup[event.vertex.glueindex]);
             if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){

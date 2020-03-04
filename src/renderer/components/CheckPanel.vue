@@ -8,8 +8,9 @@
     </h1>
     <div id="panel" width="100%">            
       <el-row v-for="(result,idx) in results" :key="idx">
-        <el-col :span="7">{{ result.id }}</el-col>
         <el-col :span="15">{{ result.message }}</el-col>
+        <el-col :span="7"><el-button v-on:click="show(result.id)">Show</el-button></el-col>
+         
       </el-row>
     </div>
   </div>
@@ -27,6 +28,9 @@
       }
     },
     methods: {
+      show (idx) {
+        this.$parent.$parent.$parent.$refs.editLayer.show(idx)
+      }
     },
     computed: {
       results: function () {
@@ -38,7 +42,7 @@
 
 <style>
 .el-row {
-  margin-bottom: 1px;
+  margin: 1px;
 }
 .el-col {
   border-radius: 1px;
