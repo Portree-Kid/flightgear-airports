@@ -24,6 +24,3 @@ install:
 - npm install
 script:
 - npm run build
-branches:
-  only:
-  - master
