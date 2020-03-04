@@ -2,7 +2,7 @@
   "name": "flightgear-airports",
   "version": "0.0.1",
   "author": "portree_kid <keith.paterson@gmx.de>",
-  "description": "An electron-vue project",
+  "description": "An software to design Flightgear groundnets",
   "license": null,
   "main": "./dist/electron/main.js",
   "scripts": {
