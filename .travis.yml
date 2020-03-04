@@ -19,11 +19,6 @@ cache:
   - "$HOME/.electron"
   - "$HOME/.cache"
 addons:
-  apt:
-    packages:
-    - libgnome-keyring-dev
-    - icnsutils
-    #- xvfb
 before_install:
 install:
 - source ~/.bashrc
