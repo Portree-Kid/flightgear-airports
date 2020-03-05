@@ -21,6 +21,7 @@ install:
 - npm install -g xvfb-maybe
 - npm install
 script:
+- sudo snap install snapcraft --classic
 - npm run build
 deploy:
   provider: releases
