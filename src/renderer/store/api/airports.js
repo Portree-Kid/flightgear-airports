@@ -1,6 +1,6 @@
 /* eslint-disable */
 const DB_NAME = 'flightgear';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 let DB;
 
 export default {
@@ -19,6 +19,7 @@ export default {
 	
 			request.onsuccess = e => {
 				DB = e.target.result;
+				console.log('OPENED DB', DB);
 				resolve(DB);
 			};
 			

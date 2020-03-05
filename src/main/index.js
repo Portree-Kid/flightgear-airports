@@ -29,7 +29,11 @@ function createWindow () {
     width: 1000
   })
   mainWindow.loadURL(winURL)
+  mainWindow.webContents.openDevTools()
 
+  mainWindow.onerror = function (message, source, lineno, colno, error) {
+    console.error(error)
+  }
   mainWindow.on('closed', () => {
     mainWindow = null
   })

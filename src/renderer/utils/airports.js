@@ -8,7 +8,7 @@ async function initDB() {
         if (features == null) {
             console.log("Loading DB");
             console.log(this.indexedDB);
-            var request = this.indexedDB.open("flightgear", 2);
+            var request = this.indexedDB.open("flightgear", 3);
             request.onerror = function (event) {
                 reject(event);
             };
@@ -26,7 +26,7 @@ async function initDB() {
                     var objectStore = db.createObjectStore("airports", { keyPath: "properties.icao" });
                 }
                 if (event.oldVersion < 2) {
-                    // Version 1 is the first version of the database.
+                    // Version 2 is the first version of the database.
                     var objectStore = event.target.transaction.objectStore("airports");
                     var indexNames = objectStore.indexNames;
                     var desiredKeyPathForMyIndex = "properties.icao";

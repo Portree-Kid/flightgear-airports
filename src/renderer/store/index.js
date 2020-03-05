@@ -12,5 +12,5 @@ const debug = process.env.NODE_ENV !== 'production'
 export default new Vuex.Store({
   modules,
   strict: debug,
-  plugins: debug ? [createLogger(), createPersistedState({paths: ['Settings']})] : [] // set logger only for development
+  plugins: debug ? [createLogger(), createPersistedState({paths: ['Settings']})] : [createPersistedState({paths: ['Settings']})] // set logger only for development
 })

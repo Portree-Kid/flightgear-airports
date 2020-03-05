@@ -102,7 +102,7 @@
           const winURL = process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/src/renderer/utils/check.js`
             : `file://${__dirname}/check.js`
-          console.log('make a worker: ', path.resolve(__dirname, 'check.js'))
+          console.log('make a check worker: ', path.resolve(__dirname, 'check.js'))
 
           const worker = new Worker(winURL)
           console.log(fileUrl('src/renderer/utils/check.js'))

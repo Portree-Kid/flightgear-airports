@@ -8,6 +8,7 @@ const modules = {}
 
 files.keys().forEach(key => {
   if (key === './index.js') return
+  console.log('Vuex Module : ' + key.replace(/(\.\/|\.js)/g, ''))
   modules[key.replace(/(\.\/|\.js)/g, '')] = files(key).default
 })
 

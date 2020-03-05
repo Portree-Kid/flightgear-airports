@@ -64,6 +64,7 @@ async function scanGroundnetFiles(p, features) {
       }).catch(reason => {
         logger('info', "Crashed");
         logger('info', reason);
+        this.postMessage('DONE');
       });
 
       //walkDir(p, f => { readGroundnet(f, features) });

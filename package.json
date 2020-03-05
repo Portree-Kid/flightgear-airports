@@ -27,6 +27,15 @@
     "directories": {
       "output": "build"
     },
+    "asar": "true",
+    "extraResources": [
+      {
+        "from": "src/renderer/utils",
+        "to": "workers",
+        "filter": [
+          "**/*"
+        ]
+      }],
     "files": [
       "dist/electron/**/*"
     ],

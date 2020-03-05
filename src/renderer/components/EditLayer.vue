@@ -19,11 +19,13 @@
     components: {},
     props: [],
     created () {
+
       console.log(LMap)
       console.log(LMarker)
       console.log(L)
       console.log(LEdit)
       console.log(L2)
+      console.log('Created Editlayer')
       // console.log(LSymbol)
     },
     mounted () {

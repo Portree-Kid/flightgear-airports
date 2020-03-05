@@ -33,17 +33,25 @@ const actions = {
     await idb.deleteAirport(airport); 
   },
   async getAirports(context) {
-    context.commit(RESET_AIRPORTS);
-    let airports = await idb.getAirports();
-    context.commit(SET_AIRPORTS, airports
-      .filter(point => typeof point.geometry.coordinates !== "undefined" )
-      .filter(point => point.properties.flights > 0 ));
-    },
+    try {
+      context.commit(RESET_AIRPORTS);
+      let airports = await idb.getAirports();
+      context.commit(SET_AIRPORTS, airports
+        .filter(point => typeof point.geometry.coordinates !== "undefined" )
+        .filter(point => point.properties.flights > 0 ));        
+    } catch (error) {
+      console.error(error);
+    }
+  },
   async getAirportsUnfiltered(context) {
-    context.commit(RESET_AIRPORTS);
-    let airports = await idb.getAirports();
-    context.commit(SET_UNFILTERED_AIRPORTS, airports
-      .filter(point => typeof point.geometry.coordinates !== "undefined" ));
+    try {
+      context.commit(RESET_AIRPORTS);
+      let airports = await idb.getAirports();
+      context.commit(SET_UNFILTERED_AIRPORTS, airports
+        .filter(point => typeof point.geometry.coordinates !== "undefined" ));
+    } catch (error) {
+      console.error(error);
+    }
   },
   async saveAirport(context, airport) {
     await idb.saveAirport(airport);

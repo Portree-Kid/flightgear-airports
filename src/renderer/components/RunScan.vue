@@ -66,7 +66,7 @@
           this.scanning = true
           const winURL = process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/src/renderer/utils/worker.js`
-            : `file://${__dirname}/worker.js`
+            : `file://${process.resourcesPath}/workers/worker.js`
           console.log('make a worker: ', path.resolve(__dirname, 'worker.js'))
 
           const worker = new Worker(winURL)
@@ -112,7 +112,7 @@
           this.scanning = true
           const winURL = process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/src/renderer/utils/worker.js`
-            : `file://${__dirname}/worker.js`
+            : `file://${process.resourcesPath}/workers/worker.js`
           console.log('make a worker: ', path.resolve(__dirname, 'worker.js'))
 
           const worker = new Worker(winURL)
@@ -160,7 +160,7 @@
           this.scanning = true
           const winURL = process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/src/renderer/utils/worker.js`
-            : `file://${__dirname}/worker.js`
+            : `file://${process.resourcesPath}/workers/worker.js`
           console.log('make a worker: ', path.resolve(__dirname, 'worker.js'))
 
           const worker = new Worker(winURL)
