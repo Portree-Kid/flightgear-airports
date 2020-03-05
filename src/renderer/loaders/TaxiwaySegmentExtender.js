@@ -88,16 +88,25 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
               event.latlng.__vertex['glueindex'] = Number(closest.glueindex);     
               event.latlng.__vertex.setLatLng(closest.latlng);
               this.editLayer.featureLookup[event.latlng.__vertex.glueindex].push(event.latlng.__vertex);
+              event.latlng.attributes = {index: event.latlng.__vertex.glueindex, isOnRunway: 0};
               console.log(closest)
             } else {
-              event.latlng.__vertex['glueindex'] = ++this.editLayer.groundnetLayerGroup.maxId;
-              this.editLayer.featureLookup[event.latlng.__vertex.glueindex] = [];
-              this.editLayer.featureLookup[event.latlng.__vertex.glueindex].push(event.latlng.__vertex);
+              event.vertex['glueindex'] = ++this.editLayer.groundnetLayerGroup.maxId;
+              event.vertex.latlng.attributes = {index: event.vertex.glueindex, isOnRunway: 0};
+              this.editLayer.featureLookup[event.vertex.glueindex] = [];
+              this.editLayer.featureLookup[event.vertex.glueindex].push(event.vertex);
+              event.vertex.editor.enable();
             }
-            event.latlng.attributes = {index: event.latlng.__vertex.glueindex, isOnRunway: 0};
-          })
+          });
+        this.on('editable:vertex:deleted', event => {
+            console.log(event)
+        });
+        this.on('editable:vertex:rawclick', event => {
+            event.cancel()
+            console.log(event)
+        });
         this.on('editable:vertex:clicked', function (event) {
-            console.log(this.featureLookup[event.vertex.glueindex]);
+            console.log(this.featureLookup[event.vertex.glueindex]);            
 
             store.default.dispatch('setNode', event.vertex.latlng.attributes)
             if(event.vertex._icon!=null) {
