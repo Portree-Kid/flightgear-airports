@@ -24,9 +24,30 @@ export default {
 			};
 			
 			request.onupgradeneeded = e => {
-				console.log('onupgradeneeded');
-                let db = e.target.result;
-				db.createObjectStore("airports", { autoIncrement: true, keyPath:'properties.icao' });
+                var db = event.target.result;
+                console.log("Migrate " + event);
+                if (event.oldVersion < 1) {
+                    // Version 1 is the first version of the database.
+                    var objectStore = db.createObjectStore("airports", { keyPath: "properties.icao" });
+                }
+                if (event.oldVersion < 2) {
+                    // Version 2 is the first version of the database.
+                    var objectStore = event.target.transaction.objectStore("airports");
+                    var indexNames = objectStore.indexNames;
+                    var desiredKeyPathForMyIndex = "properties.icao";
+                    console.log(indexNames);
+                  
+                    if(indexNames.contains('icaoIndex')) {
+                      var myIndex = objectStore.index('icaoIndex');
+                      var currentKeyPath = myIndex.keyPath;
+                      if(currentKeyPath != desiredKeyPathForMyIndex) {
+                        objectStore.deleteIndex('icaoIndex');
+                        objectStore.createIndex('icaoIndex', desiredKeyPathForMyIndex);
+                      }
+                    } else {
+                        objectStore.createIndex('icaoIndex', desiredKeyPathForMyIndex);
+                    }                    
+                }
 			};
 		});
 	},
