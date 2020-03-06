@@ -128,10 +128,20 @@
       searched: function () {
         console.log(this.searchterm)
         let searchRegex = new RegExp(this.searchterm, 'i')
-        return this.$store.state.Airports.airports
+        let result = this.$store.state.Airports.airports
+          .filter(point => point.geometry !== undefined)
+          .filter(point => point.geometry.coordinates !== undefined)
+          .filter(a => a.properties !== undefined)
           .filter(a => searchRegex.test(a.properties.icao) || searchRegex.test(a.properties.name))
           // .map(a => console.log(a.properties))
           .map(a => ({ icao: a.properties.icao, name: a.properties.name }))
+        if (result !== undefined &&
+            result.length === 0 &&
+            this.searchterm !== undefined &&
+            this.searchterm.length >= 3) {
+          this.$store.dispatch('getAirport', this.searchterm)
+        }
+        return result
       }
     }
 }

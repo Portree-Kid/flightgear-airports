@@ -14,7 +14,7 @@ const state = {
 const mutations = {
   'DELETE_INDEXED_DB' () { },
   ADD_AIRPORT (state, airports) {
-    state.airports.push(airports);
+    Vue.set(state, 'airports', state.airports.concat(airports));
   },
   SET_AIRPORTS (state, airports) {
     Vue.set(state, 'airports', airports);
@@ -39,6 +39,18 @@ const actions = {
       context.commit(SET_AIRPORTS, airports
         .filter(point => typeof point.geometry.coordinates !== "undefined" )
         .filter(point => point.properties.flights > 0 ));        
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  async getAirport(context, icao) {
+    try {
+      let airports = await idb.getAirports();
+      let searchRegex = new RegExp(icao, 'i');
+      let airport = airports
+      .filter(point => typeof point.geometry.coordinates !== "undefined" )
+      .filter(a => searchRegex.test(a.properties.icao));
+      context.commit(ADD_AIRPORT, airport);
     } catch (error) {
       console.error(error);
     }
