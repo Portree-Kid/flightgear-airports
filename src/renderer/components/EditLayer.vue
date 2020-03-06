@@ -279,6 +279,8 @@
       },
       editedArc() {
         console.log('Edited Arc : ' + this.$store.state.Editable.index);
+        if (!this.groundnetLayerGroup)
+          return;
         var arc = this.groundnetLayerGroup.getLayer(this.$store.state.Editable.index);
         if (arc && arc instanceof L.Polyline) {
           arc.options.attributes = Object.assign({}, this.$store.state.Editable.data.arc)
