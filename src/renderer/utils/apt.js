@@ -36,6 +36,24 @@ var scanMethods = {
     });
     return promise;
   },
+  18: async (l, apts) => {
+    var promise = new Promise(function (resolve, reject) {
+      logger('info','Airport light beacon:', l);
+      saveCoordinates(apts, icao, l[1], l[2]).then(result => {
+        resolve(result)
+      }).catch( err => {reject(err)});;
+    });
+    return promise;
+  },
+  19: async (l, apts) => {
+    var promise = new Promise(function (resolve, reject) {
+      logger('info','Windsock:', l);
+      saveCoordinates(apts, icao, l[1], l[2]).then(result => {
+        resolve(result)
+      }).catch( err => {reject(err)});;
+    });
+    return promise;
+  },
   99: async (l) => {
     logger('info','Finished');
   }
@@ -107,7 +125,14 @@ async function saveCoordinates(features, icao, lat, lon) {
           }
         };
       }
-      feature.geometry.coordinates = [lon, lat];
+
+      if (!feature.geometry.coordinates || isNaN(feature.geometry.coordinates[0]) || isNaN(feature.geometry.coordinates[1])) {
+        feature.geometry.coordinates = [lon, lat];
+      } else {
+        var avgLon = (Number(lon) + Number(feature.geometry.coordinates[0])) / 2;
+        var avgLat = (Number(lat) + Number(feature.geometry.coordinates[1])) / 2;
+        feature.geometry.coordinates = [avgLon, avgLat];
+      }
       logger('info',"ICAO : " + feature.properties.icao);
       // Create another request that inserts the item back into the database
       var updateAirportRequest = objectStore.put(feature);

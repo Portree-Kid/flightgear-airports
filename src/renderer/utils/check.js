@@ -11,6 +11,7 @@ importScripts('../../../node_modules/dijkstrajs/dijkstra.js');
 const homedir = require('os').homedir();
 
 importScripts('logger.js');
+importScripts('haversine.js');
 
 function errorReceiver(event) {
     throw event.data;
@@ -27,8 +28,8 @@ onmessage = function (event) {
             // event.origin.webContents.send('scanFinished');
         }
         ).catch(result => {
-            console.log('Crashed');
-            console.log(result);
+            console.error('Crashed');
+            console.error(result);
             postMessage('DONE');
         });
     }
@@ -41,7 +42,8 @@ async function checkGroundnet(data) {
             var parkings = data.map(mapParkings).filter(n => n !== undefined);
             var runwayNodes = data.map(mapRunwayNodes).filter(n => n !== undefined);
             var edges = data.map(mapEdges).filter(n => n !== undefined);
-            this.max = parkings.length * runwayNodes.length;
+            this.max = parkings.length * runwayNodes.length + 
+            parkings.length;
             this.postMessage(['max', this.max]);
 
             var graph = {};
@@ -61,6 +63,7 @@ async function checkGroundnet(data) {
                 var node2 = graph[element.end];
                 node2[Number(element.start)] = 1;
             });
+            // Check if there is a route from every parking to every runway node            
             var okNodes = [];
             logger('info', graph);
             parkings.forEach(parkingNode => {
@@ -86,6 +89,7 @@ async function checkGroundnet(data) {
             if (runwayNodes.length === 0) {
                 notOkNodes.push({id:0, message:'No Runwaynodes'});
             }
+            // Ends that are not on Runway and not a Parking
             var danglingEnds = Object.entries(graph).filter(
                 (v,i) => Object.keys(v[1]).length <= 1
                 ).filter(
@@ -94,6 +98,23 @@ async function checkGroundnet(data) {
                         v => {return {id:Number(v[0]), message:'Node not a legimate end'}}
                         );
             notOkNodes = notOkNodes.concat(danglingEnds);
+
+            var parkingNodes = data.map(mapParkingNode).filter(n => n !== undefined);
+
+            // Check for intersecting radii
+            parkingNodes.forEach(parkingNode => {
+                parkingNodes.forEach( parkingNode1 => {
+                    console.log(parkingNode, parkingNode1);
+                    if(parkingNode.index !== parkingNode1.index) {
+                        var d = distance([parkingNode.lng, parkingNode.lat], 
+                          [parkingNode1.lng, parkingNode1.lat]);
+                        if (d < parkingNode.radius + parkingNode1.radius) {
+                            notOkNodes.push({id: parkingNode.index, message:'Intersecting node'});
+                        }
+                    }
+                    this.postMessage(['progress', 1]);
+                });
+            });
     
     //        check1(graph);
     //        check2();
@@ -143,6 +164,12 @@ function check2(params) {
 var mapParkings = function (o) {
     if(o.type === 'parking')
       return o.index;
+    console.log(o);
+}
+
+var mapParkingNode = function (o) {
+    if(o.type === 'parking')
+      return {index: o.index, lat:o.lat, lng:o.lng, radius: Number(o.radius)};
     console.log(o);
 }
 

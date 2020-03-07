@@ -167,7 +167,13 @@
       },
       featuresMapper(o) {
         if (o instanceof L.ParkingSpot) {
-          return { 'index': Number(o['id']), '_leaflet_id': o._leaflet_id, 'type': 'parking', 'name': o.options.attributes.name, 'radius': String(o.options.attributes.radius) };
+          return { 'index': Number(o['id']), 
+          '_leaflet_id': o._leaflet_id, 
+          'type': 'parking', 
+          'name': o.options.attributes.name, 
+          'radius': String(o.options.attributes.radius),
+          'lat': o._latlng.lat,
+          'lng': o._latlng.lng };
         } else if (o instanceof L.RunwayNode) {
           console.log(o)
           return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'type': 'runway' };

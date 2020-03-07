@@ -9,7 +9,7 @@
     ref="map"
   >
     <!--The backgroundmap-->
-    <l-tile-layer :url="url" :attribution="attribution">
+    <l-tile-layer :url="url" :attribution="attribution" :options="{maxZoom: 22, maxNativeZoom: 19}">
     </l-tile-layer>
     <!--<l-marker :lat-lng="marker"></l-marker>-->
     <LeafletSidebar></LeafletSidebar>
