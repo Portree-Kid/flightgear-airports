@@ -14,6 +14,10 @@ const state = {
 const mutations = {
   'DELETE_INDEXED_DB' () { },
   ADD_AIRPORT (state, airports) {
+    airports.forEach(airport => {
+      airport.properties.manual = true;
+      idb.saveAirport(airport);
+    });
     Vue.set(state, 'airports', state.airports.concat(airports));
   },
   SET_AIRPORTS (state, airports) {
@@ -38,7 +42,7 @@ const actions = {
       let airports = await idb.getAirports();
       context.commit(SET_AIRPORTS, airports
         .filter(point => typeof point.geometry.coordinates !== "undefined" )
-        .filter(point => point.properties.flights > 0 ));        
+        .filter(point => (point.properties.flights > 0 || point.properties.manual)));        
     } catch (error) {
       console.error(error);
     }
