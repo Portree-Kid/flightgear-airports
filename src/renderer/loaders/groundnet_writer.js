@@ -48,7 +48,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
             arcElement._latlngs.forEach( latlng => {
                 if (latlng.__vertex !== undefined && latlng.__vertex.glueindex !== undefined) {
                     nodes[latlng.__vertex.glueindex] = mapVertexNode(latlng);
-                    if (startIndex > 0) {
+                    if (startIndex >= 0) {
                         if (featureLookup[startIndex] == undefined) {
                             featureLookup[startIndex] = [];
                         }
