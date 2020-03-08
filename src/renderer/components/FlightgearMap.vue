@@ -9,8 +9,12 @@
     ref="map"
   >
     <!--The backgroundmap-->
-    <l-tile-layer :url="url" :attribution="attribution" :options="{maxZoom: 22, maxNativeZoom: 19}">
-    </l-tile-layer>
+    <l-tile-layer :url="url" :attribution="attribution" :options="{maxZoom: 22, maxNativeZoom: 17}"></l-tile-layer>
+    <l-control position="topright" >
+      <el-card :body-style="{ padding: '0px' }">
+          <p>&nbsp;{{ icao }}&nbsp;</p>
+      </el-card>
+    </l-control>
     <!--<l-marker :lat-lng="marker"></l-marker>-->
     <LeafletSidebar></LeafletSidebar>
     <EditBar></EditBar>
@@ -21,7 +25,7 @@
         :key="index"
         :lat-lng="[item.geometry.coordinates[1], item.geometry.coordinates[0]]"
         :radius="((item.properties.flights+5)*20)"
-        :color='item.color'
+        :color="item.color"
         @add="addEvent($event, item)"
         @click="onClick(item)"
       ></l-circle>
@@ -32,7 +36,7 @@
 
 <script lang="js">
   import 'leaflet/dist/leaflet.css'
-  import { LMap, LTileLayer, LMarker, LCircle, LLayerGroup } from 'vue2-leaflet'
+  import { LMap, LTileLayer, LMarker, LCircle, LLayerGroup, LControl } from 'vue2-leaflet'
   import LeafletSidebar from './LeafletSidebar'
   import EditBar from './EditBar'
   import EditLayer from './EditLayer'
@@ -49,7 +53,7 @@
   })
   export default {
     name: 'flightgear-map',
-    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, EditBar, EditLayer, PavementLayer, LLayerGroup },
+    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, EditBar, EditLayer, PavementLayer, LLayerGroup, LControl },
     props: [],
     mounted () {
       this.$store.dispatch('getAirports')
@@ -79,10 +83,14 @@
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         marker: L.latLng(47.413220, -1.219482),
         airports: this.$store.state.Airports.airports,
-        options: {editable: true}
+        options: {editable: true},
+        icao: 'TEST'
       }
     },
     methods: {
+      setIcao (icao) {
+        this.icao = icao
+      },
       visible (feature) {
         let bounds = this.$store.state.Settings.bounds
         if (!bounds.hasOwnProperty('getNorthEast')) {
@@ -156,5 +164,14 @@
 }
 .flightgear-map {
   color: aqua;
+}
+.item {
+    padding: 18px 0;
+}
+.l-control.el-card {
+    padding-left: 2px;
+    padding-top: 0px;
+    padding-right: 2px;
+    padding-bottom: 0px;
 }
 </style>

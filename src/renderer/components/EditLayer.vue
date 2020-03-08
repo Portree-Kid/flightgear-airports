@@ -75,11 +75,11 @@
         if (this.groundnetLayerGroup !== undefined) {
           this.groundnetLayerGroup.removeFrom(this.$parent.mapObject)
         }        
-
+        this.$parent.$parent.setIcao(icao)
         this.icao = icao
         this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao, force)
         if (this.groundnetLayerGroup === undefined) {
-          console.console.error('ICAO not loaded ' + icao)
+          console.error('ICAO not loaded ' + icao)
           return
         }
         this.groundnetLayerGroup.eachLayer(l => {
