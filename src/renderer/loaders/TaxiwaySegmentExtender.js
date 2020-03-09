@@ -107,6 +107,9 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         });
         this.on('editable:vertex:clicked', function (event) {
             console.log(this.featureLookup[event.vertex.glueindex]);            
+            if (this.edit) {
+                
+            }
 
             store.default.dispatch('setNode', event.vertex.latlng.attributes)
             if(event.vertex._icon!=null) {
@@ -235,10 +238,14 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
           style.color = '#3388ff';  
         }
         this.setStyle(style);
-        if (!this.bidirectional) {
-            this.setText('  ►  ', {repeat: true, attributes: {fill: 'red', size: 20}})
-        } else {
-            this.setText('')
+        if (this.options.attributes.direction === 'forward') {
+            this.setText(null);
+            this.setText('  ⮞  ', {repeat: true, attributes: {fill: 'red', size: 30}})
+        } else if (this.options.attributes.direction === 'backward') {
+            this.setText(null);
+            this.setText('  ⮜  ', {repeat: true, attributes: {fill: 'red', size: 30}})
+        }else {
+            this.setText(null);
         }        
     };
 };

@@ -53,6 +53,8 @@ exports.readGroundnetXML = function (fDir, icao, force) {
             var merged = new Array();
 
             var nodesLookup = {};
+            featureLookup = [];
+
 
             parkingNodes.map(n => {
                 var circle = parkingSpot(n, layerGroup);
@@ -102,6 +104,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                         featureLookup[n.attr('begin')].forEach(element => {
                             if (element instanceof L.Polyline && element.end === n.attr('begin') && element.begin === n.attr('end')) {
                                 element.bidirectional = true;
+                                element.options.attributes.direction = 'bi-directional'
                                 bidirectional = true;
                                 element.updateStyle();
                             }
@@ -111,7 +114,8 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                         featureLookup[n.attr('end')].forEach(element => {
                             if (element instanceof L.Polyline && element.end === n.attr('begin') && element.begin === n.attr('end')) {
                                 element.bidirectional = true;
-                                bidirectional = true;
+                                element.options.attributes.direction = 'bi-directional'
+                                bidirectional = true;                                
                                 element.updateStyle();
                             }
                         });
@@ -148,6 +152,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                             else
                                 polyline.options.attributes[key] = Number(value);
                         });
+                        polyline.options.attributes.direction = 'forward'
                         polyline.updateStyle();
 
                         polyline.begin = beginNode.attr('index');

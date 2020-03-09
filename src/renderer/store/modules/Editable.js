@@ -63,6 +63,9 @@ const mutations = {
   'SET_EDIT_PUSHBACK' (state, isPushBackRoute) {
     Vue.set(state.data.arc, 'isPushBackRoute', isPushBackRoute)
   },
+  'SET_EDIT_DIRECTION' (state, direction) {
+    Vue.set(state.data.arc, 'direction', direction)
+  },
   'SET_EDIT_HOLDPOINTTYPE' (state, holdPointType) {
     Vue.set(state.data.node, 'holdPointType', holdPointType)
   },

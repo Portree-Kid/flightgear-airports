@@ -55,14 +55,18 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
                         if (featureLookup[latlng.__vertex.glueindex] == undefined) {
                             featureLookup[latlng.__vertex.glueindex] = [];
                         }
-                        arc = { '@begin': startIndex, '@end': String(latlng.__vertex.glueindex) };
-                        styleArc(currentArc, arc);
-                        arcList.push(arc);
-                        featureLookup[startIndex][latlng.__vertex.glueindex] = arc;
-                        arc = { '@begin': String(latlng.__vertex.glueindex), '@end': startIndex };
-                        styleArc(currentArc, arc);
-                        arcList.push(arc);
-                        featureLookup[latlng.__vertex.glueindex][startIndex] = arc;
+                        if( currentArc.direction === 'bi-directional' || currentArc.direction === 'forward' ){
+                            arc = { '@begin': startIndex, '@end': String(latlng.__vertex.glueindex) };
+                            styleArc(currentArc, arc);
+                            arcList.push(arc);
+                            featureLookup[startIndex][latlng.__vertex.glueindex] = arc;    
+                        }
+                        if( currentArc.direction === 'bi-directional' || currentArc.direction === 'backward' ){
+                            arc = { '@begin': String(latlng.__vertex.glueindex), '@end': startIndex };
+                            styleArc(currentArc, arc);
+                            arcList.push(arc);
+                            featureLookup[latlng.__vertex.glueindex][startIndex] = arc;
+                        }
                     }
                     startIndex = latlng.__vertex.glueindex;
                 }
