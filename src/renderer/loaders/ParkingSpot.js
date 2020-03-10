@@ -12,7 +12,7 @@ L.ParkingSpot = L.Circle.extend({
             var start = this._latlng;
             var options = { units: 'kilometers' };
             
-            var end = turf.destination([start.lng, start.lat], this.options.attributes.radius / 1000, this.options.attributes.heading - 180, options);
+            var end = turf.destination([start.lng, start.lat], this.options.attributes.radius / 1000, this.options.attributes.heading, options);
             // Resize, since leaflet is wrong      
             var rad2 = start.distanceTo(this.turfToLatLng(end), options);
             console.debug('Dist ', start, [start.lng, start.lat], end.geometry.coordinates, this.options.attributes.radius, rad2);
@@ -63,7 +63,7 @@ L.ParkingSpot = L.Circle.extend({
         if (this.editEnabled()) {
             var start = this._latlng;
             var options = { units: 'kilometers' };
-            var end = turf.destination([start.lng, start.lat], this.options.attributes.radius / 1000, this.options.attributes.heading - 180, options);
+            var end = turf.destination([start.lng, start.lat], this.options.attributes.radius / 1000, this.options.attributes.heading, options);
             // Resize, since leaflet is wrong
             var rad2 = start.distanceTo(this.turfToLatLng(end), options);
             this.setRadius(rad2);
@@ -78,7 +78,7 @@ L.ParkingSpot = L.Circle.extend({
             var start = this._latlng;
             var end = this.editor._resizeLatLng.__vertex.getLatLng();
             var heading = turf.bearing([start.lng, start.lat], [end.lng, end.lat]);
-            this.options.attributes.heading = heading + 180;
+            this.options.attributes.heading = heading;
             const counts = [7.5, 12, 18, 26, 32.5, 40];
 
             const output = counts.reduce((prev, curr) => Math.abs(curr - this._mRadius) < Math.abs(prev - this._mRadius) ? curr : prev);

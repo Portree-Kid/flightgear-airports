@@ -107,7 +107,7 @@ var mapParkings = function (o) {
         var lat = convertLat(o.getLatLng());
         var lon = convertLon(o.getLatLng());
         // <Parking index="0" type="gate" name="GA_Parking" lat="S9 25.739923" lon="E160 2.927602" heading="67"  radius="44" airlineCodes="" />
-        return { '@index': String(o['id']), '@type': o.options.attributes.type, '@name': o.options.attributes.name, '@lat': lat, '@lon': lon, '@heading': Number(o.options.attributes.heading), '@radius': String(o.options.attributes.radius) };
+        return { '@index': String(o['id']), '@type': o.options.attributes.type, '@name': o.options.attributes.name, '@lat': lat, '@lon': lon, '@heading': Number(o.options.attributes.heading+180), '@radius': String(o.options.attributes.radius) };
     }
 }
 
