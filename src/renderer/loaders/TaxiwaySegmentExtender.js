@@ -84,17 +84,31 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         this.on('editable:vertex:new', event => {
             console.log(event)
             let closest = this.editLayer.closestLayerSnap(event.latlng, 10)
+            let taxiwaySegment = event.latlng.__vertex.editor.feature;
+            if(taxiwaySegment.options.attributes === undefined) {
+                taxiwaySegment.options.attributes = {direction: 'bi-directional'};
+            }
             if (closest) {
               event.latlng.__vertex['glueindex'] = Number(closest.glueindex);     
               event.latlng.__vertex.setLatLng(closest.latlng);
-              this.editLayer.featureLookup[event.latlng.__vertex.glueindex].push(event.latlng.__vertex);
               event.latlng.attributes = {index: event.latlng.__vertex.glueindex, isOnRunway: 0};
-              console.log(closest)
+              this.editLayer.featureLookup[event.latlng.__vertex.glueindex].push(event.latlng.__vertex);
+              if (taxiwaySegment.options.attributes.start === undefined) {
+                taxiwaySegment.options.attributes.start = event.latlng.__vertex['glueindex']
+              } else {
+                taxiwaySegment.options.attributes.end = event.latlng.__vertex['glueindex']
+              }
+              console.log(`Closest : ${closest}`)
             } else {
               event.vertex['glueindex'] = ++this.editLayer.groundnetLayerGroup.maxId;
               event.vertex.latlng.attributes = {index: event.vertex.glueindex, isOnRunway: 0};
               this.editLayer.featureLookup[event.vertex.glueindex] = [];
               this.editLayer.featureLookup[event.vertex.glueindex].push(event.vertex);
+              if (taxiwaySegment.options.attributes.start === undefined) {
+                taxiwaySegment.options.attributes.start =  event.vertex['glueindex']
+              } else {
+                taxiwaySegment.options.attributes.end =  event.vertex['glueindex']
+              }
               event.vertex.editor.enable();
             }
           });
