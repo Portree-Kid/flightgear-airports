@@ -47,6 +47,22 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                 console.error("Error in " + airline);
                 throw err;
             }
+            // <frequencies>
+            //   <AWOS>13135</AWOS>
+            //   <GROUND>12175</GROUND>
+            //   <TOWER>11870</TOWER>
+            //   <APPROACH>12120</APPROACH>
+            // </frequencies>
+
+            var awos = xml.find('groundnet/frequencies/AWOS/text()').text();
+            store.default.dispatch('setAwos', awos);
+            var ground = xml.find('groundnet/frequencies/GROUND/text()').text();
+            store.default.dispatch('setGround', ground);
+            var tower = xml.find('groundnet/frequencies/TOWER/text()').text();
+            store.default.dispatch('setTower', tower);
+            var approach = xml.find('groundnet/frequencies/APPROACH/text()').text();
+            store.default.dispatch('setApproach', approach);
+        
             var parkingNodes = xml.find('groundnet/parkingList/Parking');
             console.log("Parking Nodes" + parkingNodes.length);
 

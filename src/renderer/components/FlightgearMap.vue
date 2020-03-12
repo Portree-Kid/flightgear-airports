@@ -11,9 +11,7 @@
     <!--The backgroundmap-->
     <l-tile-layer :url="url" :attribution="attribution" :options="{maxZoom: 22, maxNativeZoom: 17}"></l-tile-layer>
     <l-control position="topright" >
-      <el-card :body-style="{ padding: '0px' }">
-          <p>&nbsp;{{ icao }}&nbsp;</p>
-      </el-card>
+      <el-button @click="editAirport()">{{ icao }}</el-button>
     </l-control>
     <!--<l-marker :lat-lng="marker"></l-marker>-->
     <LeafletSidebar></LeafletSidebar>
@@ -88,6 +86,14 @@
       }
     },
     methods: {
+      editAirport () {
+        if (this.editingAirport) {
+          let airportsToLoad = this.$store.state.Airports.airports
+            .filter(feature => feature.properties.icao === this.icao)
+          let properties = Object.assign({}, airportsToLoad[0].properties)
+          this.$store.commit('SET_EDIT_AIRPORT', properties)
+        }
+      },
       setIcao (icao) {
         this.icao = icao
       },
