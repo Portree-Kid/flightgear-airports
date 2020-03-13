@@ -31,6 +31,9 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         var nodes = [];
         var arcList = [];
 
+        var version = new Date().toUTCString() + ' by FlightgearAirports';
+        var name = store.default.state.Settings.settings.name;
+
         //Frequencies
         var frequencies = {
             'AWOS': store.default.state.Frequencies.AWOS,
@@ -99,7 +102,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
 
         var maxId = uniqueNodes.slice(-1)[0]['@index'];
 
-        var xmlObj = { groundnet: { version: 1, frequencies, parkingList: { Parking: parkings }, TaxiNodes: { node: uniqueNodes }, TaxiWaySegments: { arc: arcList } } };
+        var xmlObj = { groundnet: { version: version, name: name, frequencies, parkingList: { Parking: parkings }, TaxiNodes: { node: uniqueNodes }, TaxiWaySegments: { arc: arcList } } };
 
         xmlString = builder.create(xmlObj).end({ pretty: true });
         fs.writeFileSync(f, xmlString);

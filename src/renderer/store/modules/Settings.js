@@ -1,5 +1,5 @@
 const state = {
-  settings: { flightgearDirectory: '.' },
+  settings: {flightgearDirectory: '.', name: ''},
   zoom: 14,
   center: [47.413220, -1.219482],
   bounds: undefined
@@ -24,6 +24,9 @@ const mutations = {
   },
   'BOUNDS' (state, bounds) {
     state.bounds = bounds
+  },
+  'SET_USERNAME' (state, name) {
+    state.settings.name = name
   }
 }
 

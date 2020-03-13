@@ -8,35 +8,41 @@
     </h1>
     <div id="panel" width="100%">      
       <el-row>
-        <el-col :span="7">Airports Directory</el-col>
+        <el-col :span="7" class="label">Airports Directory</el-col>
         <el-col :span="15">{{ airports_directory }}</el-col>
         <el-col :span="2">
           <directory-select @input="airportsDirectorySelect"></directory-select>
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="7">Flightgear Directory</el-col>
+        <el-col :span="7" class="label">Flightgear Directory</el-col>
         <el-col :span="15">{{ flightgear_directory }}</el-col>
         <el-col :span="2">
           <directory-select @input="flightgearDirectorySelect"></directory-select>
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="7">AI Directory</el-col>
+        <el-col :span="7" class="label">AI Directory</el-col>
         <el-col :span="15">{{ AI_directory }}</el-col>
         <el-col :span="2">
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="7">Traffic Directory</el-col>
+        <el-col :span="7" class="label">Traffic Directory</el-col>
         <el-col :span="15">{{ Traffic_directory }}</el-col>
         <el-col :span="2">
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="7">APT File</el-col>
+        <el-col :span="7" class="label">APT File</el-col>
         <el-col :span="15">{{ apt_file }}</el-col>
         <el-col :span="2">
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="7" class="label">Author : </el-col>
+        <el-col :span="17">
+            <el-input placeholder="Please input your name" v-model="name"></el-input>
         </el-col>
       </el-row>
     </div>
@@ -68,6 +74,16 @@
       }
     },
     computed: {
+      name: {
+      // getter
+        get: function () {
+          return this.$store.state.Settings.settings.name
+        },
+        // setter
+        set: function (newValue) {
+          this.$store.commit('SET_USERNAME', newValue)
+        }
+      },
       flightgear_directory: function () {
         return this.$store.state.Settings.settings.flightgearDirectory
       },
@@ -93,5 +109,8 @@
 }
 .el-col {
   border-radius: 4px;
+}
+.label {
+  padding: 10px;
 }
 </style>
