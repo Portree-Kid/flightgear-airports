@@ -67,7 +67,7 @@
     },
     data () {
       return {
-        maxId: 1, icao: String, checking: false
+        maxId: 1, icao: String, checking: false, editing: false
       }
     },
     methods: {
@@ -134,6 +134,7 @@
       },
       enableEdit () {
         this.editable = true
+        this.editing = true
         this.featureLookup = [];
         this.groundnetLayerGroup.eachLayer(l => {
           l.enableEdit()
@@ -149,6 +150,7 @@
       },
       disableEdit () {
         this.editable = false
+        this.editing = false
         this.groundnetLayerGroup.eachLayer(l => {
           l.disableEdit()
         })

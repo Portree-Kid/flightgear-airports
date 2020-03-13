@@ -31,7 +31,16 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         var nodes = [];
         var arcList = [];
 
-        var featureLookup = [];
+        //Frequencies
+        var frequencies = {
+            'AWOS': store.default.state.Frequencies.AWOS,
+            'GROUND': store.default.state.Frequencies.GROUND,
+            'TOWER': store.default.state.Frequencies.TOWER,
+            'APPROACH': store.default.state.Frequencies.APPROACH,
+            'DEPARTURE': store.default.state.Frequencies.DEPARTURE
+        };
+
+        var featureLookup = [];        
         // Loaded segments
         featureList.filter(o => o instanceof L.TaxiwaySegment).filter(n => n).forEach(element => {
             var begin = mapBeginNode(element);
@@ -90,7 +99,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
 
         var maxId = uniqueNodes.slice(-1)[0]['@index'];
 
-        var xmlObj = { groundnet: { version: 1, parkingList: { Parking: parkings }, TaxiNodes: { node: uniqueNodes }, TaxiWaySegments: { arc: arcList } } };
+        var xmlObj = { groundnet: { version: 1, frequencies, parkingList: { Parking: parkings }, TaxiNodes: { node: uniqueNodes }, TaxiWaySegments: { arc: arcList } } };
 
         xmlString = builder.create(xmlObj).end({ pretty: true });
         fs.writeFileSync(f, xmlString);

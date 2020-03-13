@@ -30,19 +30,33 @@
     <div v-if="airport">
         <el-row>
           <el-col :span="7">AWOS :</el-col>
-          <el-col :span="15"><el-input placeholder="Please input AWOS frequency" v-model="AWOS" v-bind:class="{ invalid: !awosOk}">></el-input></el-col>
+          <el-col :span="15"><el-input placeholder="Please input AWOS frequency" v-model="AWOS" 
+          :disabled="!editing"
+          v-bind:class="{ invalid: !awosOk && editing}">></el-input></el-col>
         </el-row>
         <el-row>
           <el-col :span="7">Ground :</el-col>
-          <el-col :span="15"><el-input placeholder="Please input GROUND frequency" v-model="GROUND" v-bind:class="{ invalid: !groundOk}"></el-input></el-col>
+          <el-col :span="15"><el-input placeholder="Please input GROUND frequency" v-model="GROUND"
+          :disabled="!editing"
+           v-bind:class="{ invalid: !groundOk && editing}"></el-input></el-col>
         </el-row>
         <el-row>
           <el-col :span="7">Tower :</el-col>
-          <el-col :span="15"><el-input placeholder="Please input TOWER frequency" v-model="TOWER" v-bind:class="{ invalid: !towerOk}"></el-input></el-col>
+          <el-col :span="15"><el-input placeholder="Please input TOWER frequency" v-model="TOWER" 
+          :disabled="!editing"
+          v-bind:class="{ invalid: !towerOk && editing}"></el-input></el-col>
         </el-row>
         <el-row>
           <el-col :span="7">Approach :</el-col>
-          <el-col :span="15"><el-input placeholder="Please input APPROACH frequency" v-model="APPROACH" v-bind:class="{ invalid: !approachOk}"></el-input></el-col>
+          <el-col :span="15"><el-input placeholder="Please input APPROACH frequency" v-model="APPROACH" 
+          :disabled="!editing"
+          v-bind:class="{ invalid: !approachOk && editing}"></el-input></el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="7">Departure :</el-col>
+          <el-col :span="15"><el-input placeholder="Please input DEPARTURE frequency" v-model="DEPARTURE" 
+          :disabled="!editing"
+          v-bind:class="{ invalid: !departureOk && editing}"></el-input></el-col>
         </el-row>
     </div>
   </div>
@@ -51,7 +65,7 @@
 <script lang="js">
   export default {
     data () {
-      return { awosOk: true, groundOk: true, towerOk: true, approachOk: true }
+      return { awosOk: true, groundOk: true, towerOk: true, approachOk: true, departureOk: true }
     },
     methods: {
       isValid (frequency) {
@@ -79,6 +93,9 @@
       }
     },
     computed: {
+      editing: function () {
+        return this.$parent.$parent.$parent.$refs.editLayer.editing
+      },
       icao: function () {
         return this.$store.state.Editable.data.airport.icao
       },
@@ -150,6 +167,19 @@
         set: function (newValue) {
           this.approachOk = this.isValid(newValue)
           this.$store.dispatch('setApproach', newValue * 100)
+        }
+      },
+      DEPARTURE: {
+        // getter
+        get: function () {
+          let newValue = (this.$store.state.Frequencies.DEPARTURE / 100).toFixed(3)
+          this.departureOk = this.isValid(newValue)
+          return newValue
+        },
+        // setter
+        set: function (newValue) {
+          this.departureOk = this.isValid(newValue)
+          this.$store.dispatch('setDeparture', newValue * 100)
         }
       }
     }

@@ -19,6 +19,9 @@ const mutations = {
   },
   'SET_APPROACH' (state, frequency) {
     Vue.set(state, 'APPROACH', frequency)
+  },
+  'SET_DEPARTURE' (state, frequency) {
+    Vue.set(state, 'DEPARTURE', frequency)
   }
 }
 
@@ -34,6 +37,9 @@ const actions = {
   },
   async setApproach (context, frequency) {
     context.commit('SET_APPROACH', frequency)
+  },
+  async setDeparture (context, frequency) {
+    context.commit('SET_DEPARTURE', frequency)
   }
 }
 
