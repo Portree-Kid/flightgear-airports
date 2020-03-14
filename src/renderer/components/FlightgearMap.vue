@@ -134,12 +134,14 @@
         if (zoom !== this.$store.state.Settings.zoom) {
           this.$store.dispatch('setZoom', zoom)
           this.$refs.airportLayer.setVisible(zoom < 12)
+          this.$refs.pavementLayer.setVisible(zoom < 12)
         }
       },
       async centerUpdated (center) {
         if (center !== this.$store.state.Settings.center) {
           this.$store.dispatch('setCenter', center)
           this.$refs.airportLayer.setVisible(this.zoom < 12)
+          this.$refs.pavementLayer.setVisible(this.zoom < 12)
         }
       },
       async boundsUpdated (bounds) {

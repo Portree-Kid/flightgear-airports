@@ -54,6 +54,15 @@ var scanMethods = {
     });
     return promise;
   },
+  111: (l, apts) => {
+    var promise = new Promise(function (resolve, reject) {
+      logger('info','Node :', l);
+      saveCoordinates(apts, icao, l[1], l[2]).then(result => {
+        resolve(result)
+      }).catch( err => {reject(err)});;
+    });
+    return promise;
+  },
   99: async (l) => {
     logger('info','Finished');
   }

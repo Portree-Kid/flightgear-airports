@@ -1,5 +1,7 @@
 <template>
   <div id="EditBar">
+    <EditButton icon="fas fa-th" v-on:click="zoomin" :show="true" tooltip="Zoomin"></EditButton>
+    <EditButton icon="fas fa-th-large" v-on:click="zoomout" :show="true" tooltip="Zoomout"></EditButton>
     <EditButton icon="fas fa-edit" v-on:click="edit" :show="!editing" tooltip="Edit"></EditButton>
     <EditButton
       icon="fas fa-undo"
@@ -57,6 +59,12 @@
     created () {
     },
     methods: {
+      zoomout() {
+        this.$parent.$parent.zoomUpdated(9)
+      },
+      zoomin() {
+        this.$parent.$parent.zoomUpdated(14)
+      },
       edit () {
         this.editing = true
         this.$parent.$parent.$refs.editLayer.enableEdit()
