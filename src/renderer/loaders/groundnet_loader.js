@@ -17,6 +17,17 @@ var $ = require('jquery');
 
 var featureLookup = {};
 
+var frequencies = [];
+
+function addFrequencies (type, value) {
+    value.split(' ').forEach(frequencyValue => {
+        if( value.length > 0) {
+            var frequency = {type: type, value: frequencyValue};
+            frequencies.push(frequency);    
+        }
+    })      
+}
+
 exports.addFeature = function (feature) {
     featureLookup[feature.id] = new Array();
 }
@@ -54,14 +65,22 @@ exports.readGroundnetXML = function (fDir, icao, force) {
             //   <APPROACH>12120</APPROACH>
             // </frequencies>
 
-            var awos = xml.find('groundnet/frequencies/AWOS/text()').text();
-            store.default.dispatch('setAwos', awos);
-            var ground = xml.find('groundnet/frequencies/GROUND/text()').text();
-            store.default.dispatch('setGround', ground);
-            var tower = xml.find('groundnet/frequencies/TOWER/text()').text();
-            store.default.dispatch('setTower', tower);
             var approach = xml.find('groundnet/frequencies/APPROACH/text()').text();
-            store.default.dispatch('setApproach', approach);
+            addFrequencies('APPROACH', approach);
+            var awos = xml.find('groundnet/frequencies/AWOS/text()').text();
+            addFrequencies('AWOS', awos);
+            var clearance = xml.find('groundnet/frequencies/CLEARANCE/text()').text();
+            addFrequencies('CLEARANCE', clearance);
+            var departure = xml.find('groundnet/frequencies/DEPARTURE/text()').text();
+            addFrequencies('DEPARTURE', departure);
+            var ground = xml.find('groundnet/frequencies/GROUND/text()').text();
+            addFrequencies('GROUND', ground);
+            var tower = xml.find('groundnet/frequencies/TOWER/text()').text();
+            addFrequencies('TOWER', tower);
+            var unicom = xml.find('groundnet/frequencies/UNICOM/text()').text();
+            addFrequencies('UNICOM', unicom);
+
+            store.default.dispatch('setFrequencies', frequencies);
         
             var parkingNodes = xml.find('groundnet/parkingList/Parking');
             console.log("Parking Nodes" + parkingNodes.length);

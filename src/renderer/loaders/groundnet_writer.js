@@ -30,18 +30,12 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
 
         var nodes = [];
         var arcList = [];
+        var frequencies = [];
 
         var version = new Date().toUTCString() + ' by FlightgearAirports';
-        var name = store.default.state.Settings.settings.name;
+        var email = store.default.state.Settings.settings.email;        
 
-        //Frequencies
-        var frequencies = {
-            'AWOS': store.default.state.Frequencies.AWOS,
-            'GROUND': store.default.state.Frequencies.GROUND,
-            'TOWER': store.default.state.Frequencies.TOWER,
-            'APPROACH': store.default.state.Frequencies.APPROACH,
-            'DEPARTURE': store.default.state.Frequencies.DEPARTURE
-        };
+
 
         var featureLookup = [];        
         // Loaded segments
@@ -102,7 +96,23 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
 
         var maxId = uniqueNodes.slice(-1)[0]['@index'];
 
-        var xmlObj = { groundnet: { version: version, name: name, frequencies, parkingList: { Parking: parkings }, TaxiNodes: { node: uniqueNodes }, TaxiWaySegments: { arc: arcList } } };
+        var approachList = store.default.state.Frequencies.items.filter(f => f.type === 'APPROACH').map(mapFrequency);
+
+        var awosList = store.default.state.Frequencies.items.filter(f => f.type === 'AWOS').map(mapFrequency);
+
+        var clearanceList = store.default.state.Frequencies.items.filter(f => f.type === 'CLEARANCE').map(mapFrequency);
+
+        var departureList = store.default.state.Frequencies.items.filter(f => f.type === 'DEPARTURE').map(mapFrequency);
+
+        var groundList = store.default.state.Frequencies.items.filter(f => f.type === 'GROUND').map(mapFrequency);
+
+        var towerList = store.default.state.Frequencies.items.filter(f => f.type === 'TOWER').map(mapFrequency);
+
+        var unicomList = store.default.state.Frequencies.items.filter(f => f.type === 'UNICOM').map(mapFrequency);
+
+        var xmlObj = { groundnet: { version: version, email: email, 
+            'frequencies': { APPROACH: approachList, DEPARTURE: departureList, AWOS: awosList, CLEARANCE: clearanceList, GROUND: groundList, TOWER: towerList, UNICOM: unicomList },
+            parkingList: { Parking: parkings }, TaxiNodes: { node: uniqueNodes }, TaxiWaySegments: { arc: arcList } } };
 
         xmlString = builder.create(xmlObj).end({ pretty: true });
         fs.writeFileSync(f, xmlString);
@@ -111,6 +121,10 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         console.error(error);
     }
     return layerGroup;
+}
+
+var mapFrequency = function (o) {
+    return o.value;
 }
 
 var mapParkings = function (o) {

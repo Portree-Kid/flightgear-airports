@@ -1,7 +1,9 @@
 <template>
   <div id="EditBar">
+    <Upload :visible.sync="uploadVisible" ref="upload"></Upload>
     <EditButton icon="fas fa-th" v-on:click="zoomin" :show="true" tooltip="Zoomin"></EditButton>
     <EditButton icon="fas fa-th-large" v-on:click="zoomout" :show="true" tooltip="Zoomout"></EditButton>
+    <EditButton icon="fas fa-upload" v-on:click="upload" :show="!editing" tooltip="Upload"></EditButton>
     <EditButton icon="fas fa-edit" v-on:click="edit" :show="!editing" tooltip="Edit"></EditButton>
     <EditButton
       icon="fas fa-undo"
@@ -46,19 +48,23 @@
 <script lang="js">
 /* eslint-disable */
   import EditButton from './EditButton'
+  import Upload from './Upload'
   import Vue from 'vue'
 
   import fileUrl from 'file-url'
   const path = require('path')
 
   export default {
-    components: { EditButton },
+    components: { EditButton, Upload },
     data () {
-      return {isEditing: false, centerDialogVisible: false, saveDialogVisible: false, checkDialogVisible: false, checking: false, progress: 0, max: 0}
+      return {isEditing: false, uploadVisible: false, centerDialogVisible: false, saveDialogVisible: false, checkDialogVisible: false, checking: false, progress: 0, max: 0}
     },
     created () {
     },
     methods: {
+      upload() {
+        this.uploadVisible = true
+      },
       zoomout() {
         this.$parent.$parent.zoomUpdated(9)
       },

@@ -42,7 +42,7 @@
       <el-row>
         <el-col :span="7" class="label">Author : </el-col>
         <el-col :span="17">
-            <el-input placeholder="Please input your name" v-model="name"></el-input>
+            <el-input placeholder="Please input your email" v-model="email"></el-input>
         </el-col>
       </el-row>
     </div>
@@ -74,14 +74,14 @@
       }
     },
     computed: {
-      name: {
+      email: {
       // getter
         get: function () {
-          return this.$store.state.Settings.settings.name
+          return this.$store.state.Settings.settings.email
         },
         // setter
         set: function (newValue) {
-          this.$store.commit('SET_USERNAME', newValue)
+          this.$store.commit('SET_EMAIL', newValue)
         }
       },
       flightgear_directory: function () {

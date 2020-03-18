@@ -1,45 +1,29 @@
 import Vue from 'vue'
 
-const state = {
-  'AWOS': 0,
-  'GROUND': 0,
-  'TOWER': 0,
-  'APPROACH': 0
-}
+const state = { items: [] }
 
 const mutations = {
-  'SET_AWOS' (state, frequency) {
-    Vue.set(state, 'AWOS', frequency)
+  ADD_FREQUENCY: (state, item) => {
+    state.items.push(item)
   },
-  'SET_GROUND' (state, frequency) {
-    Vue.set(state, 'GROUND', frequency)
+  UPDATE_FREQUENCY: (state, item) => {
+    const existingItem = state.items.find((i) => i.id === item.id)
+    Object.assign(existingItem, item)
   },
-  'SET_TOWER' (state, frequency) {
-    Vue.set(state, 'TOWER', frequency)
-  },
-  'SET_APPROACH' (state, frequency) {
-    Vue.set(state, 'APPROACH', frequency)
-  },
-  'SET_DEPARTURE' (state, frequency) {
-    Vue.set(state, 'DEPARTURE', frequency)
+  SET_FREQUENCIES (state, frequencies) {
+    Vue.set(state, 'items', frequencies)
   }
 }
 
 const actions = {
-  async setAwos (context, frequency) {
-    context.commit('SET_AWOS', frequency)
+  async addFrequency (context, frequency) {
+    context.commit('ADD_FREQUENCY', frequency)
   },
-  async setGround (context, frequency) {
+  async updateFrequency (context, frequency) {
     context.commit('SET_GROUND', frequency)
   },
-  async setTower (context, frequency) {
-    context.commit('SET_TOWER', frequency)
-  },
-  async setApproach (context, frequency) {
-    context.commit('SET_APPROACH', frequency)
-  },
-  async setDeparture (context, frequency) {
-    context.commit('SET_DEPARTURE', frequency)
+  async setFrequencies (context, frequencies) {
+    context.commit('SET_FREQUENCIES', frequencies)
   }
 }
 
