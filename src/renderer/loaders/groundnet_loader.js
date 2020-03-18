@@ -65,6 +65,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
             //   <APPROACH>12120</APPROACH>
             // </frequencies>
 
+            frequencies = [];
             var approach = xml.find('groundnet/frequencies/APPROACH/text()').text();
             addFrequencies('APPROACH', approach);
             var awos = xml.find('groundnet/frequencies/AWOS/text()').text();
