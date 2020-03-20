@@ -115,7 +115,7 @@
           this.scanning = true
           const winURL = process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/src/renderer/utils/check.js`
-            : `file://${__dirname}/check.js`
+            : `file://${process.resourcesPath}/workers/check.js`
           console.log('make a check worker: ', path.resolve(__dirname, 'check.js'))
 
           const worker = new Worker(winURL)
@@ -191,6 +191,9 @@
         } else if (o instanceof L.RunwayNode) {
           console.log(o)
           return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'type': 'runway' };
+        } else if (o instanceof L.HoldNode) {
+          console.log(o)
+          return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'type': o.holdPointType };
         } else if (o instanceof L.Polyline) {
           console.log(o)
           return { 'start': Number(o['begin']), 'end': Number(o['end']), '_leaflet_id': o._leaflet_id, 'type': 'poly' };

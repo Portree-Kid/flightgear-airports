@@ -1,7 +1,7 @@
 /* eslint-disable */
 const winURL = process.env.NODE_ENV === 'development'
     ? `http://localhost:9080/src/renderer/utils/`
-    : `file://D:/GIT/flightgear-airports/src/renderer/utils/`
+    : `file://${process.resourcesPath}/workers/`
 
 var path = require('path');
 const fs = require('fs');
@@ -41,6 +41,7 @@ async function checkGroundnet(data) {
 //            debugger;
             var parkings = data.map(mapParkings).filter(n => n !== undefined);
             var runwayNodes = data.map(mapRunwayNodes).filter(n => n !== undefined);
+            var pushbackNodes = data.map(mapPushbackNodes).filter(n => n !== undefined);
             var edges = data.map(mapEdges).filter(n => n !== undefined);
             this.max = parkings.length * runwayNodes.length + 
             parkings.length;
@@ -115,6 +116,12 @@ async function checkGroundnet(data) {
                     this.postMessage(['progress', 1]);
                 });
             });
+            //Check for dual pushback/runway nodes
+            runwayNodes.forEach(runwayNode => {
+                if( pushbackNodes.indexOf(runwayNode) >= 0 ) {
+                    notOkNodes.push({id: runwayNode, message:'Dual runway/ pushback node'});
+                }
+            });
     
     //        check1(graph);
     //        check2();
@@ -159,6 +166,12 @@ function check1(graph) {
 
 function check2(params) {
     
+}
+
+var mapPushbackNodes = function (o) {
+    if(o.type === 'PushBack' )
+      return o.index;
+    console.log(o);
 }
 
 var mapParkings = function (o) {
