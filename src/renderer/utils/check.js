@@ -73,16 +73,18 @@ async function checkGroundnet(data) {
                    if(ok) {
                      okNodes.push(parkingNode);
                      okNodes.push(runwayNode);
-                   }
+                   } else {
+                       console.log(`No route from ${parkingNode} to ${runwayNode}`);
+                   }                   
                    this.postMessage(['progress', 1]);
                 });
             });
             okNodes = okNodes.filter((v,i) => okNodes.indexOf(v) === i);
-            var allLegitimateEndNodes = parkings.concat(runwayNodes);
-            var notOkNodes = allLegitimateEndNodes.filter(
+            var allLegitimateEndNodes = parkings.concat(runwayNodes).concat(pushbackNodes);
+            var notOkNodes = parkings.concat(runwayNodes).filter(
                 (v,i) => okNodes.indexOf(v) < 0
                 ).map(
-                    id => {return {id:id, message:'Node not connected'}}
+                    id => {return {id:id, message:'No way to each runway'}}
                     );
             if (parkings.length === 0) {
                 notOkNodes.push({id:0, message:'No parkings'});
