@@ -38,7 +38,7 @@ onmessage = function (event) {
 async function checkGroundnet(data) {
     var promise = new Promise(function (resolve, reject) {
         try {
-//            debugger;
+            // debugger;
             var parkings = data.map(mapParkings).filter(n => n !== undefined);
             var runwayNodes = data.map(mapRunwayNodes).filter(n => n !== undefined);
             var pushbackNodes = data.map(mapPushbackNodes).filter(n => n !== undefined);
@@ -92,15 +92,23 @@ async function checkGroundnet(data) {
             if (runwayNodes.length === 0) {
                 notOkNodes.push({id:0, message:'No Runwaynodes'});
             }
-            // Ends that are not on Runway and not a Parking
-            var danglingEnds = Object.entries(graph).filter(
+            var allEnds = Object.entries(graph).filter(
                 (v,i) => Object.keys(v[1]).length <= 1
-                ).filter(
+                );
+            // Ends that are not on Runway and not a Parking or Pushback
+            var danglingEnds = allEnds.filter(
                     (v,i) => allLegitimateEndNodes.indexOf(Number(v[0])) < 0
                     ).map(
                         v => {return {id:Number(v[0]), message:'Node not a legimate end'}}
                         );
             notOkNodes = notOkNodes.concat(danglingEnds);
+            // Ends that are not on Runway and not a Parking or Pushback
+            var wrongPushbackEnds = pushbackNodes.filter(
+                    (v,i) => allEnds.map(a => Number(a[0])).indexOf(Number(v)) < 0
+                    ).map(
+                        v => {return {id:Number(v), message:'Pushback node not an end'}}
+                        );
+            notOkNodes = notOkNodes.concat(wrongPushbackEnds);
 
             var parkingNodes = data.map(mapParkingNode).filter(n => n !== undefined);
 
