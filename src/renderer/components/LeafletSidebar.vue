@@ -17,13 +17,7 @@
 
     <!-- Tab panes -->
     <div class="leaflet-sidebar-content">
-        <div class="leaflet-sidebar-pane" id="home">
-            <h1 class="leaflet-sidebar-header">
-                Help
-                <div class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></div>
-            </h1>
-            <p>A responsive sidebar for mapping libraries</p>
-        </div>
+        <Help/>
         <div class="leaflet-sidebar-pane" id="edit">
             <h1 class="leaflet-sidebar-header">
                 Properties
@@ -55,6 +49,7 @@
   import '@fortawesome/fontawesome-free/css/all.css'
   import {} from 'leaflet-sidebar-v2'
   import L from 'leaflet'
+  import Help from './Help'
   import AirportEdit from './AirportEdit'
   import CheckPanel from './CheckPanel'
   import ParkingEdit from './ParkingEdit'
@@ -67,7 +62,7 @@
 
   export default {
     name: 'leaflet-sidebar',
-    components: { AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, SettingsPanel, RunScan, FileSelect, Search },
+    components: { Help, AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, SettingsPanel, RunScan, FileSelect, Search },
     props: [],
     mounted () {
       this.add()
