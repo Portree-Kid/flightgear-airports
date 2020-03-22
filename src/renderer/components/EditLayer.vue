@@ -169,10 +169,14 @@
           case 'arc':
             this.removeArc(this.$store.state.Editable.data.arc)
             break;
+          default:
+            console.log('Remove : ' + this.$store.state.Editable.type)
         }
       },
-      removeArc (arc) {
+      removeArc (arc) {        
         console.log(arc);
+        var arcLayer = this.groundnetLayerGroup.getLayer(this.$store.state.Editable.index);
+        arcLayer.removeFrom(this.groundnetLayerGroup);        
       },
       removeParking (index) {
         if(this.featureLookup[index]===undefined) {
