@@ -96,6 +96,7 @@
       },
       setIcao (icao) {
         this.icao = icao
+        this.$store.dispatch('setCurrentAirport', icao)
       },
       visible (feature) {
         let bounds = this.$store.state.Settings.bounds

@@ -77,6 +77,21 @@
     </el-row>
     <el-row>
       <el-col :span="7">
+        <span class="demo-input-label">Airline :</span>
+      </el-col>
+      <el-col :span="15">
+        <el-select v-model="airlineCodes" multiple placeholder="Select">
+          <el-option
+            v-for="item in airlines"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="7">
         <span class="demo-input-label">Pushback Route End :</span>
       </el-col>
       <el-col :span="15">{{pushbackEnd}}</el-col>
@@ -85,10 +100,41 @@
 </template>
 
 <script lang="js">
+/* eslint-disable */
   export default {
     computed: {
       parking: function () {
         return this.$store.state.Editable.type === 'parking'
+      },
+      airlines: function () {
+        var airlineCodes = [];
+        var storedairlineCodes = this.$store.state.Airports.currentAirport.airlines;
+        // return [{value: 'bi-directional', label: 'bi-directional'},
+        //   {value: 'forward', label: 'forward'},
+        //   {value: 'backward', label: 'backward'}
+        // ]
+        storedairlineCodes.forEach(element => {
+          airlineCodes.push({value: element, label: element});
+        });
+        return airlineCodes
+      },
+      airlineCodes: {
+      // getter
+        get: function () {          
+          var codes = this.$store.state.Editable.data.parking.airlineCodes
+          if (Array.isArray(codes)) {
+            return codes
+          } else if (codes !== undefined) {
+            return codes.split(',')            
+          } else {
+            return []
+          }
+          return 
+        },
+        // setter
+        set: function (newValue) {
+          this.$store.commit('SET_EDIT_PARKING_AIRLINES', newValue)
+        }
       },
       name: {
       // getter

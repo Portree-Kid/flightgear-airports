@@ -6,9 +6,10 @@ const ADD_AIRPORT = 'ADD_AIRPORT';
 const SET_AIRPORTS = 'SET_AIRPORTS';
 const SET_UNFILTERED_AIRPORTS = 'SET_UNFILTERED_AIRPORTS';
 const RESET_AIRPORTS = 'RESET_AIRPORTS';
+const SET_CURRENT_AIRPORT = 'SET_CURRENT_AIRPORT';
 
 const state = {
-  airports: [], unfilteredairports:[]
+  airports: [], unfilteredairports:[], currentAirport: {}
 }
 
 const mutations = {
@@ -22,6 +23,9 @@ const mutations = {
   },
   SET_AIRPORTS (state, airports) {
     Vue.set(state, 'airports', airports);
+  },
+  SET_CURRENT_AIRPORT (state, airport) {
+    Vue.set(state, 'currentAirport', airport);
   },
   SET_UNFILTERED_AIRPORTS (state, airports) {
     state.unfilteredairports = airports;
@@ -45,6 +49,18 @@ const actions = {
         .filter(point => (point.properties.flights > 0 || point.properties.manual)));        
     } catch (error) {
       console.error(error);
+    }
+  },
+  async setCurrentAirport(context, icao) {
+    try {
+      let airports = await idb.getAirports();
+      let searchRegex = new RegExp(icao, 'i');
+      let airport = airports
+      .filter(point => typeof point.geometry.coordinates !== "undefined" )
+      .filter(a => searchRegex.test(a.properties.icao));
+      context.commit(SET_CURRENT_AIRPORT, airport[0].properties);      
+    } catch (error) {
+      console.error(error);      
     }
   },
   async getAirport(context, icao) {
