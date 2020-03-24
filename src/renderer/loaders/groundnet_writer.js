@@ -15,6 +15,40 @@ const mathjs = require('mathjs');
 
 var builder = require('xmlbuilder');
 
+var featureLookup = [];        
+var parkings = [];
+var pushBackNodeLookup = [];
+
+function findRouteToPushback (index) {
+    if (featureLookup===undefined) {
+      return
+    }
+    var walkedNodes = [index]
+    var pushBackNodes = []
+    walkPushbackRoute(index, walkedNodes, pushBackNodes)
+    return pushBackNodes
+  }
+
+function walkPushbackRoute (index, walkedNodes, pushBackNodes) {
+    var polyLines = featureLookup[index];
+    if (pushBackNodeLookup[index]!==undefined) {
+        pushBackNodes.push(pushBackNodeLookup[index]['@index']);
+    }
+
+    polyLines.forEach(l => {
+      if( l['@isPushBackRoute'] === '1' ) {
+        if (Number(l['@begin']) === index && walkedNodes.indexOf(Number(l['@end'])) < 0) {
+          walkedNodes.push(Number(l['@end']))
+          pushBackNodes.concat(walkPushbackRoute(Number(l['@end']), walkedNodes, pushBackNodes))
+        }
+        if (Number(l['@end']) === index && walkedNodes.indexOf(Number(l['@begin'])) < 0 ) {
+          walkedNodes.push(Number(l['@begin']))
+          pushBackNodes.concat(walkPushbackRoute(Number(l['@begin']), walkedNodes, pushBackNodes))
+        }
+      }
+    });
+}
+
 
 exports.writeGroundnetXML = function (fDir, icao, featureList) {
     try {
@@ -27,7 +61,11 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
 
         var parkings = featureList.map(mapParkings).filter(n => n);
         var runwayNodes = featureList.map(mapRunwayNodes).filter(n => n);
-
+        var holdNodes = featureList.map(mapHoldPoint).filter(n => n);
+        holdNodes.forEach(n => {
+            pushBackNodeLookup[n['@index']] = n;
+        });
+    
         var nodes = [];
         var arcList = [];
         var frequencies = [];
@@ -37,7 +75,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
 
 
 
-        var featureLookup = [];        
+        featureLookup = [];        
         // Loaded segments
         featureList.filter(o => o instanceof L.TaxiwaySegment).filter(n => n).forEach(element => {
             var begin = mapBeginNode(element);
@@ -88,6 +126,10 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         // delete the parkings 
         parkings.forEach(n => {
             nodes[n['@index']] = null;
+            var pushBackNode = findRouteToPushback(Number(n['@index']))[0];
+            if (pushBackNode!==undefined) {
+              n['@pushBackRoute'] = pushBackNode;
+            }
         });
         nodes = nodes.filter(n => n);
 
@@ -133,7 +175,7 @@ var mapParkings = function (o) {
         var lat = convertLat(o.getLatLng());
         var lon = convertLon(o.getLatLng());
         // <Parking index="0" type="gate" name="GA_Parking" lat="S9 25.739923" lon="E160 2.927602" heading="67"  radius="44" airlineCodes="" />
-        return { '@index': String(o['id']), '@type': o.options.attributes.type, '@name': o.options.attributes.name, '@lat': lat, '@lon': lon, '@heading': Number(o.options.attributes.heading%360), '@radius': String(o.options.attributes.radius) };
+        return { '@index': String(o['id']), '@type': o.options.attributes.type, '@name': o.options.attributes.name, '@lat': lat, '@lon': lon, '@heading': Number(o.options.attributes.heading%360).toFixed(1), '@radius': String(o.options.attributes.radius) };
     }
 }
 
@@ -144,6 +186,12 @@ var mapRunwayNodes = function (o) {
     }
     if (o instanceof L.HoldNode) {
         // return { '@index': String(o['glueindex']), '@lat': convertLat(o._latlng), '@lon': convertLon(o._latlng), '@isOnRunway': '0', '@holdPointType': o['holdPointType'] };
+    }
+}
+
+var mapHoldPoint = function (o) {
+    if (o instanceof L.HoldNode) {
+        return { '@index': String(o['glueindex']), '@holdPointType': o['holdPointType'] };
     }
 }
 

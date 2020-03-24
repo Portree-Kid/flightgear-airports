@@ -28,10 +28,18 @@
           <el-tooltip content="PIPER PA-31/CESSNA 404 Titan" placement="top" effect="light">
             <el-radio :label="15">A</el-radio>
           </el-tooltip>
-          <el-tooltip content="BOMBARDIER Regional Jet CRJ-200/DE HAVILLAND CANADA DHC-6" placement="top" effect="light">
+          <el-tooltip
+            content="BOMBARDIER Regional Jet CRJ-200/DE HAVILLAND CANADA DHC-6"
+            placement="top"
+            effect="light"
+          >
             <el-radio :label="24">B</el-radio>
           </el-tooltip>
-          <el-tooltip content="BOEING 737-700/AIRBUS A-320/EMBRAER ERJ 190-100" placement="top" effect="light">
+          <el-tooltip
+            content="BOEING 737-700/AIRBUS A-320/EMBRAER ERJ 190-100"
+            placement="top"
+            effect="light"
+          >
             <el-radio :label="36">C</el-radio>
           </el-tooltip>
           <el-tooltip content="B767 Series/AIRBUS A-310" placement="top" effect="light">
@@ -50,25 +58,29 @@
       <el-col :span="7">
         <span class="demo-input-label">Aircraft :</span>
       </el-col>
+      <el-col :span="15">{{type}}</el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="7">
+        <span class="demo-input-label">Parking Type :</span>
+      </el-col>
       <el-col :span="15">
-        {{type}}
+        <el-select v-model="parking_type" placeholder="Select">
+          <el-option
+            v-for="type in options"
+            :key="type.value"
+            :label="type.label"
+            :value="type.value"
+          ></el-option>
+        </el-select>
       </el-col>
     </el-row>
-        <el-row>
-          <el-col :span="7">
-            <span class="demo-input-label">Parking Type :</span>
-          </el-col>
-          <el-col :span="15">
-            <el-select v-model="parking_type" placeholder="Select">
-              <el-option
-                v-for="type in options"
-                :key="type.value"
-                :label="type.label"
-                :value="type.value"
-              ></el-option>
-            </el-select>
-          </el-col>
-        </el-row>
+    <el-row>
+      <el-col :span="7">
+        <span class="demo-input-label">Pushback Route End :</span>
+      </el-col>
+      <el-col :span="15">{{pushbackEnd}}</el-col>
+    </el-row>
   </div>
 </template>
 
@@ -97,6 +109,9 @@
         set: function (newValue) {
           this.$store.commit('SET_EDIT_PARKING_RADIUS', newValue / 2)
         }
+      },
+      pushbackEnd: function () {
+        return this.$parent.$parent.$parent.$refs.editLayer.findRouteToPushback(this.$store.state.Editable.index)
       },
       type: function () {
         switch (this.$store.state.Editable.data.parking.radius * 2) {

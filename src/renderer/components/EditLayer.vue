@@ -173,6 +173,36 @@
             console.log('Remove : ' + this.$store.state.Editable.type)
         }
       },
+      findRouteToPushback (index) {
+        if (this.featureLookup===undefined) {
+          return
+        }
+        var parking = this.featureLookup[index].filter(n => n instanceof L.ParkingSpot)  
+        var walkedNodes = [index]
+        var pushBackNodes = []
+        this.walkPushbackRoute(index, walkedNodes, pushBackNodes)
+        return pushBackNodes
+      },
+      walkPushbackRoute (index, walkedNodes, pushBackNodes) {
+        var polyLines = this.featureLookup[index].filter(n => n instanceof L.Polyline)
+        var holdNodes = this.featureLookup[index].filter(n => n instanceof L.HoldNode)
+        holdNodes.forEach(n => {
+          pushBackNodes.push(Number(n.glueindex));
+        });
+
+        polyLines.forEach(l => {
+          if( l.options.attributes.isPushBackRoute === 1 ) {
+            if (Number(l.begin) === index && walkedNodes.indexOf(Number(l.end)) < 0) {
+              walkedNodes.push(Number(l.end))
+              pushBackNodes.concat(this.walkPushbackRoute(Number(l.end), walkedNodes, pushBackNodes))
+            }
+            if (Number(l.end) === index && walkedNodes.indexOf(Number(l.begin)) < 0 ) {
+              walkedNodes.push(Number(l.begin))
+              pushBackNodes.concat(this.walkPushbackRoute(Number(l.begin), walkedNodes, pushBackNodes))
+            }
+          }
+        });
+      },
       removeArc (arc) {        
         console.log(arc);
         var arcLayer = this.groundnetLayerGroup.getLayer(this.$store.state.Editable.index);
