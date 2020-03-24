@@ -58,10 +58,13 @@
         xhr.onload = function(e) {
           console.log("File uploading completed! ");
           console.log(e);
-          var response = JSON.parse(e.srcElement.response);
-          if(response.message === 'OK') {
+          if (e.srcElement.status===500) {
+            parent.$refs.upload.message == e.srcElement.statusMessage
+          }
+          if(JSON.parse(e.srcElement.response).message === `${this.icao} Imported Successfully`) {
             Vue.set(parent, 'uploadVisible', false)
-          } else if(response.message === 'XML Errors') {
+          } else if(JSON.parse(e.srcElement.response).message === 'XML Errors') {
+            var response = JSON.parse(e.srcElement.response);
             if (response.validationErrors) {
               response.validationErrors.forEach(element => {
                 parent.$refs.upload.message += element.message + '\r\n';
