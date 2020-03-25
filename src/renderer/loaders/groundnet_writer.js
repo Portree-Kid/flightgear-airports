@@ -31,6 +31,9 @@ function findRouteToPushback (index) {
 
 function walkPushbackRoute (index, walkedNodes, pushBackNodes) {
     var polyLines = featureLookup[index];
+    if (polyLines===undefined) {
+        return;
+    }
     if (pushBackNodeLookup[index]!==undefined) {
         pushBackNodes.push(pushBackNodeLookup[index]['@index']);
     }

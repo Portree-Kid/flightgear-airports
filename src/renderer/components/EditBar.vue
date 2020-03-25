@@ -91,11 +91,14 @@
         this.editing = false
         Vue.set(this, 'saveDialogVisible', true)
         this.editing = false
-        Vue.nextTick( () => {
-            this.$parent.$parent.$refs.editLayer.save()
-            this.$parent.$parent.$refs.editLayer.disableEdit()
-            Vue.set(this, 'saveDialogVisible', false)
+        Vue.nextTick( function () {
+            setTimeout( this.saveDefered.bind(this), 100);
           }, this)
+      },
+      saveDefered () {
+        this.$parent.$parent.$refs.editLayer.save()
+        this.$parent.$parent.$refs.editLayer.disableEdit()
+        Vue.set(this, 'saveDialogVisible', false)              
       },
       pollData () {
         var workery = this.worker

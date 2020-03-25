@@ -1,6 +1,6 @@
 {
   "name": "flightgear-airports",
-  "version": "0.2.0",
+  "version": "0.0.3",
   "author": "portree_kid <keith.paterson@gmx.de>",
   "description": "An software to design Flightgear groundnets",
   "license": "GPL v3",

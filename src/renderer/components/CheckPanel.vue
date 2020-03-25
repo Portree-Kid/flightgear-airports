@@ -46,5 +46,6 @@
 }
 .el-col {
   border-radius: 1px;
+  padding: 0pt;
 }
 </style>

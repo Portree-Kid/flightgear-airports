@@ -76,8 +76,8 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
             );
         });
         this.on('editable:drawing:move', function (event) {
-            console.log(event.target);
             if (dragIndex >= 0) {
+                console.log('GlueDrag' + event.target);
                 this.follow(dragIndex, event);
             }
         });
