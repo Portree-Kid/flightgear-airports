@@ -12,18 +12,24 @@
           type: "gate"
     -->
     <el-row>
-      <el-col :span="7">
+      <el-col :span="4">
         <span class="demo-input-label">Name :</span>
       </el-col>
-      <el-col :span="15">
+      <el-col :span="8">
         <el-input placeholder="Please input" v-model="name"></el-input>
+      </el-col>
+      <el-col :span="4">
+        <span class="demo-input-label">Number :</span>
+      </el-col>
+      <el-col :span="8">
+        <el-input placeholder="Please input" v-model="number"></el-input>
       </el-col>
     </el-row>
     <el-row>
       <el-col :span="7">
         <span class="demo-input-label">Size :</span>
       </el-col>
-      <el-col :span="15">
+      <el-col :span="17">
         <el-radio-group v-model="wingspan">
           <el-tooltip content="PIPER PA-31/CESSNA 404 Titan" placement="top" effect="light">
             <el-radio :label="15">A</el-radio>
@@ -54,17 +60,27 @@
         </el-radio-group>
       </el-col>
     </el-row>
+    <!--
+    <el-row>
+      <el-col :span="7">
+        <span class="demo-input-label">Coordinates :</span>
+      </el-col>
+      <el-col :span="17">
+        <el-input placeholder="Please input" v-model="coordinates"></el-input>
+      </el-col>
+    </el-row>
+    -->
     <el-row>
       <el-col :span="7">
         <span class="demo-input-label">Aircraft :</span>
       </el-col>
-      <el-col :span="15">{{type}}</el-col>
+      <el-col :span="17">{{type}}</el-col>
     </el-row>
     <el-row>
       <el-col :span="7">
         <span class="demo-input-label">Parking Type :</span>
       </el-col>
-      <el-col :span="15">
+      <el-col :span="17">
         <el-select v-model="parking_type" placeholder="Select">
           <el-option
             v-for="type in options"
@@ -79,7 +95,7 @@
       <el-col :span="7">
         <span class="demo-input-label">Airline :</span>
       </el-col>
-      <el-col :span="15">
+      <el-col :span="17">
         <el-select v-model="airlineCodes" multiple placeholder="Select">
           <el-option
             v-for="item in airlines"
@@ -94,7 +110,7 @@
       <el-col :span="7">
         <span class="demo-input-label">Pushback Route End :</span>
       </el-col>
-      <el-col :span="15">{{pushbackEnd}}</el-col>
+      <el-col :span="17">{{pushbackEnd}}</el-col>
     </el-row>
   </div>
 </template>
@@ -124,7 +140,7 @@
           var codes = this.$store.state.Editable.data.parking.airlineCodes
           if (Array.isArray(codes)) {
             return codes
-          } else if (codes !== undefined) {
+          } else if (codes !== undefined && codes instanceof String) {
             return codes.split(',')            
           } else {
             return []
@@ -144,6 +160,26 @@
         // setter
         set: function (newValue) {
           this.$store.commit('SET_EDIT_PARKING_NAME', newValue)
+        }
+      },
+      number: {
+      // getter
+        get: function () {
+          return this.$store.state.Editable.data.parking.number
+        },
+        // setter
+        set: function (newValue) {
+          this.$store.commit('SET_EDIT_PARKING_NUMBER', newValue)
+        }
+      },
+      coordinates: {
+      // getter
+        get: function () {
+          return ''
+        },
+        // setter
+        set: function (newValue) {
+          
         }
       },
       wingspan: {
@@ -204,3 +240,12 @@
     }
   }
 </script>
+
+<style>
+.el-row {
+  margin: 1px;
+}
+.el-col {
+  padding-left: 10pt;
+}
+</style>

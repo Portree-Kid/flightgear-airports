@@ -183,6 +183,10 @@ var mapParkings = function (o) {
             console.log(o.options.attributes.airlineCodes);
             parking['@airlineCodes'] = o.options.attributes.airlineCodes;
         }
+        if( o.options.attributes.number) {
+            console.log(o.options.attributes.number);
+            parking['@number'] = o.options.attributes.number;
+        }
 
         return parking;
     }
@@ -191,7 +195,12 @@ var mapParkings = function (o) {
 var mapRunwayNodes = function (o) {
     console.log(o);
     if (o instanceof L.RunwayNode) {
-        return { '@index': String(o['glueindex']), '@lat': convertLat(o._latlng), '@lon': convertLon(o._latlng), '@isOnRunway': '1', '@holdPointType': 'none' };
+        var runwayNode = { '@index': String(o['glueindex']), 
+        '@lat': convertLat(o._latlng), 
+        '@lon': convertLon(o._latlng), 
+        '@isOnRunway': '1', 
+        '@holdPointType': 'none' };
+        return runwayNode;
     }
     if (o instanceof L.HoldNode) {
         // return { '@index': String(o['glueindex']), '@lat': convertLat(o._latlng), '@lon': convertLon(o._latlng), '@isOnRunway': '0', '@holdPointType': o['holdPointType'] };
