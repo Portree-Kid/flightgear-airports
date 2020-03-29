@@ -174,7 +174,7 @@
         }
       },
       findRouteToPushback (index) {
-        if (this.featureLookup===undefined) {
+        if (this.featureLookup===undefined || this.featureLookup[index]===undefined) {
           return
         }
         var parking = this.featureLookup[index].filter(n => n instanceof L.ParkingSpot)  
