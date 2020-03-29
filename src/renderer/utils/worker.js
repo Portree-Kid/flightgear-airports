@@ -30,6 +30,7 @@ onmessage = function (event) {
         ).catch(result => {
             console.log('Crashed');
             console.log(result);
+            postMessage('DONE');
         });
     } else if (event.data[0] === 'scanai') {
         scanai(event.data[1]).then(result => {
@@ -40,6 +41,7 @@ onmessage = function (event) {
         ).catch(result => {
             console.log('Crashed');
             console.log(result);
+            postMessage('DONE');
         });
     }
     else if (event.data[0] === 'scanapt') {
@@ -51,6 +53,7 @@ onmessage = function (event) {
         ).catch(result => {
             console.log('Crashed');
             console.log(result);
+            postMessage('DONE');
         });
 
     }
