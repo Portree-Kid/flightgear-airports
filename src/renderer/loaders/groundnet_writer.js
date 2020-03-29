@@ -136,10 +136,10 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         });
         nodes = nodes.filter(n => n);
 
+        arcList = arcList.filter(a => a['@begin'] !== a['@end']);
+
         nodes.sort((p, p2) => { return p['@index'] - p2['@index'] });
         var uniqueNodes = nodes.filter((v, i, a) => a.indexOf(v) === i);
-
-        var maxId = uniqueNodes.slice(-1)[0]['@index'];
 
         var approachList = store.default.state.Frequencies.items.filter(f => f.type === 'APPROACH').map(mapFrequency);
 
@@ -169,7 +169,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
 }
 
 var mapFrequency = function (o) {
-    return o.value;
+    return mathjs.round(o.value, 0);
 }
 
 var mapParkings = function (o) {
