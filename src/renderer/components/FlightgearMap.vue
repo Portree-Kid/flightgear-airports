@@ -17,6 +17,7 @@
     <LeafletSidebar></LeafletSidebar>
     <EditBar></EditBar>
     <PavementLayer ref="pavementLayer"></PavementLayer>
+    <ThresholdLayer ref="thresholdLayer"></ThresholdLayer>
     <l-layer-group layerType="overlay" name="airports" ref="airportLayer">
       <l-circle
         v-for="(item, index) in this.$store.state.Airports.airports"
@@ -39,6 +40,7 @@
   import EditBar from './EditBar'
   import EditLayer from './EditLayer'
   import PavementLayer from './PavementLayer'
+  import ThresholdLayer from './ThresholdLayer'
   import L from 'leaflet'
 
   // https://github.com/KoRiGaN/Vue2Leaflet/issues/103
@@ -51,7 +53,7 @@
   })
   export default {
     name: 'flightgear-map',
-    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, EditBar, EditLayer, PavementLayer, LLayerGroup, LControl },
+    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, EditBar, EditLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer },
     props: [],
     mounted () {
       this.$store.dispatch('getAirports')
@@ -65,6 +67,7 @@
           if (airportsToLoad.length > 0 && airportsToLoad[0] !== this.editingAirport && this.zoom > 12) {
             this.$refs.editLayer.load(airportsToLoad[0])
             this.$refs.pavementLayer.load(airportsToLoad[0])
+            this.$refs.thresholdLayer.load(airportsToLoad[0])
             this.editingAirport = airportsToLoad[0]
           }
           this.$refs.editLayer.setVisible(this.zoom >= 12)
