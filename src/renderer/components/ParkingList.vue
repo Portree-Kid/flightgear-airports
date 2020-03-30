@@ -7,27 +7,21 @@
       </div>
     </h1>
     <el-container direction="vertical">
-      <el-row>
         <li v-for="p in parkings" v-bind:key="p.index">
-          <el-link type="primary" @click="show(p.index)">{{p.name}} {{p.number}}</el-link>
+          <ParkingItem :parking="p"></ParkingItem>
         </li>
-      </el-row>
     </el-container>
   </div>
 </template>
 
 <script lang="js">
+  import ParkingItem from './ParkingItem'
   export default {
     name: 'parking-list',
+    components: {ParkingItem},
     props: [],
     data () {
       return {
-
-      }
-    },
-    methods: {
-      show (idx) {
-        this.$parent.$parent.$parent.$refs.editLayer.show(idx)
       }
     },
     computed: {
@@ -35,13 +29,7 @@
       // getter
         get: function () {
           if (this.$store.state.Parkings.items !== undefined) {
-            return this.$store.state.Parkings.items.sort((p1, p2) => {
-              if (p1.name === p2.name) {
-                return p1.number.localeCompare(p2.number)
-              } else {
-                return p1.name.localeCompare(p2.name)
-              }
-            })
+            return this.$store.state.Parkings.items
           }
         },
         // setter
