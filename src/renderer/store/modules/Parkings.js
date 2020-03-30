@@ -8,7 +8,7 @@ const mutations = {
   },
   UPDATE_PARKING: (state, item) => {
     const existingItem = state.items.find((i) => i.index === item.index)
-    if (existingItem!==undefined) {
+    if (existingItem !== undefined) {
       Object.assign(existingItem, item)
     }
   },
