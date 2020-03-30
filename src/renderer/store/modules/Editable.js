@@ -3,6 +3,7 @@ import Vue from 'vue'
 const state = {
   type: 'none',
   index: 'none',
+  editing: false,
   data: {airports: {}, parking: {}, arc: {}, node: {}, runway: {}}
 }
 

@@ -254,6 +254,15 @@
           }
         });
       },
+      getParkings (){
+        var parkings = []
+        this.groundnetLayerGroup.eachLayer(l => {
+          if (l instanceof L.ParkingSpot) {
+            parkings.push(l)
+          }
+        })
+        return parkings
+      },
       removeNode (index) {
         if(this.featureLookup[index]===undefined) {
           console.error("Lookup " + index + " failed ");          
@@ -300,12 +309,13 @@
         })
       },
       editedParking() {
-        console.log(this.$store.state.Editable.data.parking)
+        console.log('Edited Parking : ' + this.$store.state.Editable.data.parking)
         if (this.$store.state.Editable.index === undefined ||
             this.$store.state.Editable.data.parking === undefined ||
             this.featureLookup===undefined) {
           return
         }
+        this.$store.dispatch('updatedParking', this.$store.state.Editable.data.parking);
         this.featureLookup[this.$store.state.Editable.index].forEach((element,index) => {
           if (element instanceof L.ParkingSpot) {
             element.options.attributes = Object.assign({}, this.$store.state.Editable.data.parking)

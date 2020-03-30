@@ -118,6 +118,11 @@
 <script lang="js">
 /* eslint-disable */
   export default {
+    methods: {
+      show (idx) {
+        this.$parent.$parent.$parent.$refs.editLayer.show(idx)
+      }
+    },
     computed: {
       parking: function () {
         return this.$store.state.Editable.type === 'parking'

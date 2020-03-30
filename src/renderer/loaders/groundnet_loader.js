@@ -100,6 +100,16 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                 layerGroup.maxId = Math.max(layerGroup.maxId, Number(n.attr('index')))
                 features.push(circle);
             }).sort();
+            
+            store.default.dispatch('setParkings', parkingNodes.map( 
+                p => ({index: Number(p.attrs.index), name: String(p.attrs.name), number: String(p.attrs.number)}
+            )).sort((p1, p2) => {
+                if (p1.name === p2.name) {
+                  return p1.number.localeCompare(p2.number)
+                } else {
+                  return p1.name.localeCompare(p2.name)
+                }}));
+
             // Get all nodes into the lookup
             var taxiNodes = xml.find('groundnet/TaxiNodes/node');
             taxiNodes.map(n => {
@@ -164,7 +174,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                         polyline.addListeners();
                         polyline._latlngs[0].attributes = {};
                         $.each(beginNode.attrs, function (key, value) {
-                            console.log(key + "\t" + value);
+                            console.debug(key + "\t" + value);
 
                             if (isNaN(value))
                                 polyline._latlngs[0].attributes[key] = value;
@@ -173,7 +183,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                         });
                         polyline._latlngs[1].attributes = {};
                         $.each(endNode.attrs, function (key, value) {
-                            console.log(key + "\t" + value);
+                            console.debug(key + "\t" + value);
 
                             if (isNaN(value))
                                 polyline._latlngs[1].attributes[key] = value;

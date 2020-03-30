@@ -5,12 +5,13 @@
         <ul role="tablist"> <!-- top aligned tabs -->
             <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
             <li><a href="#edit" role="tab"><i class="fas fa-edit"></i></a></li>
+            <li><a href="#parking" role="tab"><i class="fas fa-parking"></i></a></li>
             <li><a href="#search" role="tab"><i class="fa fa-search"></i></a></li>
-            <li><a href="#scan" role="tab"><i class="fa fa-sync"></i></a></li>
             <li><a href="#check" role="tab"><i class="far fa-check-square"></i></a></li>
         </ul>
 
         <ul role="tablist"> <!-- bottom aligned tabs -->
+            <li><a href="#scan" role="tab"><i class="fa fa-sync"></i></a></li>
             <li><a href="#settings" role="tab"><i class="fas fa-cog"></i></a></li>
         </ul>
     </div>
@@ -27,6 +28,9 @@
           <ParkingEdit></ParkingEdit>
           <ArcEdit></ArcEdit>
           <NodeEdit></NodeEdit>
+        </div>
+        <div class="leaflet-sidebar-pane" id="parking">
+          <ParkingList></ParkingList>
         </div>
         <div class="leaflet-sidebar-pane" id="search">
           <Search></Search>
@@ -49,20 +53,21 @@
   import '@fortawesome/fontawesome-free/css/all.css'
   import {} from 'leaflet-sidebar-v2'
   import L from 'leaflet'
-  import Help from './Help'
   import AirportEdit from './AirportEdit'
-  import CheckPanel from './CheckPanel'
-  import ParkingEdit from './ParkingEdit'
   import ArcEdit from './ArcEdit'
+  import CheckPanel from './CheckPanel'
   import FileSelect from './FileSelect'
+  import Help from './Help'
   import NodeEdit from './NodeEdit'
+  import ParkingEdit from './ParkingEdit'
+  import ParkingList from './ParkingList'
   import RunScan from './RunScan'
   import SettingsPanel from './SettingsPanel'
   import Search from './Search'
 
   export default {
     name: 'leaflet-sidebar',
-    components: { Help, AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, SettingsPanel, RunScan, FileSelect, Search },
+    components: { Help, AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, ParkingList, RunScan, FileSelect, SettingsPanel, Search },
     props: [],
     mounted () {
       this.add()
