@@ -485,8 +485,10 @@
         if (event.latlng === undefined) {
           return
         }
-        const circle = new L.ParkingSpot(event.latlng, {attributes: {radius: 20, heading: 0}})
-        circle.id = (++this.groundnetLayerGroup.maxId)
+        const newIndex = (++this.groundnetLayerGroup.maxId)
+        const circle = new L.ParkingSpot(event.latlng, {attributes: {index: newIndex, radius: 20, heading: 0}})
+        circle.id = newIndex
+        circle.glueindex = circle.id
         circle.addTo(this.groundnetLayerGroup)
         circle.featureLookup = this.featureLookup
         circle.enableEdit()

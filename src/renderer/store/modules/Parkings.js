@@ -8,7 +8,9 @@ const mutations = {
   },
   UPDATE_PARKING: (state, item) => {
     const existingItem = state.items.find((i) => i.index === item.index)
-    Object.assign(existingItem, item)
+    if (existingItem!==undefined) {
+      Object.assign(existingItem, item)
+    }
   },
   SET_PARKINGS (state, parkings) {
     Vue.set(state, 'items', parkings)

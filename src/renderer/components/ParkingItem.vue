@@ -1,5 +1,5 @@
 <template>
-  <el-link type="primary" @click="show(parking.index)">{{parking.name}}{{parking.number}}</el-link>
+  <el-link type="primary" @click="show(parking.index)">{{parking.name}} {{parking.number}}</el-link>
 </template>
 
 <script lang="js">
