@@ -5,6 +5,50 @@ const zlib = require('zlib');
 const LatLonEllipsoidal = require( 'geodesy/latlon-ellipsoidal-vincenty.js').default;
 const fs = require('fs');
 
+function createPoly(currentFeature) {
+    switch (module.exports.type) {
+        case 110:
+            var taxiwayPoly = new L.Polygon(currentFeature);
+            taxiwayPoly.setStyle({color: module.exports.colour, interactive: false});
+            taxiwayPoly.addTo(layerGroup);                                    
+            break;            
+        case 120:
+            var taxiwayPoly = new L.Polygon(currentFeature);
+            taxiwayPoly.setStyle({color: module.exports.colour, interactive: false});
+            taxiwayPoly.addTo(layerGroup);                                    
+            break;            
+        case 130:
+            var taxiwayPoly = new L.Polygon(currentFeature);
+            taxiwayPoly.setStyle({color: module.exports.colour, fillOpacity: .0, interactive: false});
+            taxiwayPoly.addTo(layerGroup);                                    
+            break;            
+        default:
+            break;
+    }
+}
+
+function createLineString(currentFeature) {
+    switch (module.exports.type) {
+        case 110:
+            var taxiwayPoly = new L.Polyline(currentFeature);
+            taxiwayPoly.setStyle({color: module.exports.colour, interactive: false});
+            taxiwayPoly.addTo(layerGroup);                                    
+            break;            
+        case 120:
+            var taxiwayPoly = new L.Polyline(currentFeature);
+            taxiwayPoly.setStyle({color: module.exports.colour, interactive: false});
+            taxiwayPoly.addTo(layerGroup);                                    
+            break;            
+        case 130:
+            var taxiwayPoly = new L.Polyline(currentFeature);
+            taxiwayPoly.setStyle({color: module.exports.colour, interactive: false});
+            taxiwayPoly.addTo(layerGroup);                                    
+            break;            
+        default:
+            break;
+    }    
+}
+
 module.exports.readPavement = function (f, icao, cb) {
     console.log(f);
     layerGroup = L.layerGroup();
@@ -37,6 +81,8 @@ module.exports.readPavement = function (f, icao, cb) {
 }
 
 module.exports.isScanning = false;
+module.exports.colour = 'grey';
+module.exports.type = 0;
 
 
 var scanMethods = {
@@ -87,20 +133,32 @@ var scanMethods = {
           return undefined;
         if(typeof currentFeature !== 'undefined')
         {
-          var taxiwayPoly = new L.Polygon(currentFeature);
-          taxiwayPoly.setStyle({color: 'grey', interactive: false});
-          taxiwayPoly.addTo(layerGroup);      
+            createPoly(currentFeature);
         }
+        module.exports.colour = 'grey';
+        module.exports.type = 110;
         return [[]];
     },
     120: (line, icao, layerGroup, currentFeature) => {
         if (!module.exports.isScanning)
           return undefined;
+        if(typeof currentFeature !== 'undefined')
+        {
+            createPoly(currentFeature);
+        }
+        module.exports.colour = 'yellow';
+        module.exports.type = 120;
         return [[]];
     },
     130: (line, icao, layerGroup, currentFeature) => {
         if (!module.exports.isScanning)
           return undefined;
+        if(typeof currentFeature !== 'undefined')
+        {
+            createPoly(currentFeature);
+        }
+        module.exports.colour = 'black';
+        module.exports.type = 130;
         return [[]];
     },
     111: (line, icao, layerGroup, currentFeature) => {
@@ -134,18 +192,15 @@ var scanMethods = {
     115: (line, icao, layerGroup, currentFeature) => {
         if (!module.exports.isScanning)
           return;
-          currentFeature.slice(-1)[0].push([line[1], line[2]]);
-        var taxiwayLine = new L.Polyline(currentFeature);
-        taxiwayLine.setStyle({color: 'red'});
-        // taxiwayLine.addTo(layerGroup);      
+        currentFeature.slice(-1)[0].push([line[1], line[2]]);
+        createLineString(currentFeature);
     },
     116: (line, icao, layerGroup, currentFeature) => {
         if (!module.exports.isScanning)
           return;
-          currentFeature.slice(-1)[0].push([line[1], line[2]]);
-        var taxiwayLine = new L.Polyline(currentFeature);
-        taxiwayLine.setStyle({color: 'red'});
-        // taxiwayLine.addTo(layerGroup);      
+        currentFeature.slice(-1)[0].push([line[1], line[2]]);
+        createLineString(currentFeature);
+          // taxiwayLine.addTo(layerGroup);      
     },
     99: (l) => {
         console.log('Finished');
