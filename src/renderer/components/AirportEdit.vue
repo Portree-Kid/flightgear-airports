@@ -3,27 +3,27 @@
     <div width="100%" v-if="airport">
         <el-row>
           <el-col :span="7">ICAO :</el-col>
-          <el-col :span="15">{{ icao }}</el-col>
+          <el-col :span="17">{{ icao }}</el-col>
         </el-row>
         <el-row>
           <el-col :span="7">Name :</el-col>
-          <el-col :span="15">{{ name }}</el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="7">Flights :</el-col>
-          <el-col :span="15">{{ flights }}</el-col>
+          <el-col :span="17">{{ name }}</el-col>
         </el-row>
         <el-row>
           <el-col :span="7">Airlines :</el-col>
-          <el-col :span="15">{{ airlines }}</el-col>
+          <el-col :span="15">
+            <el-tag v-for="item in airlines" :key="item.value">{{item.value}}</el-tag>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="5">Flights :</el-col>
+          <el-col :span="7">{{ flights }}</el-col>
+          <el-col :span="5">Parking :</el-col>
+          <el-col :span="7">{{ parking }}</el-col>
         </el-row>
         <el-row>
           <el-col :span="7">Groundnet :</el-col>
           <el-col :span="15">{{groundnet}}</el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="7">Parking Positions :</el-col>
-          <el-col :span="15">{{ parking }}</el-col>
         </el-row>
     </div>
     <el-divider  v-if="airport"></el-divider>  
@@ -32,8 +32,8 @@
         <el-row v-for="f in Frequencies" :key="f.index">
           <Frequency :frequency="f"></Frequency>
         </el-row>
+        <el-button @click="addFrequency" v-if="editing" >Add</el-button>
     </div>
-    <el-button @click="addFrequency" v-if="editing" >Add</el-button>
   </div>
 </template>
 
@@ -52,10 +52,10 @@
       }
     },
     computed: {
-      editing: function () {
-        return this.$parent.$parent.$parent.$refs.editLayer !== undefined &&
-        this.$parent.$parent.$parent.$refs.editLayer.editing &&
-        this.$store.state.Editable.type === 'airport'
+      editing: {
+        get: function () {
+          return this.$parent.$parent.$parent.$refs.editLayer.editing
+        }
       },
       icao: function () {
         return this.$store.state.Editable.data.airport.icao
@@ -67,7 +67,12 @@
         return this.$store.state.Editable.data.airport.flights
       },
       airlines: function () {
-        return this.$store.state.Editable.data.airport.airlines
+        var airlineCodes = []
+        var storedairlineCodes = this.$store.state.Airports.currentAirport.airlines
+        storedairlineCodes.forEach(element => {
+          airlineCodes.push({value: element, label: element})
+        })
+        return airlineCodes
       },
       groundnet: function () {
         return this.$store.state.Editable.data.airport.groundnet
@@ -90,6 +95,7 @@
 
 <style lang="scss" scoped>
    .el-row {
-     padding: 0em
+     padding: 0em;
+     margin-bottom: 10px;
    }
 </style>
