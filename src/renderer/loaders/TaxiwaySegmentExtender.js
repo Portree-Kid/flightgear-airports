@@ -83,7 +83,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         });
         this.on('editable:vertex:new', event => {
             console.log(event)
-            let closest = this.editLayer.closestLayerSnap(event.latlng, 10)
+            let closest = this.editLayer.closestLayerSnap(event.latlng, 5)
             let taxiwaySegment = event.latlng.__vertex.editor.feature;
             if(taxiwaySegment.options.attributes === undefined) {
                 taxiwaySegment.options.attributes = {direction: 'bi-directional'};
