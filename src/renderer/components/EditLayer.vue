@@ -254,6 +254,84 @@
           }
         });
       },
+      getPointCoords (index) {
+        if(this.featureLookup[index]===undefined) {
+          console.error("Lookup " + index + " failed ");          
+          return;
+        }
+        return this.featureLookup[index].map((element, i) => {
+          if (element instanceof L.Polyline) {
+            element._latlngs.forEach((e1, index1) => {
+              console.log(e1);
+              if (e1.attributes.index===index) {
+                var latlng = {};
+                latlng.lat =  e1.lat;
+                latlng.lng =  e1.lng;
+                return latlng;
+              }
+            });
+          } else if (element instanceof L.RunwayNode) {
+            var latlng = {};
+            latlng.lat =  element._latlng.lat;
+            latlng.lng =  element._latlng.lng;
+            return latlng;
+          } else if (element instanceof L.ParkingSpot) {
+            console.log(element);
+            var latlng = {};
+            latlng.lat =  element._latlng.lat;
+            latlng.lng =  element._latlng.lng;
+            return latlng;
+          }
+        });
+      },
+      setPointCoords (index, coordinates) {
+        var latlng = {lat: coordinates.latitude, lng: coordinates.longitude };
+        if(this.featureLookup[index]===undefined) {
+          console.error("Lookup " + index + " failed ");          
+          return;
+        }
+        return this.featureLookup[index].map((element, i) => {
+          if (element instanceof L.RunwayNode) {
+              element.setLatLng(latlng);
+          }
+          else if (element instanceof L.HoldNode) {
+              element.setLatLng(latlng);
+          }
+          else if (element instanceof L.ParkingSpot) {
+              // element.disableEdit();
+              element.setLatLng(latlng);
+              // element.enableEdit();
+              // element.extensions();
+              element.updateMiddleMarker();
+              element.updateVertexFromDirection();
+          }
+          else if (element instanceof L.Polyline) {
+              if (Number(element.begin) === Number(dragIndex)) {
+                  element.getLatLngs()[0].update(event.latlng);
+                  element.setLatLngs(element.getLatLngs());
+                  element.updateBeginVertex(latlng);
+                  element.updateMiddle();
+              }
+              if (Number(element.end) === Number(dragIndex)) {
+                  element.getLatLngs()[element.getLatLngs().length - 1].update(event.latlng);
+                  element.setLatLngs(element.getLatLngs());
+                  element.updateEndVertex(latlng);
+                  element.updateMiddle();
+              }
+          } else if (element instanceof L.Editable.VertexMarker) {
+              console.log(element);
+              element.setLatLng(latlng);
+              element.latlngs.forEach((latlng1, index) => {
+                  console.log(latlng1);
+                  if (latlng1.__vertex === element) {
+                      latlng1.update(latlng);
+                  }
+              });
+              element.editor.feature.setLatLngs(latlngs);
+              element.editor.feature.updateMiddle();
+          }    
+        });
+      },
       getParkings (){
         var parkings = []
         this.groundnetLayerGroup.eachLayer(l => {

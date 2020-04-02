@@ -60,7 +60,12 @@
         </el-radio-group>
       </el-col>
     </el-row>
-    <!--
+    <el-row>
+      <el-col :span="7">
+        <span class="demo-input-label">Aircraft :</span>
+      </el-col>
+      <el-col :span="17">{{type}}</el-col>
+    </el-row>
     <el-row>
       <el-col :span="7">
         <span class="demo-input-label">Coordinates :</span>
@@ -68,13 +73,6 @@
       <el-col :span="17">
         <el-input placeholder="Please input" v-model="coordinates"></el-input>
       </el-col>
-    </el-row>
-    -->
-    <el-row>
-      <el-col :span="7">
-        <span class="demo-input-label">Aircraft :</span>
-      </el-col>
-      <el-col :span="17">{{type}}</el-col>
     </el-row>
     <el-row>
       <el-col :span="7">
@@ -117,6 +115,9 @@
 
 <script lang="js">
 /* eslint-disable */
+  const convert = require('geo-coordinates-parser');
+  const Coordinates = require('coordinate-parser');
+
   export default {
     methods: {
       show (idx) {
@@ -180,11 +181,16 @@
       coordinates: {
       // getter
         get: function () {
-          return ''
+          if(this.$store.state.Editable.index!==undefined) {
+            var ret = this.$parent.$parent.$parent.$refs.editLayer.getPointCoords(this.$store.state.Editable.index)
+            return ret[0].lat + " " + ret[0].lng
+          }
         },
         // setter
-        set: function (newValue) {
-          
+        set: function (newValue) {          
+          var position = new Coordinates(newValue);
+          console.log(position);          
+          this.$parent.$parent.$parent.$refs.editLayer.setPointCoords(this.$store.state.Editable.index, position)
         }
       },
       wingspan: {
