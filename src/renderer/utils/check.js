@@ -79,6 +79,45 @@ async function checkGroundnet(data) {
                    this.postMessage(['progress', 1]);
                 });
             });
+            // Check forward parkings
+            var noPushbackGraph = {};
+            parkings.forEach(element => {
+                noPushbackGraph[element] = {};
+            });
+            runwayNodes.forEach(element => {
+                noPushbackGraph[element] = {};
+            });
+            edges.forEach(element => {
+                noPushbackGraph[element.start] = {};
+                noPushbackGraph[element.end] = {};
+            });
+            edges.filter(element => element.isPushBackRoute).forEach(element => {
+                var node1 = noPushbackGraph[element.start];
+                node1[Number(element.end)] = 1;
+                var node2 = noPushbackGraph[element.end];
+                node2[Number(element.start)] = 1;
+            });            
+
+            var okPushbacks = [];
+            parkings.forEach(parkingNode => {
+                pushbackNodes.forEach(pushbackNode => {
+                   var ok = checkRoute(noPushbackGraph, parkingNode, pushbackNode); 
+                   if(ok) {
+                    okPushbacks.push(parkingNode);
+                   }                   
+                   this.postMessage(['progress', 1]);
+                });
+            });
+            var wrongPushbackRoutes = parkings.filter( 
+                function(e) {
+                    return this.indexOf(e) < 0;
+                  }
+                  , okPushbacks ).map(
+                    id => {return {id:id, message:'No way to pushback holdpoint'}}
+                    );
+
+
+
             okNodes = okNodes.filter((v,i) => okNodes.indexOf(v) === i);
             var allLegitimateEndNodes = parkings.concat(runwayNodes).concat(pushbackNodes);
             var notOkNodes = parkings.concat(runwayNodes).filter(
@@ -108,7 +147,7 @@ async function checkGroundnet(data) {
                     ).map(
                         v => {return {id:Number(v), message:'Pushback node not an end'}}
                         );
-            notOkNodes = notOkNodes.concat(wrongPushbackEnds);
+            notOkNodes = notOkNodes.concat(wrongPushbackEnds).concat(wrongPushbackRoutes);
 
             var parkingNodes = data.map(mapParkingNode).filter(n => n !== undefined);
 
@@ -204,6 +243,7 @@ var mapRunwayNodes = function (o) {
 
 var mapEdges = function (o) {
     if(o.type === 'poly')
-      return {start: o.start, end: o.end};
+      return {start: o.start, end: o.end, isPushBackRoute: o.isPushBackRoute !== undefined&&
+        o.isPushBackRoute!==0};
     console.log(o);
 }

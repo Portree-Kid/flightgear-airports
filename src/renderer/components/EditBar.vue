@@ -199,7 +199,7 @@
           return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'type': o.holdPointType };
         } else if (o instanceof L.Polyline) {
           console.log(o)
-          return { 'start': Number(o['begin']), 'end': Number(o['end']), '_leaflet_id': o._leaflet_id, 'type': 'poly' };
+          return { 'start': Number(o['begin']), 'end': Number(o['end']), '_leaflet_id': o._leaflet_id, 'type': 'poly', 'isPushBackRoute': o.options.attributes.isPushBackRoute };
         } else {
           console.log('Unknown Type ')
           console.log(typeof o)
