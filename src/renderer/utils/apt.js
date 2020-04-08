@@ -36,6 +36,28 @@ var scanMethods = {
     });
     return promise;
   },
+  16: async (l, apts) => {
+    var promise = new Promise(function (resolve, reject) {
+      logger('info', 'Seaplane:', l);
+      icao = l[4];
+      saveName(apts, l[4], l.slice(5).join(' ').replace('\t', ' '))
+      .then(result => {
+        resolve(result)
+      }).catch( err => {reject(err)});
+    });
+    return promise;
+  },
+  17: async (l, apts) => {
+    var promise = new Promise(function (resolve, reject) {
+      logger('info', 'Heliport:', l);
+      icao = l[4];
+      saveName(apts, l[4], l.slice(5).join(' ').replace('\t', ' '))
+      .then(result => {
+        resolve(result)
+      }).catch( err => {reject(err)});
+    });
+    return promise;
+  },
   18: async (l, apts) => {
     var promise = new Promise(function (resolve, reject) {
       logger('info','Airport light beacon:', l);
