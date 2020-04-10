@@ -132,6 +132,7 @@
       },
       onClick (item) {
         console.log(item)
+        this.setIcao(item.properties.icao)
         this.$store.commit('SET_EDIT_AIRPORT', item.properties)
       },
       zoomUpdated (zoom) {

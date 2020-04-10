@@ -35,7 +35,7 @@ const mutations = {
     if (item === null) {
       state.wip.push(airport)
     } else {
-      Object.assign(item, airport);
+      Object.assign(item, airport)
     }
   }
 }
