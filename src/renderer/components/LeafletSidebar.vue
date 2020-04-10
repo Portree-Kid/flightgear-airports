@@ -8,6 +8,7 @@
             <li><a href="#parking" role="tab"><i class="fas fa-parking"></i></a></li>
             <li><a href="#search" role="tab"><i class="fa fa-search"></i></a></li>
             <li><a href="#check" role="tab"><i class="far fa-check-square"></i></a></li>
+            <li><a href="#wip" role="tab"><i class="fas fa-wrench"></i></a></li>
         </ul>
 
         <ul role="tablist"> <!-- bottom aligned tabs -->
@@ -27,7 +28,7 @@
           <AirportEdit></AirportEdit>
           <ParkingEdit></ParkingEdit>
           <ArcEdit></ArcEdit>
-          <NodeEdit></NodeEdit>
+          <NodeEdit></NodeEdit>          
         </div>
         <div class="leaflet-sidebar-pane" id="parking">
           <ParkingList></ParkingList>
@@ -43,6 +44,9 @@
         </div>
         <div class="leaflet-sidebar-pane" id="check">
           <CheckPanel></CheckPanel>
+        </div>
+        <div class="leaflet-sidebar-pane" id="wip">
+          <WorkInProgress></WorkInProgress>
         </div>
     </div>
 </div>  
@@ -64,10 +68,11 @@
   import RunScan from './RunScan'
   import SettingsPanel from './SettingsPanel'
   import Search from './Search'
+  import WorkInProgress from './WorkInProgress'
 
   export default {
     name: 'leaflet-sidebar',
-    components: { Help, AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, ParkingList, RunScan, FileSelect, SettingsPanel, Search },
+    components: { Help, AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, ParkingList, RunScan, FileSelect, SettingsPanel, Search, WorkInProgress },
     props: [],
     mounted () {
       this.add()

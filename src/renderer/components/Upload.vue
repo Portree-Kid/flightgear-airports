@@ -59,7 +59,7 @@
           console.log("File uploading completed! ");
           console.log(e);
           if (e.srcElement.status===500) {
-            parent.$refs.upload.message == e.srcElement.statusMessage
+            parent.$refs.upload.message == e.srcElement.statusText
           } else if(JSON.parse(e.srcElement.response).message.match('[A-Z0-9]* Imported Successfully')) {
             Vue.set(parent, 'uploadVisible', false)
           } else if(JSON.parse(e.srcElement.response).message === 'XML Errors') {

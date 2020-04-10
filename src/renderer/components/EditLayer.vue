@@ -146,8 +146,8 @@
           if (typeof l.bringToFront === 'function') {
             l.bringToFront()
           }
-        })        
-      },
+        })
+        this.$store.dispatch('addWip', {icao: this.icao});      },
       disableEdit () {
         this.editable = false
         this.editing = false

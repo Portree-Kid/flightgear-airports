@@ -1,8 +1,9 @@
 const state = {
-  settings: {flightgearDirectory: '.', email: 'x'},
+  settings: { flightgearDirectory: '.', email: 'x' },
   zoom: 14,
   center: [47.413220, -1.219482],
-  bounds: undefined
+  bounds: undefined,
+  wip: []
 }
 
 const mutations = {
@@ -27,6 +28,15 @@ const mutations = {
   },
   'SET_EMAIL' (state, email) {
     state.settings.email = email
+  },
+  'ADD_WIP' (state, airport) {
+    const item = state.wip.find((e) => e.icao === airport.icao)
+    airport.time = Date.now()
+    if (item === null) {
+      state.wip.push(airport)
+    } else {
+      Object.assign(item, airport);
+    }
   }
 }
 
@@ -41,6 +51,9 @@ const actions = {
   },
   async setBounds (context, bounds) {
     context.commit('BOUNDS', bounds)
+  },
+  async addWip (context, airport) {
+    context.commit('ADD_WIP', airport)
   }
 }
 
