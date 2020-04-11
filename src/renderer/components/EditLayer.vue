@@ -12,6 +12,9 @@
   import L2 from 'leaflet-textpath'
   import Vue from 'vue'
 
+  const path = require('path')
+  const fs = require('fs')
+
   // import {LSymbol} from 'leaflet-polylinedecorator'
 
   export default {
@@ -587,6 +590,19 @@
         })
         writeGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, this.icao, xml)
         this.load(this.icao, false)
+      },
+      test() {
+        var f = path.join(this.$store.state.Settings.settings.airportsDirectory, this.icao[0], this.icao[1], this.icao[2], this.icao + '.groundnet.new.xml');
+        var fNew = path.join(this.$store.state.Settings.settings.testDirectory, 'Airports', this.icao[0], this.icao[1], this.icao[2], this.icao + '.groundnet.xml');
+        try {
+          fs.mkdirSync(path.join(this.$store.state.Settings.settings.testDirectory, 'Airports'), { recursive: true })
+          fs.mkdirSync(path.join(this.$store.state.Settings.settings.testDirectory, 'Airports', this.icao[0]),{ recursive: true })
+          fs.mkdirSync(path.join(this.$store.state.Settings.settings.testDirectory, 'Airports', this.icao[0], this.icao[1]), { recursive: true })
+          fs.mkdirSync(path.join(this.$store.state.Settings.settings.testDirectory, 'Airports', this.icao[0], this.icao[1], this.icao[2]), { recursive: true })
+        } catch (err) {
+
+        }
+        fs.copyFileSync(f, fNew)
       },
       setVisible(visible) {
         if (this.layerGroup) {

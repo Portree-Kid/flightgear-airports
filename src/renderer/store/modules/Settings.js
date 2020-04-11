@@ -1,5 +1,5 @@
 const state = {
-  settings: { flightgearDirectory: '.', email: 'x' },
+  settings: { flightgearDirectory: '.', testDirectory: '.', email: 'x' },
   zoom: 14,
   center: [47.413220, -1.219482],
   bounds: undefined,
@@ -16,6 +16,9 @@ const mutations = {
   },
   'AIPORTS_DIRECTORY' (state, airportsDirectory) {
     state.settings.airportsDirectory = airportsDirectory
+  },
+  'TEST_DIRECTORY' (state, testDirectory) {
+    state.settings.testDirectory = testDirectory
   },
   'ZOOM' (state, zoom) {
     state.zoom = zoom

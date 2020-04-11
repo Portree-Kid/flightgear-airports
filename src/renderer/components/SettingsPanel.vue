@@ -8,23 +8,27 @@
     </h1>
     <div id="panel" width="100%">      
       <el-row>
-        <el-col :span="7" class="label">Airports Directory</el-col>
-        <el-col :span="15">{{ airports_directory }}</el-col>
-        <el-col :span="2">
+        <el-col :span="22" class="label">Airports Directory</el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="20" class="label">{{ airports_directory }}</el-col>
+        <el-col :span="4">
           <directory-select @input="airportsDirectorySelect"></directory-select>
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="7" class="label">Flightgear Directory</el-col>
-        <el-col :span="15">{{ flightgear_directory }}</el-col>
-        <el-col :span="2">
+        <el-col :span="22" class="label">Flightgear Directory</el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="20" class="label">{{ flightgear_directory }}</el-col>
+        <el-col :span="4">
           <directory-select @input="flightgearDirectorySelect"></directory-select>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="7" class="label">AI Directory</el-col>
-        <el-col :span="15">{{ AI_directory }}</el-col>
-        <el-col :span="2">
+        <el-col :span="15" class="label">{{ AI_directory }}</el-col>
+        <el-col :span="2" class="label">
         </el-col>
       </el-row>
       <el-row>
@@ -37,6 +41,13 @@
         <el-col :span="7" class="label">APT File</el-col>
         <el-col :span="15">{{ apt_file }}</el-col>
         <el-col :span="2">
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="7" class="label">Test Directory</el-col>
+        <el-col :span="15">{{ test_directory }}</el-col>
+        <el-col :span="2">
+          <directory-select @input="testDirectorySelect"></directory-select>
         </el-col>
       </el-row>
       <el-row>
@@ -71,6 +82,10 @@
       airportsDirectorySelect: function (flightgearDirectory) {
         console.log(flightgearDirectory)
         this.$store.commit('AIPORTS_DIRECTORY', flightgearDirectory.path)
+      },
+      testDirectorySelect: function (testDirectory) {
+        console.log(testDirectory)
+        this.$store.commit('TEST_DIRECTORY', testDirectory.path)
       }
     },
     computed: {
@@ -98,6 +113,9 @@
       },
       airports_directory: function () {
         return this.$store.state.Settings.settings.airportsDirectory
+      },
+      test_directory: function () {
+        return this.$store.state.Settings.settings.testDirectory
       }
     }
   }

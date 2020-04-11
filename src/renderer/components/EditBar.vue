@@ -4,6 +4,7 @@
     <EditButton icon="fas fa-th" v-on:click="zoomin" :show="true" tooltip="Zoomin"></EditButton>
     <EditButton icon="fas fa-th-large" v-on:click="zoomout" :show="true" tooltip="Zoomout"></EditButton>
     <EditButton icon="fas fa-upload" v-on:click="upload" :show="!editing" tooltip="Upload"></EditButton>
+    <EditButton icon="fas fa-plane" v-on:click="test" :show="!editing" tooltip="Test"></EditButton>
     <EditButton icon="fas fa-edit" v-on:click="edit" :show="!editing" tooltip="Edit"></EditButton>
     <EditButton
       icon="fas fa-undo"
@@ -53,6 +54,7 @@
 
   import fileUrl from 'file-url'
   const path = require('path')
+  const fs = require('fs');
 
   export default {
     components: { EditButton, Upload },
@@ -112,7 +114,9 @@
           }
         }, 1000)
       },
-
+      test() {
+        this.$parent.$parent.$refs.editLayer.test()
+      },
       check () {
         try {
           this.scanning = true
