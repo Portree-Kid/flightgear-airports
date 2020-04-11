@@ -69,6 +69,9 @@
                 parent.$refs.upload.message += element.message + '\r\n';
               });
             }
+          } else if(JSON.parse(e.srcElement.response) !== undefined) {
+            var response = JSON.parse(e.srcElement.response);
+            parent.$refs.upload.message = response.err;
           } else {            
             parent.$refs.upload.message = response.message;
           }
