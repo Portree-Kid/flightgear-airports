@@ -68,10 +68,12 @@
       },
       airlines: function () {
         var airlineCodes = []
-        var storedairlineCodes = this.$store.state.Airports.currentAirport.airlines
-        storedairlineCodes.forEach(element => {
-          airlineCodes.push({value: element, label: element})
-        })
+        if (this.$store.state.Airports.currentAirport !== undefined) {
+          var storedairlineCodes = this.$store.state.Airports.currentAirport.airlines
+          storedairlineCodes.forEach(element => {
+            airlineCodes.push({value: element, label: element})
+          })
+        }
         return airlineCodes
       },
       groundnet: function () {
