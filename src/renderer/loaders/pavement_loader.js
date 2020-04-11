@@ -317,16 +317,28 @@ var scanMethods = {
             runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing + 90)));
             runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (bearing + 90)));
             runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (bearing - 90)));
-            runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing - 90)));
-
+            runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing - 90)));            
 
             var runwayPoly = new L.Polygon(runwayPoints);
             runwayPoly.setStyle({ color: 'grey', interactive: false });
             runwayPoly.addTo(layerGroup);
 
-            var runwayLine = new L.Polyline([point1, point2]);
-            runwayLine.setStyle({ color: 'red' });
-            // runwayLine.addTo(layerGroup);          
+            var displacedEnd1 = point1.destinationPoint(Number(line[20]), bearing)
+            var displacedEnd2 = point2.destinationPoint(Number(line[20]), bearing-180)
+
+            var runwayLine = new L.Polyline([displacedEnd1, displacedEnd2]);
+            runwayLine.setStyle({ color: 'yellow', stroke: true, dashArray: [50,50] });
+            runwayLine.addTo(layerGroup);
+            
+            var t1 = new L.Polyline([displacedEnd1.destinationPoint(runwayWidth / 2, (bearing - 90)), 
+                displacedEnd1.destinationPoint(runwayWidth / 2, (bearing + 90))]);
+            t1.setStyle({ color: 'yellow' });
+            t1.addTo(layerGroup);
+
+            var t2 = new L.Polyline([displacedEnd2.destinationPoint(runwayWidth / 2, (bearing - 90)), 
+                displacedEnd2.destinationPoint(runwayWidth / 2, (bearing + 90))]);
+            t2.setStyle({ color: 'yellow' });
+            t2.addTo(layerGroup);
 
             var runwayLine1 = new L.Polyline([point1, destination]);
             runwayLine1.setStyle({ color: 'red' });
