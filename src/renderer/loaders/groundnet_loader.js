@@ -39,8 +39,8 @@ exports.readGroundnetXML = function (fDir, icao, force) {
         var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.xml');
         var fNew = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');
 
-        if (f == null || !fs.existsSync(f))
-            return;
+        if (f == null || (!fs.existsSync(f) && force)|| (!fs.existsSync(f) && !fs.existsSync(fNew) ))
+            return layerGroup;
         if (fNew != null && fs.existsSync(fNew) && !force) {
             f = fNew;
         }

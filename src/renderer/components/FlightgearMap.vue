@@ -16,7 +16,8 @@
     <!--<l-marker :lat-lng="marker"></l-marker>-->
     <LeafletSidebar></LeafletSidebar>
     <EditBar></EditBar>
-    <PavementLayer ref="pavementLayer"></PavementLayer>
+    <AiLayer ref="aiLayer"></AiLayer> 
+    <PavementLayer ref="pavementLayer"></PavementLayer>    
     <ThresholdLayer ref="thresholdLayer"></ThresholdLayer>
     <l-layer-group layerType="overlay" name="airports" ref="airportLayer">
       <l-circle
@@ -37,6 +38,7 @@
   import 'leaflet/dist/leaflet.css'
   import { LMap, LTileLayer, LMarker, LCircle, LLayerGroup, LControl } from 'vue2-leaflet'
   import LeafletSidebar from './LeafletSidebar'
+  import AiLayer from './AiLayer'
   import EditBar from './EditBar'
   import EditLayer from './EditLayer'
   import PavementLayer from './PavementLayer'
@@ -53,7 +55,7 @@
   })
   export default {
     name: 'flightgear-map',
-    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, EditBar, EditLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer },
+    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, AiLayer, EditBar, EditLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer },
     props: [],
     mounted () {
       this.$store.dispatch('getAirports')

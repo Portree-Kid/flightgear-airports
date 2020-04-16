@@ -51,6 +51,14 @@
         </el-col>
       </el-row>
       <el-row>
+        <el-col :span="22" class="label">Phi Host Url</el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24" class="label">
+            <el-input placeholder="Please input a valid Phi URL" v-model="phi_url"></el-input>
+        </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="7" class="label">Author : </el-col>
         <el-col :span="17">
             <el-input placeholder="Please input your email" v-model="email"></el-input>
@@ -97,6 +105,16 @@
         // setter
         set: function (newValue) {
           this.$store.commit('SET_EMAIL', newValue)
+        }
+      },
+      phi_url: {
+      // getter
+        get: function () {
+          return this.$store.state.Settings.settings.phi_url
+        },
+        // setter
+        set: function (newValue) {
+          this.$store.commit('SET_PHI_URL', newValue)
         }
       },
       flightgear_directory: function () {

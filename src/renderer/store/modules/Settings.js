@@ -1,5 +1,6 @@
+/* eslint-disable */
 const state = {
-  settings: { flightgearDirectory: '.', testDirectory: '.', email: 'x' },
+  settings: { flightgearDirectory: '.', testDirectory: '.', email: 'x', phi_url: 'http://localhost:8080' },
   zoom: 14,
   center: [47.413220, -1.219482],
   bounds: undefined,
@@ -32,10 +33,13 @@ const mutations = {
   'SET_EMAIL' (state, email) {
     state.settings.email = email
   },
+  'SET_PHI_URL' (state, phi_url) {
+    state.settings.phi_url = phi_url
+  },  
   'ADD_WIP' (state, airport) {
     const item = state.wip.find((e) => e.icao === airport.icao)
     airport.time = Date.now()
-    if (item === null) {
+    if (item === null || item === undefined) {
       state.wip.push(airport)
     } else {
       Object.assign(item, airport)
