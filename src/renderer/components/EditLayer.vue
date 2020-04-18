@@ -389,6 +389,41 @@
           event.target.addTo(this.groundnetLayerGroup)
         })
       },
+      drawPushbackPolyline () {
+        var polyLine = this.$parent.mapObject.editTools.startPolyline()
+        polyLine.addTo(this.groundnetLayerGroup)
+        polyLine.groundnetLayerGroup = this.groundnetLayerGroup;
+        polyLine.attributes = [];
+        polyLine.options.attributes = {isPushBackRoute: 1, direction: 'bi-directional' };
+        polyLine.featureLookup = this.featureLookup;
+        extendTaxiSegment(polyLine);
+        polyLine.setEditlayer(this);
+        polyLine.updateStyle();
+        //polyLine.extensions(this);
+        polyLine.addListeners()
+
+        polyLine.on('editable:drawing:end', event => {
+          console.log(event)
+          event.target.addTo(this.groundnetLayerGroup)
+          var pt = event.sourceTarget._latlngs[event.sourceTarget._latlngs.length-1];          
+          pt.attributes.holdPointType = 'PushBack'
+          var nIndex = pt.attributes.index
+          var fa_icon = "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-arrows-alt-h'></i>";
+          const icon = new L.DivIcon({
+              className: 'custom-div-icon',
+              html: fa_icon,
+              iconSize: [30, 42],
+              iconAnchor: [15, 42]
+          });
+          const node = new L.HoldNode(pt, { icon: icon });
+          node.glueindex = nIndex;
+          node.addTo(this.groundnetLayerGroup);
+          node.featureLookup = this.featureLookup;
+          this.featureLookup[nIndex].push(node);
+          node.addListeners();
+          node.extensions();
+        })
+      },
       editedParking() {
         console.log('Edited Parking : ' + this.$store.state.Editable.data.parking)
         if (this.$store.state.Editable.index === undefined ||

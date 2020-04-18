@@ -31,6 +31,12 @@
       tooltip="Draw Taxiline"
     ></EditButton>
     <EditButton
+      icon="fas fa-arrows-alt-h"
+      v-on:click="drawPushbackPolyline"
+      :show="editing"
+      tooltip="Draw Taxiline"
+    ></EditButton>
+    <EditButton
       icon="fas fa-parking"
       v-on:click="drawParking"
       :show="editing"
@@ -175,6 +181,9 @@
       },
       drawPolyline () {
         this.$parent.$parent.$refs.editLayer.drawPolyline()
+      },
+      drawPushbackPolyline () {
+        this.$parent.$parent.$refs.editLayer.drawPushbackPolyline()
       },
       drawParking () {
         this.$parent.$parent.$refs.editLayer.drawParking()

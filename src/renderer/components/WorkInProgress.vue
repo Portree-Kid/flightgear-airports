@@ -40,7 +40,7 @@
     },
     computed: {
       wip: function () {
-        return this.$store.state.Settings.wip
+        return this.$store.state.Settings.wip.sort((p, p2) => { return p.date > p2.date })
       }
     }
 }
@@ -50,4 +50,6 @@
 .text {
   padding: 10px;
 }
-</style>
+.el-row {
+    margin-bottom: 0px;
+}</style>

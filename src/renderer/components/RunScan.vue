@@ -182,9 +182,12 @@
               this.scanning = false
               console.log('DONE')
               store.dispatch('getAirports')
-              worker.view.max = 0
-              worker.view.scanning = false
-              worker.terminate()
+              if (worker.view.max !== undefined) {
+                worker.view.max = 0
+              }
+              if (worker.view.scanning !== undefined) {
+                worker.view.scanning = false
+              }
               clearInterval(this.polling)
             } else if (e.data.length > 0) {
               if (e.data[0] === 'max') {

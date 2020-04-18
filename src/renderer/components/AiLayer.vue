@@ -31,7 +31,4 @@
 </script>
 
 <style scoped lang="scss">
-  .ai-layer {
-
-  }
 </style>
