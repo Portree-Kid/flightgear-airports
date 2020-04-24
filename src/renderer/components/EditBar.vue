@@ -34,7 +34,7 @@
       icon="fas fa-arrows-alt-h"
       v-on:click="drawPushbackPolyline"
       :show="editing"
-      tooltip="Draw Taxiline"
+      tooltip="Draw Pushback"
     ></EditButton>
     <EditButton
       icon="fas fa-parking"
