@@ -7,9 +7,9 @@
       </div>
     </h1>
     <el-container direction="vertical">
-        <li v-for="p in parkings" v-bind:key="p.index">
+        <div v-for="p in parkings" v-bind:key="p.index" class="row">
           <ParkingItem :parking="p"></ParkingItem>
-        </li>
+        </div>
     </el-container>
   </div>
 </template>
@@ -34,8 +34,18 @@
         },
         // setter
         set: function (newValue) {
+          console.log(newValue)
         }
       }
     }
 }
 </script>
+
+<style>
+div.row.div {
+  display: flex;
+  justify-content: space-between;
+}
+</style>
+
+

@@ -7,7 +7,7 @@ const store = require('../store');
 
 var $ = require('jquery');
 L.Threshold = L.Circle.extend({
-    highlight() {
+    select() {
         var style = {};
         style['color'] = 'red';
         this.setStyle(style);
@@ -35,7 +35,7 @@ L.Threshold = L.Circle.extend({
         this.on('click', function (event) {
             console.log("Click : " + event.target);
             store.default.dispatch('setParking', event.target.options.attributes);
-            this.highlight(); 
+            this.select(); 
             this.unwatch = store.default.watch(
                 function (state) {
                         return state.Editable.data.parking;

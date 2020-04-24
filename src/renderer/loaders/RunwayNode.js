@@ -42,7 +42,7 @@ L.RunwayNode = L.Marker.extend({
 
         });
     },
-    highlight() {
+    select() {
         try {
             this._icon.style['color'] = 'red';            
         } catch (error) {

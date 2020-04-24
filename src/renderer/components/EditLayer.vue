@@ -15,6 +15,8 @@
   const path = require('path')
   const fs = require('fs')
 
+  var selectedItem
+
   // import {LSymbol} from 'leaflet-polylinedecorator'
 
   export default {
@@ -59,6 +61,16 @@
               return state.Editable.data.parking;
           },
           () => { this.editedParking() }
+          ,
+          {
+            deep: true //add this if u need to watch object properties change etc.
+          }
+        );
+      this.$store.watch(
+        function (state) {
+              return state.Parkings.items;
+          },
+          () => { this.editedParkings() }
           ,
           {
             deep: true //add this if u need to watch object properties change etc.
@@ -134,6 +146,9 @@
       },
       showCheck() {
         Vue.set(this, 'checking', true)
+      },
+      getEditing () {
+        return this.editing;
       },
       enableEdit () {
         this.editable = true
@@ -245,14 +260,22 @@
             var latlng = {};
             latlng.lat =  element._latlng.lat;
             latlng.lng =  element._latlng.lng;
-            element.highlight();
+            if (this.selectedItem != null) {
+              this.selectedItem.deselect();
+            }
+            this.selectedItem = element;
+            element.select();
             this.$store.dispatch('setCenter', latlng);
           } else if (element instanceof L.ParkingSpot) {
             console.log(element);
             var latlng = {};
             latlng.lat =  element._latlng.lat;
             latlng.lng =  element._latlng.lng;
-            element.highlight();
+            if (this.selectedItem != null) {
+              this.selectedItem.deselect();
+            }
+            this.selectedItem = element;
+            element.select();
             this.$store.dispatch('setCenter', latlng);
           }
         });
@@ -438,6 +461,30 @@
             element.updateVertexFromDirection();           
           }
         })
+      },
+      editedParkings() {
+        console.log('Edited Parkings : ' + this.$store.state.Parkings.items)
+        this.$store.state.Parkings.items.forEach( newElement => {
+          console.log(newElement);
+          this.featureLookup[newElement.index].forEach((element,index) => {
+            if (element instanceof L.ParkingSpot) {
+              element.options.attributes.name = newElement.name
+              element.options.attributes.number = newElement.number
+              element.options.attributes.type = newElement.type
+              //element.updateVertexFromDirection();           
+            }
+          })
+        })
+
+/*
+        this.$store.dispatch('updatedParking', this.$store.state.Editable.data.parking);
+        this.featureLookup[this.$store.state.Editable.index].forEach((element,index) => {
+          if (element instanceof L.ParkingSpot) {
+            element.options.attributes = Object.assign({}, this.$store.state.Editable.data.parking)
+            element.updateVertexFromDirection();           
+          }
+        })
+*/        
       },
       editedArc() {
         console.log('Edited Arc : ' + this.$store.state.Editable.index);

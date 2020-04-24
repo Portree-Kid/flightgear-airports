@@ -89,11 +89,16 @@ L.ParkingSpot = L.Circle.extend({
             this.direction.setLatLngs([start, end]);
         }
     },
-    highlight() {
+    select() {
         var style = {};
         style['color'] = 'red';
-        this.setStyle(style);
+        this.setStyle(style);        
     },    
+    deselect() {
+        var style = {};
+        style['color'] = '#3388ff';
+        this.setStyle(style);
+    },
     addListeners: function () {
         this.on('editable:drawing:move', function (event) {
             console.log("Move : ", event);
@@ -117,7 +122,7 @@ L.ParkingSpot = L.Circle.extend({
         this.on('click', function (event) {
             console.log("Click : " + event.target);
             store.default.dispatch('setParking', event.target.options.attributes);
-            this.highlight(); 
+            this.select(); 
             this.unwatch = store.default.watch(
                 function (state) {
                         return state.Editable.data.parking;
@@ -139,6 +144,7 @@ L.ParkingSpot = L.Circle.extend({
             if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){
                 event.vertex._icon.style['background-color'] = 'red';
                 store.default.dispatch('setParking', event.target.options.attributes);
+                this.select();
                 this.unwatch = store.default.watch(
                     function (state) {
                             return state.Editable.data.parking;

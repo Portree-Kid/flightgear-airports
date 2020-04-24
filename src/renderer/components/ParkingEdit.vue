@@ -16,13 +16,13 @@
         <span class="demo-input-label">Name :</span>
       </el-col>
       <el-col :span="8">
-        <el-input placeholder="Please input" v-model="name"></el-input>
+        <el-input placeholder="Name" v-model="name"></el-input>
       </el-col>
       <el-col :span="4">
         <span class="demo-input-label">Number :</span>
       </el-col>
       <el-col :span="8">
-        <el-input placeholder="Please input" v-model="number"></el-input>
+        <el-input placeholder="Number" v-model="number"></el-input>
       </el-col>
     </el-row>
     <el-row>
@@ -232,7 +232,7 @@
           {value: 'cargo', label: 'cargo'},
           {value: 'gate', label: 'commercial passenger traffic'},
           {value: 'mil-fighter', label: 'military fighter'},
-          {value: 'mil-cargo', label: 'commercial passenger traffic'}
+          {value: 'mil-cargo', label: 'military cargo'}
         ]
       },
       parking_type: {

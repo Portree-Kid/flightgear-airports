@@ -14,6 +14,18 @@ const mutations = {
   },
   SET_PARKINGS (state, parkings) {
     Vue.set(state, 'items', parkings)
+  },
+  'SET_EDIT_PARKING_ITEM_NAME' (state, value) {
+    const existingItem = state.items.find((i) => i.index === value[0])
+    Vue.set(existingItem, 'name', value[1])
+  },
+  'SET_EDIT_PARKING_ITEM_NUMBER' (state, value) {
+    const existingItem = state.items.find((i) => i.index === value[0])
+    Vue.set(existingItem, 'number', value[1])
+  },
+  'SET_EDIT_PARKING_ITEM_TYPE' (state, value) {
+    const existingItem = state.items.find((i) => i.index === value[0])
+    Vue.set(existingItem, 'type', value[1])
   }
 }
 
