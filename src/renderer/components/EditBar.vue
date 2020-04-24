@@ -2,7 +2,7 @@
   <div id="EditBar">
     <Upload :visible.sync="uploadVisible" ref="upload"></Upload>
     <EditButton icon="fas fa-th" v-on:click="zoomin" :show="true" tooltip="Zoomin"></EditButton>
-    <EditButton icon="fas fa-th-large" v-on:click="zoomout" :show="true" tooltip="Zoomout"></EditButton>
+    <EditButton icon="fas fa-th-large" v-on:click="zoomout" :show="!editing" tooltip="Zoomout"></EditButton>
     <EditButton icon="fas fa-upload" v-on:click="upload" :show="!editing" tooltip="Upload"></EditButton>
     <EditButton icon="fas fa-plane" v-on:click="test" :show="!editing" tooltip="Test"></EditButton>
     <EditButton icon="fas fa-edit" v-on:click="edit" :show="!editing" tooltip="Edit"></EditButton>
@@ -81,22 +81,26 @@
       },
       edit () {
         this.editing = true
+        this.$parent.$parent.$refs.map.mapObject.options.minZoom = 13;
         this.$parent.$parent.$refs.editLayer.enableEdit()
       },
       undoFirst () {
         this.editing = false
         this.centerDialogVisible = false
+        this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         this.$parent.$parent.$refs.editLayer.disableEdit()
         this.$parent.$parent.$refs.editLayer.reload(true)
       },
       undoLast () {
         this.editing = false
         this.centerDialogVisible = false
+        this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         this.$parent.$parent.$refs.editLayer.disableEdit()
         this.$parent.$parent.$refs.editLayer.reload(false)
       },
       save () {
         this.editing = false
+        this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         Vue.set(this, 'saveDialogVisible', true)
         this.editing = false
         Vue.nextTick( function () {
