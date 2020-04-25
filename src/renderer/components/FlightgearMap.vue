@@ -27,7 +27,7 @@
         :radius="((item.properties.flights+5)*20)"
         :color="item.color"
         @add="addEvent($event, item)"
-        @click="onClick(item)"
+        @click="onClick($event, item)"
       ></l-circle>
     </l-layer-group>
     <EditLayer ref="editLayer"></EditLayer>
@@ -123,17 +123,39 @@
                   bounds.getSouthWest().lng < Number(coordinates[0])
         return ret && ret2
       },
-      // Triggered by adding airports to the map
-      addEvent (event, item) {
-        // console.log(event, item)
-        if (item.properties.groundnet === 0) {
-          event.target.setStyle({color: 'red', fillColor: 'red'})
-        } else if ((item.properties.flights / item.properties.parking) > 40) {
-          event.target.setStyle({color: 'yellow', fillColor: 'yellow'})
+      normalStyle (target) {
+        if (target.airport.properties.groundnet === 0) {
+          target.setStyle({color: 'red', fillColor: 'red', weight: '2'})
+        } else if ((target.airport.properties.flights / target.airport.properties.parking) > 40) {
+          target.setStyle({color: 'yellow', fillColor: 'yellow', weight: '2'})
+        } else {
+          target.setStyle({color: '#3388ff', fillColor: '#3388ff', weight: '2'})
         }
       },
-      onClick (item) {
+      highlightStyle (target) {
+        if (target.airport.properties.groundnet === 0) {
+          target.setStyle({color: 'red', fillColor: 'red', weight: '5'})
+        } else if ((target.airport.properties.flights / target.airport.properties.parking) > 40) {
+          target.setStyle({color: 'yellow', fillColor: 'yellow', weight: '5'})
+        } else {
+          target.setStyle({color: '#3388ff', fillColor: '#3388ff', weight: '5'})
+        }
+      },
+      // Triggered by adding airports to the map
+      addEvent (event, item) {
+        this.selected = null
+        event.target.airport = item
+        // console.log(event, item)
+        this.normalStyle(event.target)
+      },
+      onClick (event, item) {
         console.log(item)
+        if (this.selected !== null) {
+          this.normalStyle(this.selected)
+        }
+        this.selected = event.target
+        this.highlightStyle(this.selected)
+        event.target.bringToBack()
         this.setIcao(item.properties.icao)
         this.$store.commit('SET_EDIT_AIRPORT', item.properties)
       },
