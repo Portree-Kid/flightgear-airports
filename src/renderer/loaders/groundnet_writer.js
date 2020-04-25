@@ -60,7 +60,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         if (f == null)
             return;
 
-        console.log(featureList);
+        console.debug(featureList);
 
         var parkings = featureList.map(mapParkings).filter(n => n);
         var runwayNodes = featureList.map(mapRunwayNodes).filter(n => n);
@@ -90,7 +90,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         featureList.filter(o => o instanceof L.Polyline).filter(n => n).forEach(arcElement => {
             //            element._latlngs.forEach(latlng => { nodes[latlng.__vertex.glueindex] = mapVertexNode(latlng) });    
             var startIndex = -1;
-            console.log(arcElement.options.attributes);
+            console.debug(arcElement.options.attributes);
             var currentArc = arcElement.options.attributes;
             arcElement._latlngs.forEach( latlng => {
                 if (latlng.__vertex !== undefined && latlng.__vertex.glueindex !== undefined) {
@@ -161,7 +161,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
 
         xmlString = builder.create(xmlObj).end({ pretty: true });
         fs.writeFileSync(f, xmlString);
-        console.log(xmlString);
+        console.debug(xmlString);
     } catch (error) {
         console.error(error);
     }
@@ -173,18 +173,18 @@ var mapFrequency = function (o) {
 }
 
 var mapParkings = function (o) {
-    console.log(o);
+    console.debug(o);
     if (o instanceof L.ParkingSpot) {
         var lat = convertLat(o.getLatLng());
         var lon = convertLon(o.getLatLng());
         // <Parking index="0" type="gate" name="GA_Parking" lat="S9 25.739923" lon="E160 2.927602" heading="67"  radius="44" airlineCodes="" />
         var parking = { '@index': String(o['id']), '@type': o.options.attributes.type, '@name': o.options.attributes.name, '@lat': lat, '@lon': lon, '@heading': Number(o.options.attributes.heading%360).toFixed(1), '@radius': String(o.options.attributes.radius) };
         if( o.options.attributes.airlineCodes) {
-            console.log(o.options.attributes.airlineCodes);
+            console.debug(o.options.attributes.airlineCodes);
             parking['@airlineCodes'] = o.options.attributes.airlineCodes;
         }
         if( o.options.attributes.number) {
-            console.log(o.options.attributes.number);
+            console.debug(o.options.attributes.number);
             parking['@number'] = o.options.attributes.number;
         }
 
@@ -193,7 +193,7 @@ var mapParkings = function (o) {
 }
 
 var mapRunwayNodes = function (o) {
-    console.log(o);
+    console.debug(o);
     if (o instanceof L.RunwayNode) {
         var runwayNode = { '@index': String(o['glueindex']), 
         '@lat': convertLat(o._latlng), 
@@ -215,7 +215,7 @@ var mapHoldPoint = function (o) {
 
 var mapBeginNode = function (o) {
     if (o instanceof L.TaxiwaySegment) {
-        console.log(o);
+        console.debug(o);
         // <Parking index="0" type="gate" name="GA_Parking" lat="S9 25.739923" lon="E160 2.927602" heading="67"  radius="44" airlineCodes="" />
         return { '@index': String(o['begin']), '@lat': convertLat(o._latlngs[0]), '@lon': convertLon(o._latlngs[0]), '@isOnRunway': '0', '@type': 'begin' };
     }
@@ -223,7 +223,7 @@ var mapBeginNode = function (o) {
 
 var mapEndNode = function (o) {
     if (o instanceof L.TaxiwaySegment) {
-        console.log(o);
+        console.debug(o);
         // <Parking index="0" type="gate" name="GA_Parking" lat="S9 25.739923" lon="E160 2.927602" heading="67"  radius="44" airlineCodes="" />
         return { '@index': String(o['end']), '@lat': convertLat(o._latlngs[1]), '@lon': convertLon(o._latlngs[1]), '@isOnRunway': '0', '@type': 'end' };
     }
@@ -231,32 +231,32 @@ var mapEndNode = function (o) {
 
 var mapVertexNode = function (l) {
     if (l instanceof L.LatLng) {
-        console.log(l);
+        console.debug(l);
         // <Parking index="0" type="gate" name="GA_Parking" lat="S9 25.739923" lon="E160 2.927602" heading="67"  radius="44" airlineCodes="" />
         return { '@index': String(l.__vertex.glueindex), '@lat': convertLat(l), '@lon': convertLon(l), '@isOnRunway': '0', '@holdPointType': l.attributes['holdPointType'] };
     }
 }
 
 var convertLat = function (latlng) {
-    console.log(latlng.lat);
+    console.debug(latlng.lat);
     var NS = latlng.lat > 0 ? 'N' : 'S';
     var deg = mathjs.floor(mathjs.abs(latlng.lat));
     var min = (mathjs.abs(latlng.lat) - deg) * 60;
-    // console.log(NS + deg + " " + min);
+    // console.debug(NS + deg + " " + min);
     return NS + String(deg).padStart(2, '0') + " " + mathjs.round(min, 3);
 }
 
 var convertLon = function (latlng) {
-    console.log(latlng.lng);
+    console.debug(latlng.lng);
     var NS = latlng.lng > 0 ? 'E' : 'W';
     var deg = mathjs.floor(mathjs.abs(latlng.lng));
     var min = (mathjs.abs(latlng.lng) - deg) * 60;
-    // console.log(NS + deg + " " + min);
+    // console.debug(NS + deg + " " + min);
     return NS + String(deg).padStart(2, '0') + " " + mathjs.round(min, 3);
 }
 
 var styleArc = function (attributes, arc) {
-    console.log(attributes);
+    console.debug(attributes);
     if(attributes !== undefined){
         if (attributes.isPushBackRoute !== undefined && Number(attributes.isPushBackRoute) === 1 ) {
             arc['@isPushBackRoute'] = "1";
