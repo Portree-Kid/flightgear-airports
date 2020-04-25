@@ -191,7 +191,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                                 polyline._latlngs[1].attributes[key] = Number(value);
                         });
                         $.each(n.attrs, function (key, value) {
-                            console.log(key + "\t" + value);
+                            console.debug(key + "\t" + value);
 
                             if (isNaN(value))
                                 polyline.options.attributes[key] = value;

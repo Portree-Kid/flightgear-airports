@@ -28,16 +28,16 @@ L.ParkingSpot = L.Circle.extend({
     updateMiddleMarker: function() {
       if (this.editEnabled()) {
           try {
-            console.log("Update Middle ", this.editor.editLayer._layers[0]);
+            console.debug("Update Middle ", this.editor.editLayer._layers[0]);
             var o = this.editor.editLayer._layers;
     
-            console.log(o);
+            console.debug(o);
             for (var key in o) {
                 if (o.hasOwnProperty(key)) {
-                    console.log(key, o[key]);
-                    console.log(this.editor._resizeLatLng.__vertex==o[key]);
-                    // console.log(this.editor._resizeLatLng.__vertex._icon);
-                    console.log(o[key] == this.direction);
+                    console.debug(key, o[key]);
+                    console.debug(this.editor._resizeLatLng.__vertex==o[key]);
+                    // console.debug(this.editor._resizeLatLng.__vertex._icon);
+                    console.debug(o[key] == this.direction);
                     if (this.editor._resizeLatLng.__vertex!=o[key] &&
                          o[key] != this.direction) {
                             o[key].setLatLng(this.getLatLng());
@@ -47,11 +47,11 @@ L.ParkingSpot = L.Circle.extend({
             //Object.values(o);
             /*
             .forEach(vertex => {
-              console.log(this.editor._resizeLatLng.__vertex==vertex);          
+              console.debug(this.editor._resizeLatLng.__vertex==vertex);          
             });
             */                  
           } catch (error) {
-            console.log(error);
+            console.error(error);
           }
       }
     },
@@ -83,7 +83,7 @@ L.ParkingSpot = L.Circle.extend({
 
             const output = counts.reduce((prev, curr) => Math.abs(curr - this._mRadius) < Math.abs(prev - this._mRadius) ? curr : prev);
 
-            console.log(output);
+            console.debug(output);
             this._mRadius = output;
             this.options.attributes.radius = this._mRadius;
             this.direction.setLatLngs([start, end]);
@@ -101,8 +101,8 @@ L.ParkingSpot = L.Circle.extend({
     },
     addListeners: function () {
         this.on('editable:drawing:move', function (event) {
-            console.log("Move : ", event);
-            console.log("Move : ", event.latlng);
+            console.debug("Move : ", event);
+            console.debug("Move : ", event.latlng);
             // Is it the edit vertex (Middle) moving?
             if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){
                 event.target.setLatLng(event.latlng);
@@ -116,11 +116,11 @@ L.ParkingSpot = L.Circle.extend({
         });
         /*        
         this.on('editable:vertex:drag', function (event) {
-            console.log("Drag : ", event);
+            console.debug("Drag : ", event);
         });
         */
         this.on('click', function (event) {
-            console.log("Click : " + event.target);
+            console.debug("Click : " + event.target);
             store.default.dispatch('setParking', event.target.options.attributes);
             this.select(); 
             this.unwatch = store.default.watch(
@@ -140,7 +140,7 @@ L.ParkingSpot = L.Circle.extend({
             );
         });        
         this.on('editable:vertex:clicked', function (event) {
-            console.log(this.featureLookup[event.vertex.glueindex]);
+            console.debug(this.featureLookup[event.vertex.glueindex]);
             if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){
                 event.vertex._icon.style['background-color'] = 'red';
                 store.default.dispatch('setParking', event.target.options.attributes);
@@ -215,10 +215,10 @@ L.ParkingSpot = L.Circle.extend({
                         element.updateMiddle();
                     }
                 } else if (element instanceof L.Editable.VertexMarker) {
-                    console.log(element);
+                    console.debug(element);
                     element.setLatLng(event.latlng);
                     element.latlngs.forEach((latlng, index) => {
-                        console.log(latlng);
+                        console.debug(latlng);
                         if (latlng.__vertex === element) {
                             latlng.update(event.latlng);
                         }
@@ -266,7 +266,7 @@ airlineCodes="VIR,KAL,DAL,KLM" />
     //circle.attributes = { type: n.attr('type'), name: n.attr('name'), radius: Number(n.attr('radius')), airlineCodes: n.attr('airlineCodes'), heading: Number(n.attr('heading')) };
 
     $.each( n.attrs, function( key, value ) {
-        console.log( '$', circle.id, key , value);
+        console.debug( '$', circle.id, key , value);
         
         if(isNaN(value))
           circle.options.attributes[ key ] = value;

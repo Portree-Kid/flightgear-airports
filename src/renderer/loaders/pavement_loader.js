@@ -86,7 +86,7 @@ function bezier(line, icao, layerGroup, currentFeature) {
             for (let index = 0; index < points.length; index++) {
                 const element = points[index];
                 if (element[0] === "NaN") {
-                    console.log(control);
+                    console.debug(control);
                 }
                 currentFeature.slice(-1)[0].push(element);
             }
@@ -105,7 +105,7 @@ function bezier(line, icao, layerGroup, currentFeature) {
             for (let index = 0; index < points.length; index++) {
                 const element = points[index];
                 if (element[0] === "NaN") {
-                    console.log(control);
+                    console.debug(control);
                 }
                 currentFeature.slice(-1)[0].push(element);
             }
@@ -276,7 +276,7 @@ module.exports.readPavement = function (f, icao, cb) {
             // console.log('Ignored:', line);
         }
     }).on('error', function (err) {
-        console.log(err);
+        console.error(err);
         lr.close();
     }).on('close', function () {
         console.log("End");
@@ -295,7 +295,7 @@ var scanMethods = {
     1: (line, icao) => {
         // console.log('Airport:', line);
         if (line[4] === icao) {
-            console.log('Airport:', line);
+            console.debug('Airport:', line);
             module.exports.isScanning = true;
         } else {
             module.exports.isScanning = false;
@@ -304,7 +304,7 @@ var scanMethods = {
     // Runway
     100: (line, icao, layerGroup) => {
         if (module.exports.isScanning) {
-            console.log('Runway ', line);
+            console.debug('Runway ', line);
             var point1 = new LatLonEllipsoidal(Number(line[9]), Number(line[10]));
             var point2 = new LatLonEllipsoidal(Number(line[18]), Number(line[19]));
 
@@ -379,7 +379,7 @@ var scanMethods = {
     111: (line, icao, layerGroup, currentFeature) => {
         if (!module.exports.isScanning)
             return;
-        console.log(line);
+        console.debug(line);
         var previous = currentFeature.slice(-1)[0].slice(-1)[0];
         if (previous !== undefined &&
             previous !== null && 
@@ -397,14 +397,14 @@ var scanMethods = {
         if (!module.exports.isScanning) {
             return;
         }
-        console.log(line);
+        console.debug(line);
         return bezier(line, icao, layerGroup, currentFeature);
     },
     113: (line, icao, layerGroup, currentFeature) => {
         if (!module.exports.isScanning) {
             return;
         }
-        console.log(line);
+        console.debug(line);
         currentFeature.slice(-1)[0].push([line[1], line[2]]);
         currentFeature.push([]);
         exports.bezierPoint = null;
@@ -415,7 +415,7 @@ var scanMethods = {
         if (!module.exports.isScanning) {
             return;
         }
-        console.log(line);
+        console.debug(line);
         bezier(line, icao, layerGroup, currentFeature);
         currentFeature.push([]);
         exports.bezierPoint = null;
@@ -425,7 +425,7 @@ var scanMethods = {
     115: (line, icao, layerGroup, currentFeature) => {
         if (!module.exports.isScanning)
             return;
-        console.log(line);
+        console.debug(line);
         if (exports.bezierPoint !== null) {
             bezier(line, icao, layerGroup, currentFeature);
         }
@@ -439,7 +439,7 @@ var scanMethods = {
     116: (line, icao, layerGroup, currentFeature) => {
         if (!module.exports.isScanning)
             return;
-        console.log(line);
+        console.debug(line);
         currentFeature = bezier(line, icao, layerGroup, currentFeature);
         createLineString(currentFeature);
         exports.bezierPoint = null;
