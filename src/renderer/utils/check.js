@@ -38,7 +38,7 @@ onmessage = function (event) {
 async function checkGroundnet(data) {
     var promise = new Promise(function (resolve, reject) {
         try {
-            // debugger;
+            debugger;
             var parkings = data.map(mapParkings).filter(n => n !== undefined);
             var runwayNodes = data.map(mapRunwayNodes).filter(n => n !== undefined);
             var pushbackNodes = data.map(mapPushbackNodes).filter(n => n !== undefined);
@@ -79,7 +79,7 @@ async function checkGroundnet(data) {
                     this.postMessage(['progress', 1]);
                 });
             });
-            // Check forward parkings
+            // Check pushback parkings
             var noPushbackGraph = {};
             parkings.forEach(element => {
                 noPushbackGraph[element] = {};
@@ -100,6 +100,11 @@ async function checkGroundnet(data) {
 
             var okPushbacks = [];
             parkings.forEach(parkingNode => {
+                if(Object.keys(noPushbackGraph[parkingNode]).length === 0) {
+                    // Not connected to a pushback must be forward push
+                    okPushbacks.push(parkingNode);
+                    return;
+                }
                 pushbackNodes.forEach(pushbackNode => {
                     var ok = checkRoute(noPushbackGraph, parkingNode, pushbackNode);
                     if (ok) {
