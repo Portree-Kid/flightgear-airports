@@ -12,7 +12,7 @@
             ></el-option>
           </el-select>
         </el-col>
-        <el-col :span="15">
+        <el-col :span="13">
           <el-input
             placeholder="Please input frequency"
             v-model="value"
@@ -20,14 +20,19 @@
             v-bind:class="{ invalid: !ok && editing}"
           ></el-input>
         </el-col>
+        <el-col :span="2">
+          <el-button @click="remove" v-if="editing" ><i class="fas fa-trash-alt"></i></el-button>
+        </el-col>
       </el-row>
     </span>
   </div>
 </template>
 <script lang="js">
+  import EditButton from './EditButton'
 /* eslint-disable */
   export default  {
     name: 'frequency',
+    components: { EditButton },
     props: {frequency: Object},
     mounted () {
     },
@@ -37,6 +42,9 @@
       }
     },
     methods: {
+      remove () {
+        this.$store.dispatch('removeFrequency', this.frequency)
+      },
       isValid (frequency) {
         let ok = frequency >= 118 && frequency <= 137
         if (!ok) {
@@ -87,7 +95,7 @@
       value: {
       // getter
         get: function () {
-        return this.frequency.value;
+          return this.frequency.value;
         },
         // setter
         set: function (newValue) {
@@ -97,8 +105,6 @@
       }
     }
   }
-
-
 </script>
 
 <style scoped lang="scss">

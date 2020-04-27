@@ -455,6 +455,9 @@
           return
         }
         this.$store.dispatch('updatedParking', this.$store.state.Editable.data.parking);
+        if (this.featureLookup[this.$store.state.Editable.index]===undefined) {
+          return
+        }
         this.featureLookup[this.$store.state.Editable.index].forEach((element,index) => {
           if (element instanceof L.ParkingSpot) {
             element.options.attributes = Object.assign({}, this.$store.state.Editable.data.parking)

@@ -98,6 +98,6 @@
 <style lang="scss" scoped>
    .el-row {
      padding: 0em;
-     margin-bottom: 10px;
+     margin-bottom: 5px;
    }
 </style>
