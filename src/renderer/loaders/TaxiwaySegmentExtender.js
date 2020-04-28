@@ -104,6 +104,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
               event.vertex.latlng.attributes = {index: event.vertex.glueindex, isOnRunway: 0};
               this.editLayer.featureLookup[event.vertex.glueindex] = [];
               this.editLayer.featureLookup[event.vertex.glueindex].push(event.vertex);
+              this.editLayer.featureLookup[event.vertex.glueindex].push(taxiwaySegment);
               if (taxiwaySegment.options.attributes.start === undefined) {
                 taxiwaySegment.options.attributes.start =  event.vertex['glueindex']
               } else {
