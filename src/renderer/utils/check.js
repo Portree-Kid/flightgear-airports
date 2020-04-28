@@ -38,7 +38,7 @@ onmessage = function (event) {
 async function checkGroundnet(data) {
     var promise = new Promise(function (resolve, reject) {
         try {
-            debugger;
+            //debugger;
             var parkings = data.map(mapParkings).filter(n => n !== undefined);
             var runwayNodes = data.map(mapRunwayNodes).filter(n => n !== undefined);
             var pushbackNodes = data.map(mapPushbackNodes).filter(n => n !== undefined);
