@@ -11,6 +11,7 @@
   import {writeGroundnetXML} from '../loaders/groundnet_writer'
   import L2 from 'leaflet-textpath'
   import Vue from 'vue'
+  import { MessageBox } from 'element-ui';
 
   const path = require('path')
   const fs = require('fs')
@@ -677,6 +678,7 @@
         writeGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, this.icao, xml)
         this.load(this.icao, false)
       },
+      //Copy to test directory
       test() {
         var f = path.join(this.$store.state.Settings.settings.airportsDirectory, this.icao[0], this.icao[1], this.icao[2], this.icao + '.groundnet.new.xml');
         var fNew = path.join(this.$store.state.Settings.settings.testDirectory, 'Airports', this.icao[0], this.icao[1], this.icao[2], this.icao + '.groundnet.xml');
@@ -686,6 +688,10 @@
         try { fs.mkdirSync(path.join(this.$store.state.Settings.settings.testDirectory, 'Airports', this.icao[0], this.icao[1], this.icao[2]), { recursive: true })} catch (err) { }
 
         fs.copyFileSync(f, fNew)
+        this.$message({
+          type: 'info',
+          message: `Copied to ${f}`
+        });
       },
       setVisible(visible) {
         if (this.layerGroup) {
