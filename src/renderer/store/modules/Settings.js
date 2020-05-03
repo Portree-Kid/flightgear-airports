@@ -44,6 +44,19 @@ const mutations = {
     } else {
       Object.assign(item, airport)
     }
+    state.wip.sort((p, p2) => { return p.date > p2.date })
+  },
+  'UPLOAD_WIP' (state, icao) {
+    const item = state.wip.find((e) => e.icao === icao)
+    item.upload = Date.now()
+    state.wip.sort((p, p2) => { return p.date > p2.date })
+  },
+  'REMOVE_WIP' (state, icao) {
+    const item = state.wip.find((e) => e.icao === icao)
+    const index = state.wip.indexOf(item)
+    if (index > -1) {
+      state.wip.splice(index, 1)
+    }
   }
 }
 
@@ -61,6 +74,9 @@ const actions = {
   },
   async addWip (context, airport) {
     context.commit('ADD_WIP', airport)
+  },
+  async removeWip (context, icao) {
+    context.commit('REMOVE_WIP', icao)
   }
 }
 

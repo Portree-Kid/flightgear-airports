@@ -62,6 +62,8 @@
             parent.$refs.upload.message == e.srcElement.statusText
           } else if(JSON.parse(e.srcElement.response).message.match('[A-Z0-9]* Imported Successfully')) {
             Vue.set(parent, 'uploadVisible', false)
+            parent.$store.commit('UPLOAD_WIP', parent.$store.state.Airports.currentAirport.icao)
+            
           } else if(JSON.parse(e.srcElement.response).message === 'XML Errors') {
             var response = JSON.parse(e.srcElement.response);
             if (response.validationErrors) {

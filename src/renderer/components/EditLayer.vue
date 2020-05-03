@@ -602,6 +602,7 @@
           node.extensions();
         }
       },
+      // Finde nearest node
       closestLayerSnap (eventLatlng, snap) {
         var layers = []
         this.groundnetLayerGroup.eachLayer((layer) => {

@@ -7,11 +7,14 @@
             </h1>
     <div>
       <el-row>
-        <el-col :span="6" class="text">
+        <el-col :span="3" class="text">
           ICAO
         </el-col>
-        <el-col :span="10" class="text">
+        <el-col :span="7" class="text">
           Edited
+        </el-col>
+        <el-col :span="9" class="text">
+          Uploaded
         </el-col>
         <el-col :span="6" class="text">
         </el-col>
@@ -40,7 +43,7 @@
     },
     computed: {
       wip: function () {
-        return this.$store.state.Settings.wip.sort((p, p2) => { return p.date > p2.date })
+        return this.$store.state.Settings.wip
       }
     }
 }
