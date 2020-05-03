@@ -1,6 +1,6 @@
 osx_image: xcode8.3
 sudo: required
-dist: trusty
+dist: xenial
 language: node_js
 node_js:
 - 10.15.3
@@ -8,6 +8,9 @@ matrix:
   include:
   - os: osx
   - os: windows
+  - os: linux
+  services: docker
+  language: generic
 cache:
   directories:
   - node_modules
