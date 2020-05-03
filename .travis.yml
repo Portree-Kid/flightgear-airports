@@ -9,8 +9,6 @@ matrix:
   - os: osx
   - os: windows
   - os: linux
-  services: docker
-  language: generic
 cache:
   directories:
   - node_modules
