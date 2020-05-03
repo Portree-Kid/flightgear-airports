@@ -1,6 +1,6 @@
 <template>
 <div>
-  <el-link v-if="!editing" type="primary" @click="show(parking.index)">{{parking.name}} {{parking.number}} {{parking.type}}</el-link>          
+  <el-link v-if="!editing" type="primary" @click="show(parking.index)">{{parking.name}} {{number}} {{parking.type}}</el-link>          
   <el-input @focus="show(parking.index)" v-if="editing" placeholder="Name" v-model="name" class="wide"></el-input>
   <el-input @focus="show(parking.index)" v-if="editing" placeholder="Number" v-model="number" class="narrow"></el-input>
   <el-select @focus="show(parking.index)" v-if="editing" v-model="parking_type" placeholder="Select">
@@ -61,6 +61,9 @@
       number: {
       // getter
         get: function () {
+          if (isNaN(this.parking.number)) {
+            return ''
+          }
           return this.parking.number
         },
         // setter
