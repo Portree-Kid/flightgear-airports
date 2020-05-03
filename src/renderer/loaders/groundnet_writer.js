@@ -56,7 +56,11 @@ function walkPushbackRoute (index, walkedNodes, pushBackNodes) {
 exports.writeGroundnetXML = function (fDir, icao, featureList) {
     try {
         var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');
+        var fBak = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.bak.xml');
 
+        if( fs.existsSync(f) ) {
+            fs.copyFileSync(f, fBak);
+        }
         if (f == null)
             return;
 
