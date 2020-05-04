@@ -13,7 +13,7 @@ cache:
   directories:
   - node_modules
   - "$HOME/.electron"
-  - "$HOME/.cache"
+  - "$HOME/.cache" 
 addons: 
 before_install: 
 install:
@@ -25,6 +25,7 @@ script:
 deploy:
   skip_cleanup: true
   draft: true
+  overwrite: true
   tag_name: '0.0.8'
   name: '0.0.8'
   provider: releases
