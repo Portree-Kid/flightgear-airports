@@ -61,6 +61,10 @@
     "win": {
       "icon": "build/icons/icon.ico"
     },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
     "linux": {
       "icon": "build/icons"
     }
