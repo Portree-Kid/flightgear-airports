@@ -5,6 +5,20 @@ const turf = require('@turf/turf');
 const util = require('util');
 const store = require('../store');
 
+/**
+ * Cat Models                   FG Radii N2M Radii
+ * B Small Regionals ERJ CRJ ATR    14       6
+ * C A319 A320 A321 B737            18      10
+ * D B757, B767                     26      15
+ * E B777 B787 A330 A340 A360       33      24
+ * F A380                           40      24
+ */
+
+ // ratchet to known radii
+const validRadii = [7.5, 14, 18, 26, 33, 40];
+
+const validN2M = [5, 6, 10, 15, 24, 24];
+
 var $ = require('jquery');
 L.ParkingSpot = L.Circle.extend({
     createDirection: function () {
@@ -23,6 +37,9 @@ L.ParkingSpot = L.Circle.extend({
             }
             this.direction = L.polyline([start, this.turfToLatLng(end)]);
             this.direction.addTo(this.editor.editLayer);
+            this.frontWheel = L.circleMarker(start, {radius:4, weight: 2 });
+            this.frontWheel.addTo(this.editor.editLayer);
+            this.updateWheelPos();
         }
     },
     updateMiddleMarker: function() {
@@ -58,7 +75,7 @@ L.ParkingSpot = L.Circle.extend({
     removeDirection: function () {
         this.direction = undefined;
     },
-    //
+    // Update the direction vertex from the direction
     updateVertexFromDirection: function () {
         if (this.editEnabled()) {
             var start = this._latlng;
@@ -73,21 +90,32 @@ L.ParkingSpot = L.Circle.extend({
             this.direction.setLatLngs([start, this.turfToLatLng(end)]);
         }
     },
+    // Update the direction from the moved direction vertex
     updateDirectionFromVertex: function () {
         if (this.editEnabled()) {
             var start = this._latlng;
             var end = this.editor._resizeLatLng.__vertex.getLatLng();
             var heading = turf.bearing([start.lng, start.lat], [end.lng, end.lat]);
             this.options.attributes.heading = heading;
-            const counts = [7.5, 12, 18, 26, 32.5, 40];
 
-            const output = counts.reduce((prev, curr) => Math.abs(curr - this._mRadius) < Math.abs(prev - this._mRadius) ? curr : prev);
+            const output = validRadii.reduce((prev, curr) => Math.abs(curr - this._mRadius) < Math.abs(prev - this._mRadius) ? curr : prev);
 
-            console.debug(output);
+            console.debug('Found radius ' + output);
+
             this._mRadius = output;
             this.options.attributes.radius = this._mRadius;
             this.direction.setLatLngs([start, end]);
         }
+    },
+    updateWheelPos() {
+        var start = this._latlng;
+        var options = { units: 'kilometers' };
+        const parkingSize = validRadii.indexOf(this.options.attributes.radius);       
+        if (parkingSize>=0) {
+            var frontWheelEnd = turf.destination([start.lng, start.lat], validN2M[parkingSize] / 1000, this.options.attributes.heading, options);
+
+            this.frontWheel.setLatLng(this.turfToLatLng(frontWheelEnd));    
+        }     
     },
     select() {
         var style = {};
@@ -101,17 +129,19 @@ L.ParkingSpot = L.Circle.extend({
     },
     addListeners: function () {
         this.on('editable:drawing:move', function (event) {
-            console.debug("Move : ", event);
-            console.debug("Move : ", event.latlng);
+            console.debug("Move Parking Spot: ", event);
+            console.debug("Move Parking Spot : ", event.latlng);
             // Is it the edit vertex (Middle) moving?
             if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){
                 event.target.setLatLng(event.latlng);
                 event.target.updateVertexFromDirection();
+                event.target.updateWheelPos();
                 this.follow(event.target.id, event);                        
             }
             else if(event.target.editor._resizeLatLng.__vertex._icon === event.sourceTarget._element) {
                 event.target.updateDirectionFromVertex();     
                 event.target.updateVertexFromDirection();     
+                event.target.updateWheelPos();
             }
         });
         /*        
