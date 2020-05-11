@@ -11,7 +11,7 @@
         <el-col :span="22" class="label">Airports Directory</el-col>
       </el-row>
       <el-row>
-        <el-col :span="20" class="label">{{ airports_directory }}</el-col>
+        <el-col :span="20" class="file-label">{{ airports_directory }}</el-col>
         <el-col :span="4">
           <directory-select @input="airportsDirectorySelect"></directory-select>
         </el-col>
@@ -20,32 +20,32 @@
         <el-col :span="22" class="label">Flightgear Directory</el-col>
       </el-row>
       <el-row>
-        <el-col :span="20" class="label">{{ flightgear_directory }}</el-col>
+        <el-col :span="20" class="file-label">{{ flightgear_directory }}</el-col>
         <el-col :span="4">
           <directory-select @input="flightgearDirectorySelect"></directory-select>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="7" class="label">AI Directory</el-col>
-        <el-col :span="15" class="label">{{ AI_directory }}</el-col>
+        <el-col :span="15" class="file-label">{{ AI_directory }}</el-col>
         <el-col :span="2" class="label">
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="7" class="label">Traffic Directory</el-col>
-        <el-col :span="15">{{ Traffic_directory }}</el-col>
+        <el-col :span="15" class="file-label">{{ Traffic_directory }}</el-col>
         <el-col :span="2">
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="7" class="label">APT File</el-col>
-        <el-col :span="15">{{ apt_file }}</el-col>
+        <el-col :span="15" class="file-label">{{ apt_file }}</el-col>
         <el-col :span="2">
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="7" class="label">Test Directory</el-col>
-        <el-col :span="15">{{ test_directory }}</el-col>
+        <el-col :span="15" class="file-label">{{ test_directory }}</el-col>
         <el-col :span="2">
           <directory-select @input="testDirectorySelect"></directory-select>
         </el-col>
@@ -141,12 +141,16 @@
 
 <style>
 .el-row {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 .el-col {
   border-radius: 4px;
 }
 .label {
+  padding: 10px;
+  font-weight: bold;
+}
+.file-label {
   padding: 10px;
 }
 </style>
