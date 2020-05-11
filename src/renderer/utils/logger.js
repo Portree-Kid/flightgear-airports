@@ -14,8 +14,8 @@ var logStream = require('fs').createWriteStream( fName, {autoClose: true});
 
 var logger = function (level, msg, o) {
     var d = new Date();
-    logStream.write(d.toUTCString() + '|' + level + ' | ' + msg + '\r\n');
+    //logStream.write(d.toUTCString() + '|' + level + ' | ' + msg + '\r\n');
     if (o != undefined) {
-      logStream.write( util.inspect(o,{depth: 2}) + '\r\n');
+      //logStream.write( util.inspect(o,{depth: 2}) + '\r\n');
     }
 }
