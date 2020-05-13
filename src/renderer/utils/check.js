@@ -74,7 +74,7 @@ async function checkGroundnet(data) {
                         okNodes.push(parkingNode);
                         okNodes.push(runwayNode);
                     } else {
-                        console.log(`No route from ${parkingNode} to ${runwayNode}`);
+                        console.log(`No route from Parking ${parkingNode} to Runwaynode ${runwayNode}`);
                     }
                     this.postMessage(['progress', 1]);
                 });
@@ -169,6 +169,17 @@ async function checkGroundnet(data) {
                     }
                     this.postMessage(['progress', 1]);
                 });
+            });
+            // Check for name
+            parkingNodes.forEach(parkingNode => {
+                if (!parkingNode.name) {
+                    notOkNodes.push({ id: parkingNode.index, message: 'Name empty' });
+                    this.postMessage(['progress', 1]);
+                }
+                if (!parkingNode.type) {
+                    notOkNodes.push({ id: parkingNode.index, message: 'Parking type empty' });
+                    this.postMessage(['progress', 1]);
+                }
             });
             // Check for intersecting radii
             parkingNodes.forEach(parkingNode => {
