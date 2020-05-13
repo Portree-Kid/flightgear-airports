@@ -239,9 +239,9 @@
         });
       },
       show (index) {
-        if(this.featureLookup[index]===undefined) {
+        if(this.featureLookup===undefined || this.featureLookup[index]===undefined) {
           console.error("Lookup " + index + " failed ");          
-          return;
+          this.buildLookup()
         }
         this.featureLookup[index].forEach((element, i) => {
           if (element instanceof L.Polyline) {
@@ -280,6 +280,29 @@
             this.$store.dispatch('setCenter', latlng);
           }
         });
+      },
+      buildLookup () {
+        this.featureLookup = {};
+        this.groundnetLayerGroup.eachLayer((layer) => {
+          if (layer instanceof L.Polyline) {
+            // console.log(layer._latlngs)
+            layer._latlngs.forEach(latlng => {
+              if (latlng.attributes.index) {
+                if( this.featureLookup[latlng.attributes.index] == undefined) {
+                  this.featureLookup[latlng.attributes.index] = [];
+                }
+                this.featureLookup[latlng.attributes.index].push(layer);
+              }
+            })
+          } else if (layer instanceof L.RunwayNode || layer instanceof L.ParkingSpot || layer instanceof L.HoldNode) {
+            if( this.featureLookup[layer.glueindex] == undefined) {
+              this.featureLookup[layer.glueindex] = [];
+            }
+            this.featureLookup[layer.glueindex].push(layer);
+          } else {
+            console.warn(layer)
+          }          
+        })
       },
       getPointCoords (index) {
         if(this.featureLookup[index]===undefined) {

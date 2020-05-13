@@ -72,6 +72,7 @@
     methods: {
       upload() {
         this.uploadVisible = true
+        this.$refs.upload.check()
       },
       zoomout() {
         this.$parent.$parent.zoomUpdated(9)
