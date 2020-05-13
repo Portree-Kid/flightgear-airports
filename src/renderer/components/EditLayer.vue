@@ -490,13 +490,13 @@
         })
       },
       editedParkings() {
-        if(this.featureLookup===undefined || this.featureLookup[index]===undefined) {
-          console.error("Lookup " + index + " failed ");          
+        if(this.featureLookup===undefined) {
+          console.warn("Lookup undefinded");          
           this.buildLookup()
         }
         console.log('Edited Parkings : ' + this.$store.state.Parkings.items)
         this.$store.state.Parkings.items.forEach( newElement => {
-          console.log(newElement);
+          console.debug(newElement);
           this.featureLookup[newElement.index].forEach((element,index) => {
             if (element instanceof L.ParkingSpot) {
               element.options.attributes.name = newElement.name
