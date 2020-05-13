@@ -490,6 +490,10 @@
         })
       },
       editedParkings() {
+        if(this.featureLookup===undefined || this.featureLookup[index]===undefined) {
+          console.error("Lookup " + index + " failed ");          
+          this.buildLookup()
+        }
         console.log('Edited Parkings : ' + this.$store.state.Parkings.items)
         this.$store.state.Parkings.items.forEach( newElement => {
           console.log(newElement);
