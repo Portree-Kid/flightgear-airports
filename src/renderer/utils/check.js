@@ -254,7 +254,7 @@ var mapParkings = function (o) {
 
 var mapParkingNode = function (o) {
     if (o.type === 'parking')
-        return { index: o.index, lat: o.lat, lng: o.lng, name: o.name, radius: Number(o.radius) };
+        return { index: o.index, lat: o.lat, lng: o.lng, name: o.name, radius: Number(o.radius), type: o.type };
     console.log(o);
 }
 

@@ -9,8 +9,7 @@
     <div id="panel" width="100%">            
       <el-row v-for="(result,idx) in results" :key="idx">
         <el-col :span="15">{{ result.message }}</el-col>
-        <el-col :span="7"><el-button v-on:click="show(result.id)">Show</el-button></el-col>
-         
+        <el-col :span="7"><el-button v-on:click="show(result.id)" class="button"><i class="fas fa-bullseye"></i></el-button></el-col>         
       </el-row>
     </div>
   </div>
@@ -47,5 +46,9 @@
 .el-col {
   border-radius: 1px;
   padding: 0pt;
+}
+.button {
+  padding-left: 10px;
+  padding-right: 10px;
 }
 </style>

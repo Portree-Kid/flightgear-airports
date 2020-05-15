@@ -436,6 +436,23 @@
           event.target.addTo(this.groundnetLayerGroup)
         })
       },
+      drawForwardPolyline () {
+        var polyLine = this.$parent.mapObject.editTools.startPolyline()
+        polyLine.addTo(this.groundnetLayerGroup)
+        polyLine.groundnetLayerGroup = this.groundnetLayerGroup;
+        polyLine.attributes = [];
+        polyLine.options.attributes = {direction: 'forward' };
+        polyLine.featureLookup = this.featureLookup;
+        extendTaxiSegment(polyLine);
+        polyLine.setEditlayer(this);
+        //polyLine.extensions(this);
+        polyLine.addListeners()
+
+        polyLine.on('editable:drawing:end', event => {
+          console.log(event)
+          event.target.addTo(this.groundnetLayerGroup)
+        })
+      },      
       drawPushbackPolyline () {
         var polyLine = this.$parent.mapObject.editTools.startPolyline()
         polyLine.addTo(this.groundnetLayerGroup)

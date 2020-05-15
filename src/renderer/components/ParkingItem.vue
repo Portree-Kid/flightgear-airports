@@ -61,9 +61,6 @@
       number: {
       // getter
         get: function () {
-          if (isNaN(this.parking.number)) {
-            return ''
-          }
           return this.parking.number
         },
         // setter

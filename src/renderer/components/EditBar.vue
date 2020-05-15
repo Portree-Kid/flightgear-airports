@@ -28,7 +28,13 @@
       icon="fas fa-draw-polygon"
       v-on:click="drawPolyline"
       :show="editing"
-      tooltip="Draw Taxiline"
+      tooltip="Draw Bi-Directional Taxiline"
+    ></EditButton>
+    <EditButton
+      icon="fas fa-long-arrow-alt-right"
+      v-on:click="drawForwardPolyline"
+      :show="editing"
+      tooltip="Draw Forward Taxiline"
     ></EditButton>
     <EditButton
       icon="fas fa-arrows-alt-h"
@@ -186,6 +192,9 @@
       },
       drawPolyline () {
         this.$parent.$parent.$refs.editLayer.drawPolyline()
+      },
+      drawForwardPolyline () {
+        this.$parent.$parent.$refs.editLayer.drawForwardPolyline()
       },
       drawPushbackPolyline () {
         this.$parent.$parent.$refs.editLayer.drawPushbackPolyline()

@@ -31,5 +31,5 @@ deploy:
   file_glob: true    
   file: build/*
   on:
-    branches: 'master'
+    branches: '0.0.10'
     repo: Portree-Kid/flightgear-airports
