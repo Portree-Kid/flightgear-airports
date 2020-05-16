@@ -46,11 +46,11 @@
         this.$store.dispatch('removeFrequency', this.frequency)
       },
       isValid (frequency) {
-        let ok = frequency >= 118 && frequency <= 137
+        let ok = frequency >= 11800 && frequency <= 13700
         if (!ok) {
           return false
         }
-        let fractions = (frequency - Math.trunc(frequency)) * 1000
+        let fractions = (frequency - (Math.trunc(frequency/100)*100))
         let subFraction = Math.round(fractions % 25)
         switch (subFraction) {
           case 0:
@@ -100,7 +100,7 @@
         // setter
         set: function (newValue) {
           this.frequency.value = newValue;
-          ok = this.isValid(newValue);
+          this.ok = this.isValid(newValue);
         }
       }
     }

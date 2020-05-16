@@ -125,11 +125,17 @@ async function checkGroundnet(data) {
 
             okNodes = okNodes.filter((v, i) => okNodes.indexOf(v) === i);
             var allLegitimateEndNodes = parkings.concat(runwayNodes).concat(pushbackNodes);
-            var notOkNodes = parkings.concat(runwayNodes).filter(
+            var notOkNodes = parkings.filter(
                 (v, i) => okNodes.indexOf(v) < 0
             ).map(
-                id => { return { id: id, message: 'No way to each runway' } }
+                id => { return { id: id, message: 'No way from parking to each runway' } }
+            );            
+            var notOkNodes2 = runwayNodes.filter(
+                (v, i) => okNodes.indexOf(v) < 0
+            ).map(
+                id => { return { id: id, message: 'No way from runway to each parking' } }
             );
+            
             if (parkings.length === 0) {
                 notOkNodes.push({ id: 0, message: 'No parkings' });
             }
@@ -146,6 +152,8 @@ async function checkGroundnet(data) {
                 v => { return { id: Number(v[0]), message: 'Node not a legimate end' } }
             );
             notOkNodes = notOkNodes.concat(danglingEnds);
+            notOkNodes = notOkNodes.concat(notOkNodes2);
+
             // Ends that are not on Runway and not a Parking or Pushback
             var wrongPushbackEnds = pushbackNodes.filter(
                 (v, i) => allEnds.map(a => Number(a[0])).indexOf(Number(v)) < 0
