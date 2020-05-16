@@ -80,10 +80,10 @@
       })
     },
     data () {
+      var appVersion = require('electron').remote.app.getVersion()
       return {
-        // 'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
         url: 'https://a.tile.openstreetmap.de/{z}/{x}/{y}.png',
-        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+        attribution: ' &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         marker: L.latLng(47.413220, -1.219482),
         airports: this.$store.state.Airports.airports,
         options: {editable: true},
@@ -167,14 +167,15 @@
         }
       },
       async centerUpdated (center) {
-        if (center !== this.$store.state.Settings.center) {
+        if (center.lat !== this.$store.state.Settings.center[0] &&
+            center.lon !== this.$store.state.Settings.center[1]) {
           this.$store.dispatch('setCenter', center)
           this.$refs.airportLayer.setVisible(this.zoom < 12)
           this.$refs.pavementLayer.setVisible(this.zoom < 12)
         }
       },
       async boundsUpdated (bounds) {
-        if (bounds !== this.$store.state.Settings.bounds) {
+        if (!bounds.equals(this.$store.state.Settings.bounds)) {
           this.$store.dispatch('setBounds', bounds)
           this.$refs.airportLayer.setVisible(this.zoom < 12)
           this.$refs.pavementLayer.setVisible(this.zoom < 12)
