@@ -255,13 +255,14 @@
                 if(e1.__vertex._icon.style!=null) {
                     e1.__vertex._icon.style['background-color'] = 'red';
                 }
+                return;
               }
             });
           } else if (element instanceof L.RunwayNode) {
             var latlng = {};
             latlng.lat =  element._latlng.lat;
             latlng.lng =  element._latlng.lng;
-            if (this.selectedItem != null) {
+            if (this.selectedItem != null && this.selectedItem.deselect !== undefined) {
               this.selectedItem.deselect();
             }
             this.selectedItem = element;
@@ -272,7 +273,7 @@
             var latlng = {};
             latlng.lat =  element._latlng.lat;
             latlng.lng =  element._latlng.lng;
-            if (this.selectedItem != null) {
+            if (this.selectedItem != null && this.selectedItem.deselect !== undefined) {
               this.selectedItem.deselect();
             }
             this.selectedItem = element;
@@ -734,7 +735,7 @@
         fs.copyFileSync(f, fNew)
         this.$message({
           type: 'info',
-          message: `Copied to ${f}`
+          message: `Copied to ${fNew}`
         });
       },
       setVisible(visible) {
