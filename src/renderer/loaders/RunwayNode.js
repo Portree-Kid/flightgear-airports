@@ -49,6 +49,13 @@ L.RunwayNode = L.Marker.extend({
             console.error(error);
         }
     },    
+    deselect() {
+        try {
+            this._icon.style['color'] = 'black';            
+        } catch (error) {
+            console.error(error);
+        }
+    },    
     extensions: function (editLayer) {
         this.options.attributes = {};
         if (typeof this.featureLookup[this.glueindex] === 'undefined') {
