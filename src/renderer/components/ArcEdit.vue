@@ -72,7 +72,8 @@
       isPushback: {
       // getter
         get: function () {
-          return this.$store.state.Editable.data.arc.isPushBackRoute === '1'
+          return this.$store.state.Editable.data.arc.isPushBackRoute === '1' ||
+          this.$store.state.Editable.data.arc.isPushBackRoute === 1
         },
         // setter
         set: function (newValue) {
