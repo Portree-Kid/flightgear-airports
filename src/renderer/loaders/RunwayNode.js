@@ -29,7 +29,7 @@ L.RunwayNode = L.Marker.extend({
                             event.target.options.attributes && 
                             event.target.options.attributes.selected) {
                             event.target.options.attributes.selected = false;
-                            event.target.updateStyle();
+                            event.target.deselect();
                             this.unwatch();    
                         }
                     }                    
