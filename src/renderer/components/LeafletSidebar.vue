@@ -6,8 +6,8 @@
             <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
             <li><a href="#edit" role="tab"><i class="fas fa-edit"></i></a></li>
             <li><a href="#parking" role="tab"><i class="fas fa-parking"></i></a></li>
-            <li><a href="#search" role="tab"><i class="fa fa-search"></i></a></li>
             <li><a href="#check" role="tab"><i class="far fa-check-square"></i></a></li>
+            <li><a href="#search" role="tab"><i class="fa fa-search"></i></a></li>
             <li><a href="#wip" role="tab"><i class="fas fa-wrench"></i></a></li>
         </ul>
 
@@ -88,11 +88,27 @@
       deferredMountedTo (parent) {
         this.sidebar = L.control.sidebar({
           autopan: false, // whether to maintain the centered map point when opening the sidebar
-          closeButton: true, // whether t add a close button to the panes
+          closeButton: true, // whether to add a close button to the panes
           container: 'sidebar', // the DOM container or #ID of a predefined sidebar container that should be used
           position: 'left' // left or right
         })
         parent.addControl(this.sidebar)
+        this.$store.subscribe((mutation, state) => {
+          switch (mutation.type) {
+            case 'SET_EDIT_AIRPORT':
+            case 'SET_EDIT_PARKING':
+            case 'SET_EDIT_NODE':
+            case 'SET_EDIT_RUNWAY':
+            case 'SET_EDIT_ARC':
+              this.sidebar.open('edit')
+              break
+            case 'CHECK_RESULTS':
+              this.sidebar.open('check')
+              break
+            default:
+              break
+          }
+        })
       },
       remove () {
         if (this.sidebar) {
