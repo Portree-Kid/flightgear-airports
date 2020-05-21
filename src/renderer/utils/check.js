@@ -30,7 +30,7 @@ onmessage = function (event) {
         ).catch(result => {
             console.error('Crashed');
             console.error(result);
-            postMessage('DONE');
+            postMessage(['DONE', []]);
         });
     }
 };
@@ -54,9 +54,22 @@ async function checkGroundnet(data) {
             runwayNodes.forEach(element => {
                 graph[element] = {};
             });
-            edges.forEach(element => {
-                graph[element.start] = {};
-                graph[element.end] = {};
+            var notOkNodes = [];
+
+            edges.forEach(edge => {
+                graph[edge.start] = {};
+                graph[edge.end] = {};
+                //debugger;
+                edge.latLngs.forEach((latLng, index, arr) => {
+                    if (index>0) {
+                        var d = distance([arr[index-1].lng, arr[index-1].lat], [latLng.lng, latLng.lat]);
+                        if(d>2000) {
+                            notOkNodes.push({ id: Number(arr[index-1].index), message: `Start of long route ${d.toFixed(2)}` });
+                            notOkNodes.push({ id: Number(arr[index].index), message: `End of long route ${d.toFixed(2)}` });
+                        }                        
+                        //console.log(d);
+                    }
+                });
             });
             edges.forEach(element => {
                 var node1 = graph[element.start];
@@ -125,11 +138,12 @@ async function checkGroundnet(data) {
 
             okNodes = okNodes.filter((v, i) => okNodes.indexOf(v) === i);
             var allLegitimateEndNodes = parkings.concat(runwayNodes).concat(pushbackNodes);
-            var notOkNodes = parkings.filter(
+            var notOkNodesParkings = parkings.filter(
                 (v, i) => okNodes.indexOf(v) < 0
             ).map(
                 id => { return { id: id, message: 'No way from parking to each runway' } }
             );            
+            notOkNodes = notOkNodes.concat(notOkNodesParkings);
             var notOkNodes2 = runwayNodes.filter(
                 (v, i) => okNodes.indexOf(v) < 0
             ).map(
@@ -274,9 +288,10 @@ var mapRunwayNodes = function (o) {
 
 var mapEdges = function (o) {
     if (o.type === 'poly')
+        // debugger;
         return {
             start: o.start, end: o.end, isPushBackRoute: o.isPushBackRoute !== undefined &&
-                o.isPushBackRoute !== 0
+                o.isPushBackRoute !== 0, latLngs: o.latLngs
         };
     console.log(o);
 }

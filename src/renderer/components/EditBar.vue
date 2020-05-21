@@ -226,7 +226,9 @@
           return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'type': o.holdPointType };
         } else if (o instanceof L.Polyline) {
           console.log(o)
-          return { 'start': Number(o['begin']), 'end': Number(o['end']), '_leaflet_id': o._leaflet_id, 'type': 'poly', 'isPushBackRoute': o.options.attributes.isPushBackRoute };
+          //_latlngs[""0""].__vertex.glueindex
+          var latLngs = o.getLatLngs().map(l => ({lat: l.lat, lng: l.lng, index: l.__vertex.glueindex}));
+          return { 'start': Number(o['begin']), 'end': Number(o['end']), '_leaflet_id': o._leaflet_id, 'type': 'poly', 'isPushBackRoute': o.options.attributes.isPushBackRoute, latLngs: latLngs };
         } else {
           console.log('Unknown Type ')
           console.log(typeof o)
