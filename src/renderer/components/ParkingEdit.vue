@@ -16,13 +16,13 @@
         <span class="label">Name :</span>
       </el-col>
       <el-col :span="8">
-        <el-input placeholder="Name" v-model="name"></el-input>
+        <el-input placeholder="Name" v-model="name" :disabled="!editing"></el-input>
       </el-col>
       <el-col :span="5">
         <span class="label">Number :</span>
       </el-col>
       <el-col :span="7">
-        <el-input placeholder="Number" v-model="number"></el-input>
+        <el-input placeholder="Number" v-model="number" :disabled="!editing"></el-input>
       </el-col>
     </el-row>
     <el-row>
@@ -37,9 +37,9 @@
           * D B757, B767                     26      15
           * E B777 B787 A330 A340 A360       33      24
           * F A380                           40      24
-          -->
+        -->
 
-        <el-radio-group v-model="wingspan">
+        <el-radio-group v-model="wingspan" :disabled="!editing">
           <el-tooltip content="PIPER PA-31/CESSNA 404 Titan" placement="top" effect="light">
             <el-radio :label="15">A</el-radio>
           </el-tooltip>
@@ -80,7 +80,7 @@
         <span class="label">Coordinates :</span>
       </el-col>
       <el-col :span="17">
-        <el-input placeholder="Please input" v-model="coordinates"></el-input>
+        <el-input placeholder="Please input" v-model="coordinates" :disabled="!editing"></el-input>
       </el-col>
     </el-row>
     <el-row>
@@ -88,7 +88,7 @@
         <span class="label">Parking Type :</span>
       </el-col>
       <el-col :span="17">
-        <el-select v-model="parking_type" placeholder="Select">
+        <el-select v-model="parking_type" placeholder="Select" :disabled="!editing">
           <el-option
             v-for="type in options"
             :key="type.value"
@@ -103,7 +103,7 @@
         <span class="label">Airline :</span>
       </el-col>
       <el-col :span="17">
-        <el-select v-model="airlineCodes" multiple placeholder="Select">
+        <el-select v-model="airlineCodes" multiple placeholder="Select" :disabled="!editing">
           <el-option
             v-for="item in airlines"
             :key="item.value"
@@ -134,6 +134,11 @@
       }
     },
     computed: {
+      editing: {
+        get: function () {
+          return this.$parent.$parent.$parent.$refs.editLayer.editing
+        }
+      },
       parking: function () {
         return this.$store.state.Editable.type === 'parking'
       },
@@ -278,7 +283,7 @@
   padding-left: 2pt;
 }
 .label {
-display: flex;
+  display: flex;
   justify-content: left;
   align-items: center;
   font-weight: bold;

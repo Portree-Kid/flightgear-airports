@@ -548,7 +548,8 @@
       editedNode() {
         if (this.$store.state.Editable.index === undefined ||
             this.$store.state.Editable.data.node === undefined ||
-            this.featureLookup===undefined) {
+            this.featureLookup===undefined ||
+            !this.editing) {
           return;
         }
         var isOnRunway = Number(this.$store.state.Editable.data.node.isOnRunway);
@@ -602,8 +603,8 @@
                 latlng = element._latlngs[1];
               }
           } else if (element instanceof L.Polyline) {
-              element._latlngs.forEach(element => {
-                if(Number(element.__vertex.glueindex) === Number(nIndex)){
+              element._latlngs.forEach(element => {                
+                if(!element.__vertex && Number(element.__vertex.glueindex) === Number(nIndex)){
                   latlng = element.__vertex.latlng;
                 }
               });

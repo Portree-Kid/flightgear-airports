@@ -36,7 +36,7 @@ const mutations = {
   },
   SET_EDIT_RUNWAY (state, runway) {
     Vue.set(state, 'data', {})
-    Vue.set(state.data, 'runway', runway)
+    Vue.set(state.data, 'node', runway)
     Vue.set(state, 'index', runway.index)
     Vue.set(state, 'type', 'runway')
   },
