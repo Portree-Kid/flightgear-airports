@@ -13,10 +13,11 @@
         <el-col :span="7" class="text">
           Edited
         </el-col>
-        <el-col :span="9" class="text">
+        <el-col :span="8" class="text">
           Uploaded
         </el-col>
         <el-col :span="6" class="text">
+          Actions
         </el-col>
       </el-row>
         
@@ -52,6 +53,7 @@
 <style scoped lang="scss">
 .text {
   padding: 10px;
+  font-weight: bold;
 }
 .el-row {
     margin-bottom: 0px;
