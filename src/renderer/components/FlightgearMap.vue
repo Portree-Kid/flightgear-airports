@@ -60,7 +60,7 @@
     mounted () {
       this.$store.dispatch('getAirports')
       this.$store.subscribe((mutation, state) => {
-        if (mutation.type === 'BOUNDS' || mutation.type === 'SET_AIRPORTS') {
+        if (mutation.type === 'CENTER' || mutation.type === 'SET_AIRPORTS' || mutation.type === 'ZOOM') {
           // console.log(this.$parent)
           // console.log(this.$store.state.Settings.bounds)
           let airportsToLoad = this.$store.state.Airports.airports
@@ -103,10 +103,11 @@
         this.$store.dispatch('setCurrentAirport', icao)
       },
       visible (feature) {
-        let bounds = this.$store.state.Settings.bounds
-        bounds = L.latLngBounds(L.latLng(bounds._southWest), L.latLng(bounds._northEast))
-        if (!bounds.hasOwnProperty('_northEast') && this.$refs.map) {
+        let bounds
+        if (this.$refs.map) {
           bounds = this.$refs.map.mapObject.getBounds()
+        } else {
+          return false
         }
         let width = L.latLng(bounds._northEast).distanceTo(L.latLng(bounds._southWest))
         // Load all airports in a minimum 5 km box
@@ -158,6 +159,8 @@
         event.target.bringToBack()
         this.setIcao(item.properties.icao)
         this.$store.commit('SET_EDIT_AIRPORT', item.properties)
+        let newCenter = L.latLng(item.geometry.coordinates[1], item.geometry.coordinates[0])
+        this.$refs.map.setCenter(newCenter)
       },
       zoomUpdated (zoom) {
         if (zoom !== this.$store.state.Settings.zoom) {
@@ -167,20 +170,20 @@
         }
       },
       async centerUpdated (center) {
-        /*
         if (center !== this.$store.state.Settings.center) {
           this.$store.dispatch('setCenter', center)
           this.$refs.airportLayer.setVisible(this.zoom < 12)
           this.$refs.pavementLayer.setVisible(this.zoom < 12)
         }
-        */
       },
       async boundsUpdated (bounds) {
+        /*
         if (bounds !== this.$store.state.Settings.bounds) {
           this.$store.dispatch('setBounds', bounds)
           this.$refs.airportLayer.setVisible(this.zoom < 12)
           this.$refs.pavementLayer.setVisible(this.zoom < 12)
         }
+        */
       }
     },
     computed: {
@@ -188,10 +191,7 @@
         return this.$store.state.Settings.zoom
       },
       center: function () {
-        let bounds = this.$store.state.Settings.bounds
-        bounds = L.latLngBounds(L.latLng(bounds._southWest), L.latLng(bounds._northEast))
-
-        return bounds.getCenter()
+        return this.$store.state.Settings.center
       }
     }
 }

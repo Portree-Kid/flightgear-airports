@@ -508,21 +508,26 @@
         })
       },
       editedParkings() {
-        if(this.featureLookup===undefined) {
+        if (this.featureLookup===undefined) {
           console.warn("Lookup undefinded");          
           this.buildLookup()
+        }
+        if (this.featureLookup===undefined) {
+          return
         }
         console.log('Edited Parkings : ' + this.$store.state.Parkings.items)
         this.$store.state.Parkings.items.forEach( newElement => {
           console.debug(newElement);
-          this.featureLookup[newElement.index].forEach((element,index) => {
-            if (element instanceof L.ParkingSpot) {
-              element.options.attributes.name = newElement.name
-              element.options.attributes.number = newElement.number
-              element.options.attributes.type = newElement.type
-              //element.updateVertexFromDirection();           
-            }
-          })
+          if(this.featureLookup[newElement.index]) {
+            this.featureLookup[newElement.index].forEach((element,index) => {
+              if (element instanceof L.ParkingSpot) {
+                element.options.attributes.name = newElement.name
+                element.options.attributes.number = newElement.number
+                element.options.attributes.type = newElement.type
+                //element.updateVertexFromDirection();           
+              }
+            })
+          }
         })
 
 /*

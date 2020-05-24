@@ -68,7 +68,7 @@
       },
       airlines: function () {
         var airlineCodes = []
-        if (this.$store.state.Airports.currentAirport !== undefined) {
+        if (this.$store.state.Airports.currentAirport !== undefined && this.$store.state.Airports.currentAirport.airlines) {
           var storedairlineCodes = this.$store.state.Airports.currentAirport.airlines
           storedairlineCodes.forEach(element => {
             airlineCodes.push({value: element, label: element})
