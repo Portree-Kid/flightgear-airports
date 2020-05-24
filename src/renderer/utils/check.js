@@ -43,8 +43,8 @@ async function checkGroundnet(data) {
             var runwayNodes = data.map(mapRunwayNodes).filter(n => n !== undefined);
             var pushbackNodes = data.map(mapPushbackNodes).filter(n => n !== undefined);
             var edges = data.map(mapEdges).filter(n => n !== undefined);
-            this.max = parkings.length * runwayNodes.length +
-                parkings.length;
+            this.max = 4 * parkings.length * runwayNodes.length +
+                3 * parkings.length;
             this.postMessage(['max', this.max]);
 
             var graph = {};
@@ -59,7 +59,7 @@ async function checkGroundnet(data) {
             edges.forEach(edge => {
                 graph[edge.start] = {};
                 graph[edge.end] = {};
-                //debugger;
+                // Check if there are segments > 2km
                 edge.latLngs.forEach((latLng, index, arr) => {
                     if (index>0) {
                         var d = distance([arr[index-1].lng, arr[index-1].lat], [latLng.lng, latLng.lat]);
@@ -169,12 +169,13 @@ async function checkGroundnet(data) {
             notOkNodes = notOkNodes.concat(notOkNodes2);
 
             // Ends that are not on Runway and not a Parking or Pushback
-            var wrongPushbackEnds = pushbackNodes.filter(
+            /*var wrongPushbackEnds = pushbackNodes.filter(
                 (v, i) => allEnds.map(a => Number(a[0])).indexOf(Number(v)) < 0
             ).map(
                 v => { return { id: Number(v), message: 'Pushback node not an end' } }
             );
-            notOkNodes = notOkNodes.concat(wrongPushbackEnds).concat(wrongPushbackRoutes);
+            notOkNodes = notOkNodes.concat(wrongPushbackEnds)*/
+            notOkNodes = notOkNodes.concat(wrongPushbackRoutes);
 
             var parkingNodes = data.map(mapParkingNode).filter(n => n !== undefined);
 
@@ -203,7 +204,7 @@ async function checkGroundnet(data) {
                     this.postMessage(['progress', 1]);
                 }
             });
-            // Check for intersecting radii
+            // Check for name
             parkingNodes.forEach(parkingNode => {
                 if (!parkingNode.name || /^\s*$/.test(parkingNode.name)) {
                     notOkNodes.push({ id: parkingNode.index, message: 'Empty name' });
