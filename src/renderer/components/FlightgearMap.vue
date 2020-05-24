@@ -104,10 +104,11 @@
       },
       visible (feature) {
         let bounds = this.$store.state.Settings.bounds
-        if (!bounds.hasOwnProperty('getNorthEast')) {
+        bounds = L.latLngBounds(L.latLng(bounds._southWest), L.latLng(bounds._northEast))
+        if (!bounds.hasOwnProperty('_northEast') && this.$refs.map) {
           bounds = this.$refs.map.mapObject.getBounds()
         }
-        let width = bounds.getNorthWest().distanceTo(bounds.getSouthEast())
+        let width = L.latLng(bounds._northEast).distanceTo(L.latLng(bounds._southWest))
         // Load all airports in a minimum 5 km box
         if (width < 5000) {
           let rest = 5000 - width
@@ -116,10 +117,10 @@
         }
 
         let coordinates = feature.geometry.coordinates
-        let ret = bounds.getNorthEast().lat > Number(coordinates[1]) &&
-                  bounds.getNorthEast().lng > Number(coordinates[0])
-        let ret2 = bounds.getSouthWest().lat < Number(coordinates[1]) &&
-                  bounds.getSouthWest().lng < Number(coordinates[0])
+        let ret = bounds._northEast.lat > Number(coordinates[1]) &&
+                  bounds._northEast.lng > Number(coordinates[0])
+        let ret2 = bounds._southWest.lat < Number(coordinates[1]) &&
+                  bounds._southWest.lng < Number(coordinates[0])
         return ret && ret2
       },
       normalStyle (target) {
@@ -166,11 +167,13 @@
         }
       },
       async centerUpdated (center) {
+        /*
         if (center !== this.$store.state.Settings.center) {
           this.$store.dispatch('setCenter', center)
           this.$refs.airportLayer.setVisible(this.zoom < 12)
           this.$refs.pavementLayer.setVisible(this.zoom < 12)
         }
+        */
       },
       async boundsUpdated (bounds) {
         if (bounds !== this.$store.state.Settings.bounds) {
@@ -185,7 +188,10 @@
         return this.$store.state.Settings.zoom
       },
       center: function () {
-        return this.$store.state.Settings.center
+        let bounds = this.$store.state.Settings.bounds
+        bounds = L.latLngBounds(L.latLng(bounds._southWest), L.latLng(bounds._northEast))
+
+        return bounds.getCenter()
       }
     }
 }
