@@ -55,6 +55,9 @@ const mutations = {
   'SET_EDIT_PARKING_NUMBER' (state, parkingName) {
     Vue.set(state.data.parking, 'number', parkingName)
   },
+  'SET_EDIT_PARKING_HEADING' (state, heading) {
+    Vue.set(state.data.parking, 'heading', heading)
+  },
   'SET_EDIT_PARKING_AIRLINES' (state, airlineCodes) {
     Vue.set(state.data.parking, 'airlineCodes', airlineCodes)
   },

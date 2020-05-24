@@ -85,6 +85,14 @@
     </el-row>
     <el-row>
       <el-col :span="7">
+        <span class="label">Heading :</span>
+      </el-col>
+      <el-col :span="17">
+        <el-input-number v-model="heading" :min="-1" :max="361" step=0.1 :disabled="!editing"></el-input-number>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="7">
         <span class="label">Parking Type :</span>
       </el-col>
       <el-col :span="17">
@@ -205,6 +213,22 @@
           var position = new Coordinates(newValue);
           console.log(position);          
           this.$parent.$parent.$parent.$refs.editLayer.setPointCoords(this.$store.state.Editable.index, position)
+        }
+      },
+      heading: {
+      // getter
+        get: function () {
+          return Number(this.$store.state.Editable.data.parking.heading)
+        },
+        // setter
+        set: function (newValue) {
+          if (newValue>=360) {
+            newValue -= 360
+          }
+          if (newValue<0) {
+            newValue += 360
+          }
+          this.$store.commit('SET_EDIT_PARKING_HEADING', newValue)
         }
       },
       wingspan: {
