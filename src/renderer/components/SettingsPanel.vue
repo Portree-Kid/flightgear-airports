@@ -26,12 +26,6 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="7" class="label">AI Directory</el-col>
-        <el-col :span="15" class="file-label">{{ AI_directory }}</el-col>
-        <el-col :span="2" class="label">
-        </el-col>
-      </el-row>
-      <el-row>
         <el-col :span="7" class="label">Traffic Directory</el-col>
         <el-col :span="15" class="file-label">{{ Traffic_directory }}</el-col>
         <el-col :span="2">

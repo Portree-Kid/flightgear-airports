@@ -131,3 +131,12 @@
 
 <style scoped lang="scss">
 </style>
+<style>
+/* global styles */
+.el-popover--plain {
+  padding: 10px 10px;
+}
+.el-popover__title {
+  display: none;
+}
+</style>
