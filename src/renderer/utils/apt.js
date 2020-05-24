@@ -4,7 +4,7 @@ const zlib = require('zlib');
 
 var icao;
 
-function asyncForEach(array, apt, features, callback) {
+function aptForEach(array, apt, features, callback) {
   logger('info', "AsyncForEach Len " + array.length);
   for (let index = 0; index < array.length; index++) {
     try {
@@ -301,7 +301,7 @@ async function scanAPTIntoDB(f, features) {
                 var fields = line.split(/[ ]+/);
                 if ([1, 16, 17, 99].indexOf(Number(fields[0])) >= 0) {
                   var apt = { icao: currentIcao, last: Number(fields[0])===99 }
-                  var bla = asyncForEach(currentAirport, apt, features, (line, index, apt) => {
+                  var bla = aptForEach(currentAirport, apt, features, (line, index, apt) => {
                     //await waitFor(5000);
                     try {
                       var fields = line.split(/[ ]+/);
