@@ -312,7 +312,7 @@
         }
         return this.featureLookup[index].map((element, i) => {
           if (element instanceof L.Polyline) {
-            element._latlngs.forEach((e1, index1) => {
+            var latLng = element._latlngs.map((e1, index1) => {
               console.log(e1);
               if (e1.attributes.index===index) {
                 var latlng = {};
@@ -320,7 +320,8 @@
                 latlng.lng =  e1.lng;
                 return latlng;
               }
-            });
+            }).filter(n => n);
+            return latLng[0];
           } else if (element instanceof L.RunwayNode) {
             var latlng = {};
             latlng.lat =  element._latlng.lat;
