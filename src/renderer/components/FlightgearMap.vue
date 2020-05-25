@@ -82,7 +82,10 @@
     data () {
       return {
         url: 'https://a.tile.openstreetmap.de/{z}/{x}/{y}.png',
-        attribution: ' &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+        attribution: '<A href="https://github.com/Portree-Kid/flightgear-airports" target="_blank">Flightgear Airports ' + require('electron').remote.app.getVersion() +
+        '</A> <A href="https://www.electronjs.org/" target="_blank">Electron</A> ' +
+        ' <A href="https://element.eleme.io/#/en-US/" target="_blank">element.io</A> ' +
+        ' &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors',
         marker: L.latLng(47.413220, -1.219482),
         airports: this.$store.state.Airports.airports,
         options: {editable: true},
