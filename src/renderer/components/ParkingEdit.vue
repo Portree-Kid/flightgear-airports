@@ -88,7 +88,7 @@
         <span class="label">Heading :</span>
       </el-col>
       <el-col :span="17">
-        <el-input-number v-model="heading" :min="-1" :max="361" step=0.1 :disabled="!editing"></el-input-number>
+        <el-input-number v-model="heading" :min="-1" :max="361" :step="0.1" :precision="1" :disabled="!editing"></el-input-number>
       </el-col>
     </el-row>
     <el-row>
