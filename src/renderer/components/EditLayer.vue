@@ -239,6 +239,9 @@
         });
       },
       show (index) {
+        if(Number.isNaN(index)) {
+          return;
+        }        
         if(this.featureLookup===undefined || this.featureLookup[index]===undefined) {
           console.error("Lookup " + index + " failed ");          
           this.buildLookup()
@@ -334,7 +337,7 @@
             latlng.lng =  element._latlng.lng;
             return latlng;
           }
-        });
+        }).filter(n => n);
       },
       setPointCoords (index, coordinates) {
         var latlng = {lat: coordinates.latitude, lng: coordinates.longitude };
@@ -610,7 +613,7 @@
               }
           } else if (element instanceof L.Polyline) {
               element._latlngs.forEach(element => {                
-                if(!element.__vertex && Number(element.__vertex.glueindex) === Number(nIndex)){
+                if(element.__vertex && Number(element.__vertex.glueindex) === Number(nIndex)){
                   latlng = element.__vertex.latlng;
                 }
               });
