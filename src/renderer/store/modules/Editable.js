@@ -13,6 +13,9 @@ const SET_EDIT_ARC = 'SET_EDIT_ARC'
 const SET_EDIT_RUNWAY = 'SET_EDIT_RUNWAY'
 
 const mutations = {
+  SET_EDIT (state, editing) {
+    state.editing = editing
+  },
   SET_EDIT_AIRPORT (state, airport) {
     Vue.set(state.data, 'airport', airport)
     state.index = airport.icao

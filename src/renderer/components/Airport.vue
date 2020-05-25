@@ -12,7 +12,7 @@
           trigger="hover"
           content="Center to airport"
         >
-          <el-button @click="goto" class="button" slot="reference">
+          <el-button @click="goto" class="button" slot="reference" :disabled="editing">
             <i class="fas fa-bullseye"></i>
           </el-button>
         </el-popover>
@@ -23,7 +23,7 @@
           trigger="hover"
           content="Remove this Work in progress file"
         >
-          <el-button @click="remove" tooltip="Remove wip file" class="button" slot="reference">
+          <el-button @click="remove" tooltip="Remove wip file" class="button" slot="reference" :disabled="editing">
             <i class="fas fa-trash-alt"></i>
           </el-button>
         </el-popover>
@@ -34,7 +34,7 @@
           trigger="hover"
           content="Upload work in progress"
         >
-          <el-button @click="upload" tooltip="Upload to groundweb" class="button" slot="reference">
+          <el-button @click="upload" tooltip="Upload to groundweb" class="button" slot="reference" :disabled="editing">
             <i class="fas fa-upload"></i>
           </el-button>
         </el-popover>
@@ -50,8 +50,9 @@
 
   export default  {
     name: 'airport',
-    props: {airport: Object},
+    props: {airport: Object, editing: Boolean},
     mounted () {
+      this.$forceUpdate();
     },
     data () {
       return {

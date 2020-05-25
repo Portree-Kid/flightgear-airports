@@ -22,7 +22,7 @@
       </el-row>
         
         <el-row v-for="w in wip" :key="w.icao">
-          <Airport :airport="w"></Airport>
+          <Airport :airport="w" :editing="editing"></Airport>
         </el-row>
     </div>
   </section>
@@ -43,6 +43,11 @@
     methods: {
     },
     computed: {
+      editing: {
+        get: function () {
+          return this.$store.state.Editable.editing
+        }
+      },
       wip: function () {
         return this.$store.state.Settings.wip
       }

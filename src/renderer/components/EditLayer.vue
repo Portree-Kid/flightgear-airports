@@ -154,6 +154,8 @@
       enableEdit () {
         this.editable = true
         this.editing = true
+        this.$store.commit('SET_EDIT', true)
+        
         this.featureLookup = [];
         this.groundnetLayerGroup.eachLayer(l => {
           l.enableEdit()
@@ -170,6 +172,7 @@
       disableEdit () {
         this.editable = false
         this.editing = false
+        this.$store.commit('SET_EDIT', false)
         this.groundnetLayerGroup.eachLayer(l => {
           l.disableEdit()
         })
