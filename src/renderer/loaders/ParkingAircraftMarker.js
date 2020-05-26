@@ -23,8 +23,14 @@ function stripSVG(fName) {
     return svg2[0];
 }
 
-const airLinerSVG = stripSVG('Airplane_silhouette.svg');
-const gaSVG = stripSVG('Black_aircraft_icon.svg');
+const airLinerSVGs = {
+    A: stripSVG('FGA_ACT_A_GA.svg'),
+    B: stripSVG('FGA_ACT_B_PROP.svg'),
+    C: stripSVG('FGA_ACT_C.svg'),
+    D: stripSVG('FGA_ACT_D.svg'),
+    E: stripSVG('FGA_ACT_E.svg'),
+    F: stripSVG('FGA_ACT_F.svg')
+};
 
 L.ParkingAircraftMarker = L.Marker.extend({
     options: {

@@ -28,15 +28,6 @@ function addFrequencies (type, value) {
     })      
 }
 
-/**
- * Hack to avoid https://github.com/ianengelbrecht/geo-coordinates-parser/issues/1
- * @param {*} coordinate 
- */
-
-function cleanCoord(coordinate) {
-    return coordinate.replace('0.000', '0.001')
-}
-
 exports.addFeature = function (feature) {
     featureLookup[feature.id] = new Array();
 }
@@ -125,10 +116,10 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                 //attrs.lat
                 //console.log(n.attr('lat') + " " + n.attr('lon'));
                 try {
-                    var latlon = convert(cleanCoord(n.attr('lat')) + " " + cleanCoord(n.attr('lon')));                    
+                    var latlon = convert(n.attr('lat') + " " + n.attr('lon'));                    
                 } catch (error) {
                     console.warn(n.attr('lat') + " " + n.attr('lon'));
-                    convert(cleanCoord(n.attr('lat')) + " " + cleanCoord(n.attr('lon')));
+                    convert(n.attr('lat') + " " + n.attr('lon'));
                 }
                 //console.log(latlon.decimalLatitude);
 
@@ -181,8 +172,8 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                         });
                     }
                     if (!bidirectional) {
-                        var beginlatlon = convert(cleanCoord(beginNode.attr('lat')) + " " + cleanCoord(beginNode.attr('lon')));
-                        var endlatlon = convert(cleanCoord(endNode.attr('lat')) + " " + cleanCoord(endNode.attr('lon')));
+                        var beginlatlon = convert(beginNode.attr('lat') + " " + beginNode.attr('lon'));
+                        var endlatlon = convert(endNode.attr('lat') + " " + endNode.attr('lon'));
                         var polyline = new L.Polyline([[beginlatlon.decimalLatitude, beginlatlon.decimalLongitude], [endlatlon.decimalLatitude, endlatlon.decimalLongitude]], { attributes: {} }).addTo(layerGroup);
                         extendTaxiSegment(polyline);
                         polyline.addListeners();
