@@ -29,8 +29,8 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
     };
     taxiwaySegment.__proto__.extensions = function (editLayer) {
         this.editLayer = editLayer;
-        this._latlngs[0].__vertex.glueindex = this.begin;
-        this._latlngs.slice(-1)[0].__vertex.glueindex = this.end;
+        this._latlngs[0].glueindex = this.begin;
+        this._latlngs.slice(-1)[0].glueindex = this.end;
         if (typeof this.featureLookup[this.begin] === 'undefined') {
             this.featureLookup[this.begin] = new Array();
         }
@@ -71,7 +71,6 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                 ,
                 {
                     deep: true //add this if u need to watch object properties change etc.
-
                 }
             );
         });
@@ -89,44 +88,50 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
             if(taxiwaySegment.options.attributes === undefined) {
                 taxiwaySegment.options.attributes = {direction: 'bi-directional'};
             }
+            // Glue to another node
             if (closest) {
-              event.latlng.__vertex['glueindex'] = Number(closest.glueindex);     
+              event.latlng['glueindex'] = Number(closest.glueindex);     
               event.latlng.__vertex.setLatLng(closest.latlng);
-              event.latlng.attributes = {index: event.latlng.__vertex.glueindex, isOnRunway: 0};
-              this.editLayer.featureLookup[event.latlng.__vertex.glueindex].push(event.latlng.__vertex);
-              if (taxiwaySegment.options.attributes.start === undefined) {
-                taxiwaySegment.options.attributes.start = event.latlng.__vertex['glueindex']
+              event.latlng.attributes = {index: event.latlng.glueindex, isOnRunway: 0};
+              // Push Vertex to lookup
+              this.editLayer.featureLookup[event.latlng.glueindex].push(event.latlng.__vertex);
+              if (taxiwaySegment.options.attributes.begin === undefined) {
+                taxiwaySegment.options.attributes.begin = event.latlng['glueindex']
               } else {
-                taxiwaySegment.options.attributes.end = event.latlng.__vertex['glueindex']
+                taxiwaySegment.options.attributes.end = event.latlng['glueindex']
               }
+              if(taxiwaySegment.getLatLngs().length===1) {
+                taxiwaySegment.begin = closest.glueindex;
+              }
+              taxiwaySegment.end = closest.glueindex;
               console.log(`Closest : ${closest}`)
             } else {
-              event.vertex['glueindex'] = ++this.editLayer.groundnetLayerGroup.maxId;
-              event.vertex.latlng.attributes = {index: event.vertex.glueindex, isOnRunway: 0};
-              this.editLayer.featureLookup[event.vertex.glueindex] = [];
-              this.editLayer.featureLookup[event.vertex.glueindex].push(event.vertex);
-              this.editLayer.featureLookup[event.vertex.glueindex].push(taxiwaySegment);
-              if (taxiwaySegment.options.attributes.start === undefined) {
-                taxiwaySegment.options.attributes.start =  event.vertex['glueindex']
-              } else {
-                taxiwaySegment.options.attributes.end =  event.vertex['glueindex']
-              }
-              event.vertex.editor.enable();
+              event.vertex.latlng['glueindex'] = ++this.editLayer.groundnetLayerGroup.maxId;
+              event.vertex.latlng.attributes = {index: event.vertex.latlng.glueindex, isOnRunway: 0};
+              this.editLayer.featureLookup[event.vertex.latlng.glueindex] = [];
+              this.editLayer.featureLookup[event.vertex.latlng.glueindex].push(event.vertex);
+              this.editLayer.featureLookup[event.vertex.latlng.glueindex].push(taxiwaySegment);
+              // taxiwaySegment.editor.refresh();
+              //taxiwaySegment.editor.reset();
+              if (taxiwaySegment.options.attributes.begin === undefined) {
+                taxiwaySegment.options.attributes.begin =  event.vertex.latlng['glueindex']
+                taxiwaySegment.begin = event.vertex.latlng.glueindex;
+              } /*else if (taxiwaySegment.options.attributes.end === undefined || 
+                Number(taxiwaySegment.getLatLngs()[taxiwaySegment.getLatLngs().length-1].glueindex) !== taxiwaySegment.options.attributes.end ) {
+                taxiwaySegment.options.attributes.end =  event.vertex.latlng['glueindex']
+                taxiwaySegment.end = event.vertex.latlng.glueindex;
+              }*/
             }
+
           });
         this.on('editable:vertex:deleted', event => {
-            console.log(event)
+            console.log('editable:vertex:deleted' + event)
         });
         this.on('editable:vertex:rawclick', event => {
             event.cancel()
             console.log(event)
         });
         this.on('editable:vertex:clicked', function (event) {
-            console.log(this.featureLookup[event.vertex.glueindex]);            
-            if (this.edit) {
-                
-            }
-
             store.default.dispatch('setNode', event.vertex.latlng.attributes)
             if(event.vertex._icon!=null) {
                 event.vertex._icon.style['background-color'] = 'red';
@@ -175,15 +180,15 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         this.on('editable:vertex:dragstart', function (event) {
             console.log("Event Target : ", event.target);            
             console.log("Middle Marker : ", event.vertex == event.vertex.middleMarker);            
-            console.log("Middle Marker : ", event.vertex.glueindex == undefined);            
-            if(event.vertex.glueindex == undefined)
+            console.log("Middle Marker : ", event.vertex.latlng.glueindex == undefined);            
+            if(event.vertex.latlng.glueindex == undefined)
               return;
-            dragIndex = event.vertex.glueindex;
+            dragIndex = event.vertex.latlng.glueindex;
         });
         this.on('editable:vertex:dragend', function (event) {
             console.log("Dragend : ", event.vertex);
             if (dragIndex > 0) {
-                this.featureLookup[dragIndex].forEach(element => {
+                event.target.featureLookup[dragIndex].forEach(element => {
                     if (element instanceof L.ParkingSpot) {
                         //element.setLatLng(event);
                         console.log(element);
@@ -214,7 +219,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                     element.updateMiddleMarker();
                     element.updateVertexFromDirection();
                 }
-                else if (element instanceof L.Polyline) {
+                else if (element instanceof L.Polyline) { 
                     if (Number(element.begin) === Number(dragIndex)) {
                         element.getLatLngs()[0].update(event.latlng);
                         element.setLatLngs(element.getLatLngs());
@@ -227,7 +232,8 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                         element.updateEndVertex(event.latlng);
                         element.updateMiddle();
                     }
-                } else if (element instanceof L.Editable.VertexMarker) {
+                } else if (element instanceof L.Editable.VertexMarker && 
+                    element !== event.vertex) {
                     console.log(element);
                     element.setLatLng(event.latlng);
                     element.latlngs.forEach((latlng, index) => {

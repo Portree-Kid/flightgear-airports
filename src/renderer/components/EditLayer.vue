@@ -399,34 +399,83 @@
         })
         return parkings
       },
+      refreshLookup(index) {
+        //element.__vertex
+          this.featureLookup[index] = this.featureLookup[index].filter(item => { 
+            return !(item instanceof L.Editable.VertexMarker && item.editor.__vertex === undefined)
+            }
+            );
+          this.featureLookup[index].forEach((element, i) => {
+            if (element instanceof L.Polyline) {
+              element.editor.refresh();
+              element.editor.reset();
+            }
+          });
+      },
       removeNode (index) {
         if(this.featureLookup[index]===undefined) {
           console.error("Lookup " + index + " failed ");          
           return;
         }
-        this.featureLookup[index].forEach((element, i) => {
-          if (element instanceof L.Polyline) {
-            // element.latlngs.forEach();
-            element._latlngs.forEach((e1, index1) => {
-              console.log(e1);
-              e1.__vertex.removeFrom(element.editor.editLayer);
-              element._latlngs.splice(index1,1);
-              if (element._latlngs.length==1) {
-                this.featureLookup[index].splice(i,1);
-                this.featureLookup[element._latlngs[0].__vertex.glueindex].forEach((otherEnd, j) => {
-                  console.log(j + ' ' + otherEnd);
-                  if(element === otherEnd){
-                    this.featureLookup[element._latlngs[0].__vertex.glueindex].splice(j,1);
-                  }
-                });
+        try {
+          this.featureLookup[index].forEach((element, i) => {
+            if (element instanceof L.Polyline) {
+              console.log('Poly : ' + i + ' ' + element.attributes);
+              // Complete poly with be removed
+              if ( element._latlngs.length <= 3 ) {
+                if(Number(element.begin) !== index) {
+                  this.featureLookup[Number(element.begin)] = this.featureLookup[Number(element.begin)].filter(item => item !== element);
+                  this.refreshLookup(Number(element.begin))
+                }
+                if(Number(element.end) !== index) {
+                  this.featureLookup[Number(element.end)] = this.featureLookup[Number(element.end)].filter(item => item !== element);
+                  this.refreshLookup(Number(element.end))
+                }
                 element.removeFrom(this.groundnetLayerGroup);
               }
-            });
-          } else if (element instanceof L.RunwayNode) {
-            this.featureLookup[index] = this.featureLookup[index].filter(item => item !== element);
-            element.removeFrom(this.groundnetLayerGroup);
-          }
-        });
+              else {
+                element.getLatLngs().forEach((e1, index1) => {
+                  console.log(index1 + ' ' + e1);
+                  if (e1.attributes.index===index) {
+                    var splitOffNodes = element.getLatLngs().splice(index1); 
+                    element.editor.refresh();
+                    element.editor.reset();
+                    splitOffNodes.splice(0, 1);
+                    if( splitOffNodes.length>1) {
+                        var polyline = new L.Polyline(splitOffNodes, { attributes: {} }).addTo(layerGroup);
+                        extendTaxiSegment(polyline);
+                        polyline.addListeners();    
+                        polyline.setEditlayer(this);
+                        polyline.enableEdit();
+                        polyline.editor.refresh();
+                        polyline.editor.reset();
+                        polyline.addTo(this.groundnetLayerGroup);                
+                        polyline.end = element.end;
+                        // Remove from end lookup
+                        this.featureLookup[element.options.attributes.end] = this.featureLookup[element.options.attributes.end].filter(item => item !== element);
+                        // push to the end lookup
+                        this.featureLookup[element.options.attributes.end].push(polyline);                                                
+                    }
+                    if(element.getLatLngs().length === 1) {
+                      this.featureLookup[index] = this.featureLookup[index].filter(item => item !== element);
+                      element.removeFrom(this.groundnetLayerGroup);
+                    }
+                    // element.editor.splitShape(element._latlngs, index1);
+                    console.log('Removed');
+                  }
+                });
+              }
+            } else if (element instanceof L.RunwayNode) {
+              console.log('Runway : ' + i + ' ' + element.attributes);
+              this.featureLookup[index] = this.featureLookup[index].filter(item => item !== element);
+              element.removeFrom(this.groundnetLayerGroup);
+            } else {
+              console.warn('WTF' + element);
+            }            
+          });          
+        } catch (error) {
+            console.error(error);
+        }
       },
       drawPolyline () {
         var polyLine = this.$parent.mapObject.editTools.startPolyline()
@@ -616,8 +665,8 @@
               }
           } else if (element instanceof L.Polyline) {
               element._latlngs.forEach(element => {                
-                if(element.__vertex && Number(element.__vertex.glueindex) === Number(nIndex)){
-                  latlng = element.__vertex.latlng;
+                if(element.__vertex && Number(element.glueindex) === Number(nIndex)){
+                  latlng = element.latlng;
                 }
               });
           }    
@@ -669,9 +718,12 @@
             // console.log(layer._latlngs)
             layer._latlngs.forEach(latlng => {
               if (latlng.__vertex) {
+                if (Number.isNaN(latlng.glueindex)) {
+                  console.warn('No glueindex : ' + latlng.__vertex);
+                }
                 let distance = latlng.distanceTo(eventLatlng)
                 if (distance > 0 && distance < snap) {
-                  layers.push({d: distance, l: layer, latlng: latlng.__vertex.latlng, glueindex: latlng.__vertex.glueindex})
+                  layers.push({d: distance, l: layer, latlng: latlng.__vertex.latlng, glueindex: latlng.glueindex})
                 }
               }
             })

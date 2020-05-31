@@ -3,7 +3,6 @@ const fs = require('fs');
 const path = require('path');
 
 const markers = require('./MagneticVertex');
-const TaxiwaySegment = require('./TaxiwaySegment');
 
 const parkingSpot = require('./ParkingSpot.js');
 
@@ -92,34 +91,34 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         });
         // New segments 
         featureList.filter(o => o instanceof L.Polyline).filter(n => n).forEach(arcElement => {
-            //            element._latlngs.forEach(latlng => { nodes[latlng.__vertex.glueindex] = mapVertexNode(latlng) });    
+            //            element._latlngs.forEach(latlng => { nodes[latlng.glueindex] = mapVertexNode(latlng) });    
             var startIndex = -1;
             console.debug(arcElement.options.attributes);
             var currentArc = arcElement.options.attributes;
             arcElement._latlngs.forEach( latlng => {
-                if (latlng.__vertex !== undefined && latlng.__vertex.glueindex !== undefined) {
-                    nodes[latlng.__vertex.glueindex] = mapVertexNode(latlng);
+                if (latlng !== undefined && latlng.glueindex !== undefined) {
+                    nodes[latlng.glueindex] = mapVertexNode(latlng);
                     if (startIndex >= 0) {
                         if (featureLookup[startIndex] == undefined) {
                             featureLookup[startIndex] = [];
                         }
-                        if (featureLookup[latlng.__vertex.glueindex] == undefined) {
-                            featureLookup[latlng.__vertex.glueindex] = [];
+                        if (featureLookup[latlng.glueindex] == undefined) {
+                            featureLookup[latlng.glueindex] = [];
                         }
                         if( currentArc.direction === 'bi-directional' || currentArc.direction === 'forward' ){
-                            arc = { '@begin': startIndex, '@end': String(latlng.__vertex.glueindex) };
+                            arc = { '@begin': startIndex, '@end': String(latlng.glueindex) };
                             styleArc(currentArc, arc);
                             arcList.push(arc);
-                            featureLookup[startIndex][latlng.__vertex.glueindex] = arc;    
+                            featureLookup[startIndex][latlng.glueindex] = arc;    
                         }
                         if( currentArc.direction === 'bi-directional' || currentArc.direction === 'backward' ){
-                            arc = { '@begin': String(latlng.__vertex.glueindex), '@end': startIndex };
+                            arc = { '@begin': String(latlng.glueindex), '@end': startIndex };
                             styleArc(currentArc, arc);
                             arcList.push(arc);
-                            featureLookup[latlng.__vertex.glueindex][startIndex] = arc;
+                            featureLookup[latlng.glueindex][startIndex] = arc;
                         }
                     }
-                    startIndex = latlng.__vertex.glueindex;
+                    startIndex = latlng.glueindex;
                 }
             });
         });
@@ -237,7 +236,7 @@ var mapVertexNode = function (l) {
     if (l instanceof L.LatLng) {
         console.debug(l);
         // <Parking index="0" type="gate" name="GA_Parking" lat="S9 25.739923" lon="E160 2.927602" heading="67"  radius="44" airlineCodes="" />
-        return { '@index': String(l.__vertex.glueindex), '@lat': convertLat(l), '@lon': convertLon(l), '@isOnRunway': '0', '@holdPointType': l.attributes['holdPointType'] };
+        return { '@index': String(l.glueindex), '@lat': convertLat(l), '@lon': convertLon(l), '@isOnRunway': '0', '@holdPointType': l.attributes['holdPointType'] };
     }
 }
 
