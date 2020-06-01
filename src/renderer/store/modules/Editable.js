@@ -82,6 +82,9 @@ const mutations = {
   'SET_EDIT_HOLDPOINTTYPE' (state, holdPointType) {
     Vue.set(state.data.node, 'holdPointType', holdPointType)
   },
+  'SET_EDIT_COORDS' (state, coords) {
+    Vue.set(state.data.node, 'coords', coords)
+  },
   'SET_EDIT_ISONRUNWAY' (state, isOnRunway) {
     Vue.set(state.data.node, 'isOnRunway', isOnRunway)
   }
@@ -101,7 +104,8 @@ const actions = {
     context.commit(SET_EDIT_ARC, arc)
   },
   async setNode (context, node) {
-    context.commit('SET_EDIT_NODE', node)
+    context.commit('SET_EDIT_NODE', node.attributes)
+    context.commit('SET_EDIT_COORDS', node.lat.toFixed(5) + ' ' + node.lng.toFixed(5))
   }
 }
 

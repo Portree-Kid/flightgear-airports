@@ -64,12 +64,7 @@
       // getter
         get: function () {
           if(this.$store.state.Editable.index!==undefined) {
-            var ret = this.$parent.$parent.$parent.$refs.editLayer.getPointCoords(this.$store.state.Editable.index)
-            if(ret) {
-              return ret[0].lat + " " + ret[0].lng
-            } else {
-              return 'unknown'
-            }
+            return this.$store.state.Editable.data.node.coords;
           }
         },
         // setter
@@ -77,9 +72,7 @@
           if (newValue==='unknown') {
             
           }          
-          var position = new Coordinates(newValue);
-          console.log(position);          
-          this.$parent.$parent.$parent.$refs.editLayer.setPointCoords(this.$store.state.Editable.index, position)
+          this.$store.commit('SET_EDIT_COORDS', newValue)
         }
       },
       isOnRunway: {

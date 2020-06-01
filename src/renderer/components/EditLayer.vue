@@ -13,6 +13,7 @@
   import Vue from 'vue'
   import { MessageBox } from 'element-ui';
 
+  const Coordinates = require('coordinate-parser');
   const path = require('path')
   const fs = require('fs')
 
@@ -343,7 +344,9 @@
         }).filter(n => n);
       },
       setPointCoords (index, coordinates) {
-        var latlng = {lat: coordinates.latitude, lng: coordinates.longitude };
+        var position = new Coordinates(coordinates);
+
+        var latlng = {lat: position.latitude, lng: position.longitude };
         if(this.featureLookup[index]===undefined) {
           console.error("Lookup " + index + " failed ");          
           return;
@@ -364,14 +367,14 @@
               element.updateVertexFromDirection();
           }
           else if (element instanceof L.Polyline) {
-              if (Number(element.begin) === Number(dragIndex)) {
-                  element.getLatLngs()[0].update(event.latlng);
+              if (Number(element.begin) === Number(index)) {
+                  element.getLatLngs()[0].update(latlng);
                   element.setLatLngs(element.getLatLngs());
                   element.updateBeginVertex(latlng);
                   element.updateMiddle();
               }
-              if (Number(element.end) === Number(dragIndex)) {
-                  element.getLatLngs()[element.getLatLngs().length - 1].update(event.latlng);
+              if (Number(element.end) === Number(index)) {
+                  element.getLatLngs()[element.getLatLngs().length - 1].update(latlng);
                   element.setLatLngs(element.getLatLngs());
                   element.updateEndVertex(latlng);
                   element.updateMiddle();
@@ -606,6 +609,7 @@
           arc.updateStyle();
         }        
       },
+      //Update Node
       editedNode() {
         if (this.$store.state.Editable.index === undefined ||
             this.$store.state.Editable.data.node === undefined ||
@@ -665,8 +669,10 @@
               }
           } else if (element instanceof L.Polyline) {
               element._latlngs.forEach(element => {                
-                if(element.__vertex && Number(element.glueindex) === Number(nIndex)){
-                  latlng = element.latlng;
+                if(element.__vertex && Number(element.glueindex) === Number(nIndex)){                  
+                  if (this.$store.state.Editable.data.node.coords) {
+                    this.setPointCoords(this.$store.state.Editable.index, this.$store.state.Editable.data.node.coords)                    
+                  }
                 }
               });
           }    

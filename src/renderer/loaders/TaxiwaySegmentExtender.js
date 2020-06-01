@@ -132,7 +132,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
             console.log(event)
         });
         this.on('editable:vertex:clicked', function (event) {
-            store.default.dispatch('setNode', event.vertex.latlng.attributes)
+            store.default.dispatch('setNode', event.vertex.latlng)
             if(event.vertex._icon!=null) {
                 event.vertex._icon.style['background-color'] = 'red';
             } else if(event.vertex.icon!=null ) {
@@ -152,23 +152,26 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                 function (state) {
                         return state.Editable.data.node;
                 },
-                    () => { 
-                        if(event.vertex._icon!=null) {
-                            event.vertex._icon.style['background-color'] = 'white';
-                        } else if(event.vertex.icon!=null ) {
-                            if(event.vertex.icon.style!=null) {
-                                event.vertex.icon.style['background-color'] = 'white';
-                            } else {
-                                event.vertex.setStyle({color : 'white'})
-                            }
-                        } else if(event.vertex.options.icon!=null ) {
-                            if(event.vertex.options.icon.style!=null) {
-                                event.vertex.options.icon.style['background-color'] = 'white';
-                            } else {
-                                event.vertex.options.icon._setIconStyles({color : 'white'})
-                            }
+                    (state) => {
+                        if( state === undefined ||
+                            state.index !== Number(event.vertex.latlng.glueindex)) {
+                            if(event.vertex._icon!=null) {
+                                event.vertex._icon.style['background-color'] = 'white';
+                            } else if(event.vertex.icon!=null ) {
+                                if(event.vertex.icon.style!=null) {
+                                    event.vertex.icon.style['background-color'] = 'white';
+                                } else {
+                                    event.vertex.setStyle({color : 'white'})
+                                }
+                            } else if(event.vertex.options.icon!=null ) {
+                                if(event.vertex.options.icon.style!=null) {
+                                    event.vertex.options.icon.style['background-color'] = 'white';
+                                } else {
+                                    event.vertex.options.icon._setIconStyles({color : 'white'})
+                                }
+                            } 
+                            this.unwatch();    
                         } 
-                        this.unwatch();
                     }                    
                 ,
                 {
@@ -196,6 +199,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                 });
             }
             dragIndex = -1;
+            store.default.dispatch('setNode', event.vertex.latlng)
         });
     };
       /**
