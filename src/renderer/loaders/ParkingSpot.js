@@ -120,7 +120,7 @@ L.ParkingSpot = L.Circle.extend({
         var style = {};
         style['color'] = 'red';
         this.setStyle(style);        
-        element.updateWheelPos();
+        this.updateWheelPos();
     },    
     deselect() {
         var style = {};
@@ -151,6 +151,7 @@ L.ParkingSpot = L.Circle.extend({
             console.debug("DragEnd Parking : ", event);
             store.default.dispatch('setParking', event.target.options.attributes);
             store.default.dispatch('setParkingCoords', event.target.getLatLng().lat.toFixed(5) + ' ' + event.target.getLatLng().lng.toFixed(5));
+            event.target.updateWheelPos();
             /*
             store.default.dispatch('setParkingHeading', this.options.attributes.heading)
             store.default.dispatch('setParkingRadius', this.options.attributes.radius)
@@ -215,6 +216,29 @@ L.ParkingSpot = L.Circle.extend({
     },
     updateStyle: function () {
 
+    },
+    selectParking() {
+
+        store.default.dispatch('setParking', this.options.attributes);
+        store.default.dispatch('setParkingCoords', this.getLatLng().lat.toFixed(5) + ' ' + this.getLatLng().lng.toFixed(5));
+
+        this.select();
+        this.unwatch = store.default.watch(
+            function (state) {
+                    return state.Editable.data.parking;
+            },
+                (state) => { 
+                    if(state === undefined ||
+                        state.index !== Number(this.options.attributes.index)) {
+                            this.deselect(); 
+                            this.unwatch();    
+                        } 
+                    }                    
+            ,
+            {
+                deep: true //add this if u need to watch object properties change etc.
+            }
+        );
     },
     turfToLatLng: function (turfPoint) {
         return {lat: turfPoint.geometry.coordinates[1], lng: turfPoint.geometry.coordinates[0]};

@@ -132,52 +132,58 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
             console.log(event)
         });
         this.on('editable:vertex:clicked', function (event) {
-            store.default.dispatch('setNode', event.vertex.latlng)
-            if(event.vertex._icon!=null) {
-                event.vertex._icon.style['background-color'] = 'red';
-            } else if(event.vertex.icon!=null ) {
-                if(event.vertex.icon.style!=null) {
-                    event.vertex.icon.style['background-color'] = 'red';
-                } else {
-                    event.vertex.setStyle({color : 'red'})
-                }
-            } else if(event.vertex.options.icon!=null ) {
-                if(event.vertex.options.icon.style!=null) {
-                    event.vertex.options.icon.style['background-color'] = 'red';
-                } else {
-                    event.vertex.options.icon._setIconStyles({color : 'red'})
-                }
-            } 
-            this.unwatch = store.default.watch(
-                function (state) {
-                        return state.Editable.data.node;
-                },
-                    (state) => {
-                        if( state === undefined ||
-                            state.index !== Number(event.vertex.latlng.glueindex)) {
-                            if(event.vertex._icon!=null) {
-                                event.vertex._icon.style['background-color'] = 'white';
-                            } else if(event.vertex.icon!=null ) {
-                                if(event.vertex.icon.style!=null) {
-                                    event.vertex.icon.style['background-color'] = 'white';
-                                } else {
-                                    event.vertex.setStyle({color : 'white'})
-                                }
-                            } else if(event.vertex.options.icon!=null ) {
-                                if(event.vertex.options.icon.style!=null) {
-                                    event.vertex.options.icon.style['background-color'] = 'white';
-                                } else {
-                                    event.vertex.options.icon._setIconStyles({color : 'white'})
-                                }
+            var parking = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.ParkingSpot);
+            if(parking.length>0) {
+              parking[0].selectParking();
+            } else {
+                this.editLayer.featureLookup[event.vertex.latlng.glueindex].forEach
+                store.default.dispatch('setNode', event.vertex.latlng)
+                if(event.vertex._icon!=null) {
+                    event.vertex._icon.style['background-color'] = 'red';
+                } else if(event.vertex.icon!=null ) {
+                    if(event.vertex.icon.style!=null) {
+                        event.vertex.icon.style['background-color'] = 'red';
+                    } else {
+                        event.vertex.setStyle({color : 'red'})
+                    }
+                } else if(event.vertex.options.icon!=null ) {
+                    if(event.vertex.options.icon.style!=null) {
+                        event.vertex.options.icon.style['background-color'] = 'red';
+                    } else {
+                        event.vertex.options.icon._setIconStyles({color : 'red'})
+                    }
+                } 
+                this.unwatch = store.default.watch(
+                    function (state) {
+                            return state.Editable.data.node;
+                    },
+                        (state) => {
+                            if( state === undefined ||
+                                state.index !== Number(event.vertex.latlng.glueindex)) {
+                                if(event.vertex._icon!=null) {
+                                    event.vertex._icon.style['background-color'] = 'white';
+                                } else if(event.vertex.icon!=null ) {
+                                    if(event.vertex.icon.style!=null) {
+                                        event.vertex.icon.style['background-color'] = 'white';
+                                    } else {
+                                        event.vertex.setStyle({color : 'white'})
+                                    }
+                                } else if(event.vertex.options.icon!=null ) {
+                                    if(event.vertex.options.icon.style!=null) {
+                                        event.vertex.options.icon.style['background-color'] = 'white';
+                                    } else {
+                                        event.vertex.options.icon._setIconStyles({color : 'white'})
+                                    }
+                                } 
+                                this.unwatch();    
                             } 
-                            this.unwatch();    
-                        } 
-                    }                    
-                ,
-                {
-                    deep: true //add this if u need to watch object properties change etc.
-                }
-            );
+                        }                    
+                    ,
+                    {
+                        deep: true //add this if u need to watch object properties change etc.
+                    }
+                );    
+            }            
         });
         var dragIndex = -1;
         this.on('editable:vertex:dragstart', function (event) {
@@ -199,7 +205,13 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                 });
             }
             dragIndex = -1;
-            store.default.dispatch('setNode', event.vertex.latlng)
+            var parking = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.ParkingSpot);
+            if(parking.length>0) {
+              parking[0].selectParking();
+            } else { 
+              store.default.dispatch('setNode', event.vertex.latlng)
+            }
+
         });
     };
       /**
@@ -222,6 +234,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                     // element.extensions();
                     element.updateMiddleMarker();
                     element.updateVertexFromDirection();
+                    element.updateWheelPos();
                 }
                 else if (element instanceof L.Polyline) { 
                     if (Number(element.begin) === Number(dragIndex)) {

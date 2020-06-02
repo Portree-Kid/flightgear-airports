@@ -365,6 +365,7 @@
               // element.extensions();
               element.updateMiddleMarker();
               element.updateVertexFromDirection();
+              element.updateWheelPos();
           }
           else if (element instanceof L.Polyline) {
               if (Number(element.begin) === Number(index)) {
@@ -480,6 +481,9 @@
             console.error(error);
         }
       },
+      stopDrawing () {
+        this.$parent.mapObject.editTools.stopDrawing()
+      },
       drawPolyline () {
         var polyLine = this.$parent.mapObject.editTools.startPolyline()
         polyLine.addTo(this.groundnetLayerGroup)
@@ -562,7 +566,8 @@
         this.featureLookup[this.$store.state.Editable.index].forEach((element,index) => {
           if (element instanceof L.ParkingSpot) {
             element.options.attributes = Object.assign({}, this.$store.state.Editable.data.parking)
-            element.updateVertexFromDirection();           
+            element.updateVertexFromDirection();     
+            element.updateWheelPos();      
           }
         })
         if (this.$store.state.Editable.data.parking.coords) {
@@ -603,11 +608,11 @@
 */        
       },
       editedArc() {
-        console.log('Edited Arc : ' + this.$store.state.Editable.index);
         if (!this.groundnetLayerGroup)
           return;
         var arc = this.groundnetLayerGroup.getLayer(this.$store.state.Editable.index);
         if (arc && arc instanceof L.Polyline) {
+          console.log('Edited Arc : ' + this.$store.state.Editable.index);
           arc.options.attributes = Object.assign({}, this.$store.state.Editable.data.arc)
           arc.updateStyle();
         }        
