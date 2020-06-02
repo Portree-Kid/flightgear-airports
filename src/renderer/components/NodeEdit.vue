@@ -72,7 +72,7 @@
           if (newValue==='unknown') {
             
           }          
-          this.$store.commit('SET_EDIT_COORDS', newValue)
+          this.$store.commit('SET_EDIT_NODE_COORDS', newValue)
         }
       },
       isOnRunway: {

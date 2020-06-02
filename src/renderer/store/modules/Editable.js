@@ -59,6 +59,13 @@ const mutations = {
     Vue.set(state.data.parking, 'number', parkingName)
   },
   'SET_EDIT_PARKING_HEADING' (state, heading) {
+    while (heading >= 360) {
+      heading -= 360
+    }
+    while (heading < 0) {
+      heading += 360
+    }
+
     Vue.set(state.data.parking, 'heading', heading)
   },
   'SET_EDIT_PARKING_AIRLINES' (state, airlineCodes) {
@@ -69,6 +76,9 @@ const mutations = {
   },
   'SET_EDIT_PARKING_RADIUS' (state, radius) {
     Vue.set(state.data.parking, 'radius', radius)
+  },
+  'SET_EDIT_PARKING_COORDS' (state, coords) {
+    Vue.set(state.data.parking, 'coords', coords)
   },
   'SET_EDIT_ARC_NAME' (state, arcName) {
     Vue.set(state.data.arc, 'name', arcName)
@@ -82,7 +92,7 @@ const mutations = {
   'SET_EDIT_HOLDPOINTTYPE' (state, holdPointType) {
     Vue.set(state.data.node, 'holdPointType', holdPointType)
   },
-  'SET_EDIT_COORDS' (state, coords) {
+  'SET_EDIT_NODE_COORDS' (state, coords) {
     Vue.set(state.data.node, 'coords', coords)
   },
   'SET_EDIT_ISONRUNWAY' (state, isOnRunway) {
@@ -100,12 +110,21 @@ const actions = {
   async setParking (context, parking) {
     context.commit(SET_EDIT_PARKING, parking)
   },
+  async setParkingRadius (context, radius) {
+    context.commit('SET_EDIT_PARKING_RADIUS', radius)
+  },
+  async setParkingHeading (context, heading) {
+    context.commit('SET_EDIT_PARKING_HEADING', heading)
+  },
+  async setParkingCoords (context, coords) {
+    context.commit('SET_EDIT_PARKING_COORDS', coords)
+  },
   async setArc (context, arc) {
     context.commit(SET_EDIT_ARC, arc)
   },
   async setNode (context, node) {
     context.commit('SET_EDIT_NODE', node.attributes)
-    context.commit('SET_EDIT_COORDS', node.lat.toFixed(5) + ' ' + node.lng.toFixed(5))
+    context.commit('SET_EDIT_NODE_COORDS', node.lat.toFixed(5) + ' ' + node.lng.toFixed(5))
   }
 }
 

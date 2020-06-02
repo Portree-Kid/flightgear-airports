@@ -388,7 +388,7 @@
                       latlng1.update(latlng);
                   }
               });
-              element.editor.feature.setLatLngs(latlngs);
+              element.editor.feature.setLatLngs(element.latlngs);
               element.editor.feature.updateMiddle();
           }    
         });
@@ -549,13 +549,13 @@
         })
       },
       editedParking() {
-        console.log('Edited Parking : ' + this.$store.state.Editable.data.parking)
         if (this.$store.state.Editable.index === undefined ||
             this.$store.state.Editable.data.parking === undefined ||
             this.featureLookup===undefined) {
           return
         }
-        this.$store.dispatch('updatedParking', this.$store.state.Editable.data.parking);
+        console.log('Edited Parking : ' + this.$store.state.Editable.data.parking)
+        //Notify list
         if (this.featureLookup[this.$store.state.Editable.index]===undefined) {
           return
         }
@@ -565,6 +565,9 @@
             element.updateVertexFromDirection();           
           }
         })
+        if (this.$store.state.Editable.data.parking.coords) {
+          this.setPointCoords(this.$store.state.Editable.index, this.$store.state.Editable.data.parking.coords)                    
+        }
       },
       editedParkings() {
         if (this.featureLookup===undefined) {

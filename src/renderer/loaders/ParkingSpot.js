@@ -72,11 +72,11 @@ L.ParkingSpot = L.Circle.extend({
           }
       }
     },
-    removeDirection: function () {
+    removeDirection() {
         this.direction = undefined;
     },
     // Update the direction vertex from the direction
-    updateVertexFromDirection: function () {
+    updateVertexFromDirection() {
         if (this.editEnabled()) {
             var start = this._latlng;
             var options = { units: 'kilometers' };
@@ -91,13 +91,12 @@ L.ParkingSpot = L.Circle.extend({
         }
     },
     // Update the direction from the moved direction vertex
-    updateDirectionFromVertex: function () {
+    updateDirectionFromVertex() {
         if (this.editEnabled()) {
             var start = this._latlng;
             var end = this.editor._resizeLatLng.__vertex.getLatLng();
             var heading = turf.bearing([start.lng, start.lat], [end.lng, end.lat]);
             this.options.attributes.heading = heading;
-
             const output = validRadii.reduce((prev, curr) => Math.abs(curr - this._mRadius) < Math.abs(prev - this._mRadius) ? curr : prev);
 
             console.debug('Found radius ' + output);
@@ -121,6 +120,7 @@ L.ParkingSpot = L.Circle.extend({
         var style = {};
         style['color'] = 'red';
         this.setStyle(style);        
+        element.updateWheelPos();
     },    
     deselect() {
         var style = {};
@@ -144,24 +144,35 @@ L.ParkingSpot = L.Circle.extend({
                 event.target.updateWheelPos();
             }
         });
-        /*        
-        this.on('editable:vertex:drag', function (event) {
-            console.debug("Drag : ", event);
+        this.on('editable:vertex:drag', function (event) { 
+            console.debug("Drag Parking : ", event);
         });
-        */
-        this.on('click', function (event) {
-            console.debug("Click : " + event.target);
+        this.on('editable:vertex:dragend', function (event) {
+            console.debug("DragEnd Parking : ", event);
             store.default.dispatch('setParking', event.target.options.attributes);
+            store.default.dispatch('setParkingCoords', event.target.getLatLng().lat.toFixed(5) + ' ' + event.target.getLatLng().lng.toFixed(5));
+            /*
+            store.default.dispatch('setParkingHeading', this.options.attributes.heading)
+            store.default.dispatch('setParkingRadius', this.options.attributes.radius)
+            */
+        });
+        this.on('click', function (event) {
+            console.debug("Click Parking : " + event.target);
+            store.default.dispatch('setParking', event.target.options.attributes);
+            store.default.dispatch('setParkingCoords', event.target.getLatLng().lat.toFixed(5) + ' ' + event.target.getLatLng().lng.toFixed(5));
             this.select(); 
             this.unwatch = store.default.watch(
                 function (state) {
                         return state.Editable.data.parking;
                 },
-                    () => { 
-                        if (event.target instanceof L.ParkingSpot) {
-                            event.target.setStyle({color : '#3388ff'}); 
-                            this.unwatch();    
-                        }
+                    (state) => {
+                        if(state === undefined ||
+                        state.index !== Number(event.target.glueindex)) {
+                            if (event.target instanceof L.ParkingSpot) {
+                                this.deselect(); 
+                                this.unwatch();    
+                            }    
+                        } 
                     }                    
                 ,
                 {
@@ -180,9 +191,14 @@ L.ParkingSpot = L.Circle.extend({
                             return state.Editable.data.parking;
                     },
                         () => { 
-                            event.target.setStyle({color : '#3388ff'}); 
-                            this.unwatch();
-                        }                    
+                            if(state === undefined ||
+                                state.index !== Number(event.target.glueindex)) {
+                                    if (event.target instanceof L.ParkingSpot) {
+                                        this.deselect(); 
+                                        this.unwatch();    
+                                    }    
+                                } 
+                            }                    
                     ,
                     {
                         deep: true //add this if u need to watch object properties change etc.
@@ -230,6 +246,7 @@ L.ParkingSpot = L.Circle.extend({
                     // element.extensions();
                     element.updateMiddleMarker();
                     element.updateVertexFromDirection();
+                    element.updateWheelPos();
                 }
                 else if (element instanceof L.TaxiwaySegment) {
                     if (element.begin === dragIndex) {

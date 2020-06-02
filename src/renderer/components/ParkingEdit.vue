@@ -88,7 +88,7 @@
         <span class="label">Heading :</span>
       </el-col>
       <el-col :span="17">
-        <el-input-number v-model="heading" :min="-1" :max="361" :step="0.1" :precision="1" :disabled="!editing"></el-input-number>
+        <el-input-number v-model="heading" :min="-361" :max="720" :step="0.1" :precision="1" :disabled="!editing"></el-input-number>
       </el-col>
     </el-row>
     <el-row>
@@ -157,9 +157,11 @@
         //   {value: 'forward', label: 'forward'},
         //   {value: 'backward', label: 'backward'}
         // ]
-        storedairlineCodes.forEach(element => {
-          airlineCodes.push({value: element, label: element});
-        });
+        if(storedairlineCodes) {
+          storedairlineCodes.forEach(element => {
+            airlineCodes.push({value: element, label: element});
+          });
+        }
         return airlineCodes
       },
       airlineCodes: {
@@ -204,15 +206,15 @@
       // getter
         get: function () {
           if(this.$store.state.Editable.index!==undefined) {
-            var ret = this.$parent.$parent.$parent.$refs.editLayer.getPointCoords(this.$store.state.Editable.index)
-            return ret[0].lat + " " + ret[0].lng
+            return this.$store.state.Editable.data.parking.coords;
           }
         },
         // setter
-        set: function (newValue) {          
-          var position = new Coordinates(newValue);
-          console.log(position);          
-          this.$parent.$parent.$parent.$refs.editLayer.setPointCoords(this.$store.state.Editable.index, position)
+        set: function (newValue) {
+          if (newValue==='unknown') {
+            
+          }          
+          this.$store.commit('SET_EDIT_PARKING_COORDS', newValue)
         }
       },
       heading: {
@@ -222,13 +224,15 @@
         },
         // setter
         set: function (newValue) {
-          if (newValue>=360) {
+          while (newValue>=360) {
             newValue -= 360
           }
-          if (newValue<0) {
+          while (newValue<0) {
             newValue += 360
           }
-          this.$store.commit('SET_EDIT_PARKING_HEADING', newValue)
+          if (Number(this.$store.state.Editable.data.parking.heading) !== newValue) {
+            this.$store.commit('SET_EDIT_PARKING_HEADING', newValue)
+          }
         }
       },
       wingspan: {
