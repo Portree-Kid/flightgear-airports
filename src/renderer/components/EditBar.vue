@@ -81,9 +81,11 @@
         this.$refs.upload.check()
       },
       zoomout() {
+        this.$parent.$parent.$refs.editLayer.stopDrawing()
         this.$parent.$parent.zoomUpdated(9)
       },
       zoomin() {
+        this.$parent.$parent.$refs.editLayer.stopDrawing()
         this.$parent.$parent.zoomUpdated(14)
       },
       edit () {
@@ -106,6 +108,7 @@
         this.$parent.$parent.$refs.editLayer.reload(false)
       },
       save () {
+        this.$parent.$parent.$refs.editLayer.stopDrawing()
         this.editing = false
         this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         Vue.set(this, 'saveDialogVisible', true)
@@ -191,21 +194,27 @@
         }
       },
       drawPolyline () {
+        this.$parent.$parent.$refs.editLayer.stopDrawing()
         this.$parent.$parent.$refs.editLayer.drawPolyline()
       },
       drawForwardPolyline () {
+        this.$parent.$parent.$refs.editLayer.stopDrawing()
         this.$parent.$parent.$refs.editLayer.drawForwardPolyline()
       },
       drawPushbackPolyline () {
+        this.$parent.$parent.$refs.editLayer.stopDrawing()
         this.$parent.$parent.$refs.editLayer.drawPushbackPolyline()
       },
       drawParking () {
+        this.$parent.$parent.$refs.editLayer.stopDrawing()
         this.$parent.$parent.$refs.editLayer.drawParking()
       },
       deleteFeature () {
+        this.$parent.$parent.$refs.editLayer.stopDrawing()
         this.$parent.$parent.$refs.editLayer.deleteFeature()
       },
       showCheck() {
+        this.$parent.$parent.$refs.editLayer.stopDrawing()
         Vue.set(this, 'checkDialogVisible', true)
         this.check()
       },

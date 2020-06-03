@@ -766,6 +766,7 @@
         }
       },
       drawParking () {
+        this.$parent.mapObject._container.style.cursor = 'crosshair'
         this.$parent.mapObject.on('click', this.addParking)
       },
       removeLayerClick (event) {
@@ -789,6 +790,7 @@
         addFeature(circle)
         // console.log(this.groundnetLayerGroup)
         this.$parent.mapObject.off('click', this.addParking)
+        this.$parent.mapObject._container.style.cursor = ''
       },
       reload (force) {
         this.load(this.icao, force)

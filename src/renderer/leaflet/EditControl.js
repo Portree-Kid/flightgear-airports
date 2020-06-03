@@ -17,6 +17,11 @@ L.EditControl = L.Control.extend({
         link.title = this.options.tooltip;
         link.innerHTML = this.options.html;
         link.callback = this.options.callback;
+        link.addEventListener('click',function (event) {
+            event.stopPropagation();
+            event.preventDefault(); 
+            event.stopImmediatePropagation();               
+        }, false);
         link.addEventListener('mousedown',function (event) {
             event.stopPropagation();
             event.preventDefault(); 
