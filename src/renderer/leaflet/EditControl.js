@@ -16,11 +16,18 @@ L.EditControl = L.Control.extend({
         link.href = '#';
         link.title = this.options.tooltip;
         link.innerHTML = this.options.html;
-        L.DomEvent.on(link, 'click', L.DomEvent.stop)
-            .on(link, 'click', function () {
-                window.LAYER = this.options.callback.call(map.editTools);
-            }, this);
-
+        link.callback = this.options.callback;
+        link.addEventListener('mousedown',function (event) {
+            event.stopPropagation();
+            event.preventDefault(); 
+            event.stopImmediatePropagation();               
+            window.LAYER = this.callback.call(map.editTools);
+        }, false);
+        link.addEventListener('mouseup',function (event) {
+            event.stopPropagation();
+            event.preventDefault(); 
+            event.stopImmediatePropagation();               
+        }, false);
         return container;
     }
 });
