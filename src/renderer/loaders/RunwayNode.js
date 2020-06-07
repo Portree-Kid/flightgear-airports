@@ -23,7 +23,7 @@ L.RunwayNode = L.Marker.extend({
                 function (state) {
                         return state.Editable.data.runway;
                 },
-                    () => { 
+                    (state) => { 
                         // Reset colour
                         if(event.target instanceof L.RunwayNode &&
                             event.target.options.attributes && 

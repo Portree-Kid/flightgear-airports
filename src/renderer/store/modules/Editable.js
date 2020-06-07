@@ -32,7 +32,9 @@ const mutations = {
     if (node === undefined) {
       return
     }
-    Vue.set(state, 'data', {})
+    if (!state.data || state.type !== 'node') {
+      Vue.set(state, 'data', {})
+    }
     Vue.set(state.data, 'node', node)
     Vue.set(state, 'index', node.index)
     Vue.set(state, 'type', 'node')
@@ -44,7 +46,12 @@ const mutations = {
     Vue.set(state, 'type', 'runway')
   },
   SET_EDIT_ARC (state, arc) {
-    Vue.set(state, 'data', {})
+    if (arc === undefined) {
+      return
+    }
+    if (!state.data || state.type !== 'arc') {
+      Vue.set(state, 'data', {})
+    }
     Vue.set(state.data, 'arc', arc)
     if (state.data.arc.name === undefined) {
       Vue.set(state.data.arc, 'name', '')

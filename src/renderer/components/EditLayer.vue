@@ -343,6 +343,9 @@
           }
         }).filter(n => n);
       },
+      /**
+       * 
+       */
       setPointCoords (index, coordinates) {
         var position = new Coordinates(coordinates);
 
@@ -372,15 +375,20 @@
                   element.getLatLngs()[0].update(latlng);
                   element.setLatLngs(element.getLatLngs());
                   element.updateBeginVertex(latlng);
+                  element.editor.refresh();
+                  element.editor.reset();
                   element.updateMiddle();
               }
               if (Number(element.end) === Number(index)) {
                   element.getLatLngs()[element.getLatLngs().length - 1].update(latlng);
                   element.setLatLngs(element.getLatLngs());
                   element.updateEndVertex(latlng);
+                  element.editor.refresh();
+                  element.editor.reset();
                   element.updateMiddle();
               }
           } else if (element instanceof L.Editable.VertexMarker) {
+            /*
               console.log(element);
               element.setLatLng(latlng);
               element.latlngs.forEach((latlng1, index) => {
@@ -391,6 +399,7 @@
               });
               element.editor.feature.setLatLngs(element.latlngs);
               element.editor.feature.updateMiddle();
+            */
           }    
         });
       },
@@ -608,8 +617,13 @@
 */        
       },
       editedArc() {
-        if (!this.groundnetLayerGroup)
+        if (!this.groundnetLayerGroup ||
+            this.$store.state.Editable.index === undefined ||
+            this.$store.state.Editable.data.arc === undefined ||
+            this.featureLookup===undefined ||
+            !this.editing) {
           return;
+        }
         var arc = this.groundnetLayerGroup.getLayer(this.$store.state.Editable.index);
         if (arc && arc instanceof L.Polyline) {
           console.log('Edited Arc : ' + this.$store.state.Editable.index);
@@ -624,7 +638,7 @@
             this.featureLookup===undefined ||
             !this.editing) {
           return;
-        }
+        }        
         var isOnRunway = Number(this.$store.state.Editable.data.node.isOnRunway);
         var isHoldPoint = this.$store.state.Editable.data.node.holdPointType !== 'none' &&
                           this.$store.state.Editable.data.node.holdPointType !== undefined;
@@ -679,6 +693,8 @@
               element._latlngs.forEach(element => {                
                 if(element.__vertex && Number(element.glueindex) === Number(nIndex)){                  
                   if (this.$store.state.Editable.data.node.coords) {
+                    console.log('Cords : ' + this.$store.state.Editable.data.node.coords);
+                    
                     this.setPointCoords(this.$store.state.Editable.index, this.$store.state.Editable.data.node.coords)                    
                   }
                 }
