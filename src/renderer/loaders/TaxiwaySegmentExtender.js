@@ -21,7 +21,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
 
     taxiwaySegment.__proto__.updateMiddle = function () {
         this._latlngs.forEach(element => {
-            if (element.__vertex.middleMarker) {
+            if (element.__vertex && element.__vertex.middleMarker) {
                 element.__vertex.middleMarker.updateLatLng();
             }
         });

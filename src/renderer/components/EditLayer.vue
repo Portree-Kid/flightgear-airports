@@ -694,8 +694,9 @@
                 if(element.__vertex && Number(element.glueindex) === Number(nIndex)){                  
                   if (this.$store.state.Editable.data.node.coords) {
                     console.log('Cords : ' + this.$store.state.Editable.data.node.coords);
-                    
                     this.setPointCoords(this.$store.state.Editable.index, this.$store.state.Editable.data.node.coords)                    
+                    var position = new Coordinates(this.$store.state.Editable.data.node.coords);
+                    latlng = {lat: position.latitude, lng: position.longitude };
                   }
                 }
               });
