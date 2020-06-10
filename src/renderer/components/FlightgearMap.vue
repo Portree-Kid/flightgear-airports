@@ -18,7 +18,7 @@
     <EditBar></EditBar>
     <AiLayer ref="aiLayer"></AiLayer> 
     <PavementLayer ref="pavementLayer"></PavementLayer>    
-    <ThresholdLayer ref="thresholdLayer"></ThresholdLayer>
+    <!--<ThresholdLayer ref="thresholdLayer"></ThresholdLayer>-->
     <l-layer-group layerType="overlay" name="airports" ref="airportLayer">
       <l-circle
         v-for="(item, index) in this.$store.state.Airports.airports"
@@ -69,7 +69,9 @@
           if (airportsToLoad.length > 0 && airportsToLoad[0] !== this.editingAirport && this.zoom > 12) {
             this.$refs.editLayer.load(airportsToLoad[0])
             this.$refs.pavementLayer.load(airportsToLoad[0])
+            /*
             this.$refs.thresholdLayer.load(airportsToLoad[0])
+            */
             this.editingAirport = airportsToLoad[0]
           }
           this.$refs.editLayer.setVisible(this.zoom >= 12)
