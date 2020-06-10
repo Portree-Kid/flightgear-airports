@@ -301,6 +301,37 @@ var scanMethods = {
             module.exports.isScanning = false;
         }
     },
+    // APTDAT 715 Segment
+    10: (line, icao, layerGroup) => {
+        if (module.exports.isScanning) {
+          //var marker = new L.marker([line[1], line[2]], { title: '10 Point', color: 'fuchsia' });
+          //marker.bindTooltip(String(line), { className: "my-label", offset: [0, 0] });
+          //marker.addTo(layerGroup);
+          var pointMiddle = new LatLonEllipsoidal(Number(line[1]), Number(line[2]));
+          var point1 = pointMiddle.destinationPoint(line[5]/6.562, line[4]);
+          var point2 = pointMiddle.destinationPoint(line[5]/6.562, line[4]-180);
+
+          //var runwayPoly2 = new L.Polygon([point1, point2]);
+          //var marker2 = new L.marker(point2, { title: '10 Point 2', color: 'fuchsia' });
+          //marker2.bindTooltip(String(line), { className: "my-label", offset: [0, 0] });
+          //marker2.addTo(layerGroup);
+          //runwayPoly2.setStyle({ color: 'red', interactive: false });
+          //runwayPoly2.addTo(layerGroup);
+          var runwayPoints = [];
+
+          var bearing = point1.initialBearingTo(point2);
+          var runwayWidth = Number(line[8])/3.281;
+
+          runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing + 90)));
+          runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (bearing + 90)));
+          runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (bearing - 90)));
+          runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing - 90)));            
+
+          var runwayPoly = new L.Polygon(runwayPoints);
+          runwayPoly.setStyle({ color: 'grey', fillColor: 'grey', opacity: 0.5, fillOpacity: 0.5, interactive: false });
+          runwayPoly.addTo(layerGroup);
+      }
+    },
     // Runway
     100: (line, icao, layerGroup) => {
         if (module.exports.isScanning) {
