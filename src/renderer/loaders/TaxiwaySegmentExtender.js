@@ -43,9 +43,61 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         this.featureLookup[this.end].push(this);
         this.bidirectional = true;
     };
+    taxiwaySegment.__proto__.select = function () {
+        this.options.attributes.selected = true;
+        this.updateStyle();
+    };
+    taxiwaySegment.__proto__.selectVertex = function () {
+        this.getLatLngs().forEach( element => {
+            if (Number(element.glueindex) === store.default.state.Editable.index) {
+                if (element.__vertex._icon != null) {
+                    element.__vertex._icon.style.setProperty('background-color','red');                    
+                    element.__vertex._icon.style.setProperty('color','red');                    
+                } else if (element.__vertex !== undefined && element.__vertex.icon != null) {
+                    if (element.__vertex.icon.style != null) {
+                        element.__vertex.icon.style['background-color'] = 'red';
+                    } else {
+                        element.__vertex.setStyle({ color: 'red' })
+                    }
+                } else if (element.__vertex.options.icon != null) {
+                    if (element.__vertex.options.icon.style != null) {
+                        element.__vertex.options.icon.style['background-color'] = 'red';
+                    } else {
+                        element.__vertex.options.icon._setIconStyles({ color: 'red' })
+                    }
+                }                        
+            }
+        });
+    };
+    taxiwaySegment.__proto__.deselect = function () {
+        this.options.attributes.selected = false;
+        this.updateStyle();
+        this.getLatLngs().forEach( element => {
+            if (element.__vertex._icon != null) {
+                element.__vertex._icon.style['background-color'] = 'white';
+            } else if (element.vertex.icon != null) {
+                if (element.__vertex.icon.style != null) {
+                    element.__vertex.icon.style['background-color'] = 'white';
+                } else {
+                    element.__vertex.setStyle({ color: 'white' })
+                }
+            } else if (element.__vertex.options.icon != null) {
+                if (element.__vertex.options.icon.style != null) {
+                    element.__vertex.options.icon.style['background-color'] = 'white';
+                } else {
+                    element.__vertex.options.icon._setIconStyles({ color: 'white' })
+                }
+            }    
+        });
+    };
     taxiwaySegment.__proto__.addListeners = function () {
         this.on('click', function (event) {
-            event.target.setStyle({ color: 'red' });
+            if (Number(store.default.state.Editable.index) >= 0) {
+                this.featureLookup[store.default.state.Editable.index].forEach(element => {
+                    element.deselect();
+                });
+            }
+            event.target.select();
             console.log("Click : " + event.target);
             if (store.default.state.Editable.data.arc === undefined ||
                 store.default.state.Editable.data.arc !== event.target.options.attributes) {
@@ -53,28 +105,11 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                     event.target.options.attributes = {};
                 }
                 event.target.options.attributes.index = event.target._leaflet_id;
+
+                this.editLayer.featureLookup[event.target._leaflet_id] = [];
+                this.featureLookup[event.target._leaflet_id].push(this);
                 event.target.options.attributes.selected = true;
                 store.default.dispatch('setArc', event.target.options.attributes);
-                this.unwatch = store.default.watch(
-                    function (state) {
-                        return state.Editable.data.arc;
-                    },
-                    (arc) => {
-                        console.debug(arc);
-                        // Reset colour
-                        if (event.target instanceof L.Polyline &&
-                            event.target.options.attributes &&
-                            event.target.options.attributes.selected) {
-                            event.target.options.attributes.selected = false;
-                            event.target.updateStyle();
-                            this.unwatch();
-                        }
-                    }
-                    ,
-                    {
-                        deep: true //add this if u need to watch object properties change etc.
-                    }
-                );
             }
         });
         this.on('editable:drawing:move', function (event) {
@@ -136,57 +171,24 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
             console.log(event)
         });
         this.on('editable:vertex:clicked', function (event) {
+            if (Number(store.default.state.Editable.index) >= 0) {
+                this.featureLookup[store.default.state.Editable.index].forEach(element => {
+                    if(element.deselect !== undefined) {
+                        element.deselect();
+                    }
+                });
+            }
+            var hold = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.HoldNode);
+            if (hold.length > 0) {
+                hold[0].select();
+            }
             var parking = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.ParkingSpot);
             if (parking.length > 0) {
                 parking[0].selectParking();
             } else {
                 this.editLayer.featureLookup[event.vertex.latlng.glueindex].forEach
                 store.default.dispatch('setNode', event.vertex.latlng)
-                if (event.vertex._icon != null) {
-                    event.vertex._icon.style['background-color'] = 'red';
-                } else if (event.vertex.icon != null) {
-                    if (event.vertex.icon.style != null) {
-                        event.vertex.icon.style['background-color'] = 'red';
-                    } else {
-                        event.vertex.setStyle({ color: 'red' })
-                    }
-                } else if (event.vertex.options.icon != null) {
-                    if (event.vertex.options.icon.style != null) {
-                        event.vertex.options.icon.style['background-color'] = 'red';
-                    } else {
-                        event.vertex.options.icon._setIconStyles({ color: 'red' })
-                    }
-                }
-                this.unwatch = store.default.watch(
-                    function (state) {
-                        return state.Editable.data.node;
-                    },
-                    (state) => {
-                        if (state === undefined ||
-                            state.index !== Number(event.vertex.latlng.glueindex)) {
-                            if (event.vertex._icon != null) {
-                                event.vertex._icon.style['background-color'] = 'white';
-                            } else if (event.vertex.icon != null) {
-                                if (event.vertex.icon.style != null) {
-                                    event.vertex.icon.style['background-color'] = 'white';
-                                } else {
-                                    event.vertex.setStyle({ color: 'white' })
-                                }
-                            } else if (event.vertex.options.icon != null) {
-                                if (event.vertex.options.icon.style != null) {
-                                    event.vertex.options.icon.style['background-color'] = 'white';
-                                } else {
-                                    event.vertex.options.icon._setIconStyles({ color: 'white' })
-                                }
-                            }
-                            this.unwatch();
-                        }
-                    }
-                    ,
-                    {
-                        deep: true //add this if u need to watch object properties change etc.
-                    }
-                );
+                this.selectVertex()
             }
         });
         var dragIndex = -1;

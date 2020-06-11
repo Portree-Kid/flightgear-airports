@@ -159,27 +159,17 @@ L.ParkingSpot = L.Circle.extend({
         });
         this.on('click', function (event) {
             console.debug("Click Parking : " + event.target);
+            if (Number(store.default.state.Editable.index) >= 0 &&
+            this.featureLookup[store.default.state.Editable.index]!==undefined) {
+                this.featureLookup[store.default.state.Editable.index].forEach(element => {
+                    if(element.deselect !== undefined) {
+                        element.deselect();
+                    }
+                });
+            }
             store.default.dispatch('setParking', event.target.options.attributes);
             store.default.dispatch('setParkingCoords', event.target.getLatLng().lat.toFixed(5) + ' ' + event.target.getLatLng().lng.toFixed(5));
             this.select(); 
-            this.unwatch = store.default.watch(
-                function (state) {
-                        return state.Editable.data.parking;
-                },
-                    (state) => {
-                        if(state === undefined ||
-                        state.index !== Number(event.target.glueindex)) {
-                            if (event.target instanceof L.ParkingSpot) {
-                                this.deselect(); 
-                                this.unwatch();    
-                            }    
-                        } 
-                    }                    
-                ,
-                {
-                    deep: true //add this if u need to watch object properties change etc.
-                }
-            );
         });        
         this.on('editable:vertex:clicked', function (event) {
             console.debug(this.featureLookup[event.vertex.glueindex]);

@@ -371,22 +371,20 @@
               element.updateWheelPos();
           }
           else if (element instanceof L.Polyline) {
-              if (Number(element.begin) === Number(index)) {
-                  element.getLatLngs()[0].update(latlng);
+              element._latlngs.forEach((e1, index1) => {
+              if (e1.attributes.index===index && (
+                    latlng.lat !== element.getLatLngs()[index1].lat ||  
+                    latlng.lng !== element.getLatLngs()[index1].lng
+                  )
+                  ) {
+                  element.getLatLngs()[index1].update(latlng);
                   element.setLatLngs(element.getLatLngs());
                   element.updateBeginVertex(latlng);
                   element.editor.refresh();
                   element.editor.reset();
                   element.updateMiddle();
               }
-              if (Number(element.end) === Number(index)) {
-                  element.getLatLngs()[element.getLatLngs().length - 1].update(latlng);
-                  element.setLatLngs(element.getLatLngs());
-                  element.updateEndVertex(latlng);
-                  element.editor.refresh();
-                  element.editor.reset();
-                  element.updateMiddle();
-              }
+              })
           } else if (element instanceof L.Editable.VertexMarker) {
             /*
               console.log(element);
@@ -693,7 +691,6 @@
               element._latlngs.forEach(element => {                
                 if(element.__vertex && Number(element.glueindex) === Number(nIndex)){                  
                   if (this.$store.state.Editable.data.node.coords) {
-                    console.log('Cords : ' + this.$store.state.Editable.data.node.coords);
                     this.setPointCoords(this.$store.state.Editable.index, this.$store.state.Editable.data.node.coords)                    
                     var position = new Coordinates(this.$store.state.Editable.data.node.coords);
                     latlng = {lat: position.latitude, lng: position.longitude };

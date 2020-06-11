@@ -15,6 +15,12 @@ L.RunwayNode = L.Marker.extend({
         });
         this.on('click', function (event) {
             console.log("Click Runway : ", event);
+            if (Number(store.default.state.Editable.index) >= 0 &&
+            this.featureLookup[store.default.state.Editable.index]!==undefined) {
+                this.featureLookup[store.default.state.Editable.index].forEach(element => {
+                    element.deselect();
+                });
+            }
             event.target.options.attributes.selected = true;
             if (store.default.state.Editable.index !== event.target.options.attributes.index) {
                 store.default.dispatch('setRunway', event.target.options.attributes);

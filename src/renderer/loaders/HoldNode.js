@@ -7,6 +7,12 @@ const store = require('../store');
 
 var $ = require('jquery');
 L.HoldNode = L.Marker.extend({
+    select() {
+        this._icon.childNodes[0].style['background-color'] = 'red';
+    },    
+    deselect() {
+        this._icon.childNodes[0].style['background-color'] = '#4838cc';
+    },
     addListeners: function () {
         this.on('editable:drawing:move', function (event) {
             console.log("Move : ", event);
