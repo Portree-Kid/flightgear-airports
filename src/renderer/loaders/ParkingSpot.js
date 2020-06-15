@@ -182,29 +182,19 @@ L.ParkingSpot = L.Circle.extend({
         });        
         this.on('editable:vertex:clicked', function (event) {
             console.debug(this.featureLookup[event.vertex.glueindex]);
+            if (Number(store.default.state.Editable.index) >= 0 &&
+            this.featureLookup[store.default.state.Editable.index]!==undefined) {
+                this.featureLookup[store.default.state.Editable.index].forEach(element => {
+                    if(element.deselect !== undefined) {
+                        element.deselect();
+                    }
+                });
+            }
+
             if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){
                 event.vertex._icon.style['background-color'] = 'red';
                 store.default.dispatch('setParking', event.target.options.attributes);
-                this.select();
-                this.unwatch = store.default.watch(
-                    function (state) {
-                            return state.Editable.data.parking;
-                    },
-                        () => { 
-                            if(state === undefined ||
-                                state.index !== Number(event.target.glueindex)) {
-                                    if (event.target instanceof L.ParkingSpot) {
-                                        this.deselect(); 
-                                        this.unwatch();    
-                                    }    
-                                } 
-                            }                    
-                    ,
-                    {
-                        deep: true //add this if u need to watch object properties change etc.
-                    }
-                );
-    
+                this.select();    
             }
 
         });
@@ -217,27 +207,19 @@ L.ParkingSpot = L.Circle.extend({
 
     },
     selectParking() {
+        if (Number(store.default.state.Editable.index) >= 0 &&
+        this.featureLookup[store.default.state.Editable.index]!==undefined) {
+            this.featureLookup[store.default.state.Editable.index].forEach(element => {
+                if(element.deselect !== undefined) {
+                    element.deselect();
+                }
+            });
+        }
 
         store.default.dispatch('setParking', this.options.attributes);
         store.default.dispatch('setParkingCoords', this.getLatLng().lat.toFixed(5) + ' ' + this.getLatLng().lng.toFixed(5));
 
         this.select();
-        this.unwatch = store.default.watch(
-            function (state) {
-                    return state.Editable.data.parking;
-            },
-                (state) => { 
-                    if(state === undefined ||
-                        state.index !== Number(this.options.attributes.index)) {
-                            this.deselect(); 
-                            this.unwatch();    
-                        } 
-                    }                    
-            ,
-            {
-                deep: true //add this if u need to watch object properties change etc.
-            }
-        );
     },
     turfToLatLng: function (turfPoint) {
         return {lat: turfPoint.geometry.coordinates[1], lng: turfPoint.geometry.coordinates[0]};

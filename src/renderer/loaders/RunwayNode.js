@@ -25,27 +25,6 @@ L.RunwayNode = L.Marker.extend({
             if (store.default.state.Editable.index !== event.target.options.attributes.index) {
                 store.default.dispatch('setRunway', event.target.options.attributes);
             }
-            this.unwatch = store.default.watch(
-                function (state) {
-                        return state.Editable.data.runway;
-                },
-                    (state) => { 
-                        // Reset colour
-                        if(event.target instanceof L.RunwayNode &&
-                            event.target.options.attributes && 
-                            event.target.options.attributes.selected) {
-                            event.target.options.attributes.selected = false;
-                            event.target.deselect();
-                            this.unwatch();    
-                        }
-                    }                    
-                ,
-                {
-                    deep: true //add this if u need to watch object properties change etc.
-
-                }
-            );
-
         });
     },
     select() {

@@ -249,6 +249,13 @@
           console.error("Lookup " + index + " failed ");          
           this.buildLookup()
         }
+        if (Number(this.$store.state.Editable.index) >= 0 &&
+          this.featureLookup[this.$store.state.Editable.index]!==undefined) {
+            this.featureLookup[this.$store.state.Editable.index].forEach(element => {
+              element.deselect();
+            });
+        }
+
         this.featureLookup[index].forEach((element, i) => {
           if (element instanceof L.Polyline) {
             element._latlngs.forEach((e1, index1) => {
