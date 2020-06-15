@@ -9,6 +9,7 @@
             :key="type.value"
             :label="type.label"
             :value="type.value"
+            :disabled="type.disabled"
           ></el-option>
         </el-select>
 </div>
@@ -31,7 +32,7 @@
     },
     computed: {
       options: function () {
-        return [{value: 'none', label: 'none'},
+        return [{value: 'none', label: 'none', disabled: true},
           {value: 'ga', label: 'general aviation'},
           {value: 'cargo', label: 'cargo'},
           {value: 'gate', label: 'commercial passenger traffic'},

@@ -102,6 +102,7 @@
             :key="type.value"
             :label="type.label"
             :value="type.value"
+            :disabled="type.disabled"
           ></el-option>
         </el-select>
       </el-col>
@@ -213,7 +214,11 @@
         set: function (newValue) {
           if (newValue==='unknown') {
             
-          }          
+          } 
+          if( newValue.match(/,/g).length === 3) {
+            newValue = newValue.replace(', ', ' ').replace(/,/g, '.').replace(' ', ', ');
+
+          }                  
           this.$store.commit('SET_EDIT_PARKING_COORDS', newValue)
         }
       },
@@ -278,7 +283,7 @@
       // ga (general aviation), cargo (cargo), gate (commercial passenger traffic),
       // mil-fighter (military fighter), mil-cargo (military transport)
       options: function () {
-        return [{value: 'none', label: 'none'},
+        return [{value: 'none', label: 'none', disabled: true},
           {value: 'ga', label: 'general aviation'},
           {value: 'cargo', label: 'cargo'},
           {value: 'gate', label: 'commercial passenger traffic'},
