@@ -1,5 +1,4 @@
-<template>
-</template>
+<template></template>
 
 <script lang="js">
 /* eslint-disable */
@@ -793,7 +792,7 @@
           return
         }
         const newIndex = (++this.groundnetLayerGroup.maxId)
-        const circle = new L.ParkingSpot(event.latlng, {attributes: {index: newIndex, radius: 20, heading: 0}})
+        const circle = new L.ParkingSpot(event.latlng, {attributes: {index: newIndex, radius: 26, heading: 0}})
         circle.id = newIndex
         circle.glueindex = circle.id
         circle.addTo(this.groundnetLayerGroup)
@@ -801,6 +800,17 @@
         circle.enableEdit()
         circle.extensions()
         circle.addListeners()
+        if (Number(this.$store.state.Editable.index) >= 0 &&
+          this.featureLookup[this.$store.state.Editable.index]!==undefined) {
+              this.featureLookup[this.$store.state.Editable.index].forEach(element => {
+                  if(element.deselect !== undefined) {
+                      element.deselect();
+                  }
+              });
+        }
+        this.$store.dispatch('setParking', circle.options.attributes);
+        this.$store.dispatch('setParkingCoords', circle.getLatLng().lat.toFixed(5) + ' ' + circle.getLatLng().lng.toFixed(5));
+        circle.select()
         addFeature(circle)
         // console.log(this.groundnetLayerGroup)
         this.$parent.mapObject.off('click', this.addParking)

@@ -119,13 +119,22 @@ L.ParkingSpot = L.Circle.extend({
     select() {
         var style = {};
         style['color'] = 'red';
-        this.setStyle(style);        
+        this.setStyle(style);
+        if(this.direction) {
+            this.direction.setStyle(style);  
+            this.frontWheel.setStyle(style);
+        }
         this.updateWheelPos();
     },    
     deselect() {
         var style = {};
         style['color'] = '#3388ff';
         this.setStyle(style);
+        if(this.direction) {
+            this.direction.setStyle(style);  
+            this.frontWheel.setStyle(style);
+        }
+        this.updateWheelPos();
     },
     addListeners: function () {
         this.on('editable:drawing:move', function (event) {
