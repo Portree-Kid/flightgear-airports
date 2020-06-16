@@ -35,7 +35,15 @@
         "filter": [
           "**/*"
         ]
+      },
+      {
+        "from": "node_modules/dijkstrajs",
+        "to": "workers",
+        "filter": [
+          "**/dijkstra.js"
+        ]
       }
+      
     ],
     "files": [
       "dist/electron/**/*"

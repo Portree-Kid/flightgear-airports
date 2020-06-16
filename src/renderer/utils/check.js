@@ -6,7 +6,7 @@ const winURL = process.env.NODE_ENV === 'development'
 var path = require('path');
 const fs = require('fs');
 
-importScripts('../../../node_modules/dijkstrajs/dijkstra.js');
+importScripts('dijkstra.js');
 
 const homedir = require('os').homedir();
 
@@ -97,7 +97,7 @@ async function checkGroundnet(data) {
             parkings.forEach(element => {
                 noPushbackGraph[element] = {};
             });
-            runwayNodes.forEach(element => {
+            pushbackNodes.forEach(element => {
                 noPushbackGraph[element] = {};
             });
             edges.forEach(element => {
@@ -105,11 +105,12 @@ async function checkGroundnet(data) {
                 noPushbackGraph[element.end] = {};
             });
             edges.filter(element => element.isPushBackRoute).forEach(element => {
-                var node1 = noPushbackGraph[element.start];
+                var node1 = noPushbackGraph[Number(element.start)];
                 node1[Number(element.end)] = 1;
-                var node2 = noPushbackGraph[element.end];
+                var node2 = noPushbackGraph[Number(element.end)];
                 node2[Number(element.start)] = 1;
             });
+
 
             var okPushbacks = [];
             parkings.forEach(parkingNode => {
@@ -137,14 +138,12 @@ async function checkGroundnet(data) {
 
 
             okNodes = okNodes.filter((v, i) => okNodes.indexOf(v) === i);
-            var allLegitimateEndNodes = parkings.concat(runwayNodes).concat(pushbackNodes);
             var notOkNodesParkings = parkings.filter(
                 (v, i) => okNodes.indexOf(v) < 0
             ).map(
                 id => { return { id: id, message: 'No way from parking to each runway' } }
             );            
-            notOkNodes = notOkNodes.concat(notOkNodesParkings);
-            var notOkNodes2 = runwayNodes.filter(
+            var notOkNodesRunways = runwayNodes.filter(
                 (v, i) => okNodes.indexOf(v) < 0
             ).map(
                 id => { return { id: id, message: 'No way from runway to each parking' } }
@@ -160,13 +159,15 @@ async function checkGroundnet(data) {
                 (v, i) => Object.keys(v[1]).length <= 1
             );
             // Ends that are not on Runway and not a Parking or Pushback
+            var allLegitimateEndNodes = parkings.concat(runwayNodes).concat(pushbackNodes);
             var danglingEnds = allEnds.filter(
                 (v, i) => allLegitimateEndNodes.indexOf(Number(v[0])) < 0
             ).map(
                 v => { return { id: Number(v[0]), message: 'Node not a legimate end' } }
             );
             notOkNodes = notOkNodes.concat(danglingEnds);
-            notOkNodes = notOkNodes.concat(notOkNodes2);
+            notOkNodes = notOkNodes.concat(notOkNodesParkings);
+            notOkNodes = notOkNodes.concat(notOkNodesRunways);
 
             // Ends that are not on Runway and not a Parking or Pushback
             /*var wrongPushbackEnds = pushbackNodes.filter(
@@ -187,7 +188,7 @@ async function checkGroundnet(data) {
                         var d = distance([parkingNode.lng, parkingNode.lat],
                             [parkingNode1.lng, parkingNode1.lat]);
                         if (d < parkingNode.radius + parkingNode1.radius) {
-                            notOkNodes.push({ id: parkingNode.index, message: 'Intersecting node' });
+                            notOkNodes.push({ id: parkingNode.index, message: 'Overlapping parkings' });
                         }
                     }
                     this.postMessage(['progress', 1]);
@@ -235,10 +236,11 @@ function checkRoute(graph, from, to) {
         var pathD = this.dijkstra.find_path(graph, from, to);
         if (pathD.length > 0) {
             console.log(pathD);
+            return true;
         }
-        return true;
+        return false;
     } catch (error) {
-        console.log('No route from ' + from + ' to ' + to);
+        console.error(error);
         return false;
     }
 }
