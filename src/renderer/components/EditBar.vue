@@ -223,6 +223,7 @@
           return { 'index': Number(o['id']), 
           '_leaflet_id': o._leaflet_id, 
           'type': 'parking', 
+          'parkingType': o.options.attributes.type, 
           'name': o.options.attributes.name, 
           'radius': String(o.options.attributes.radius),
           'lat': o._latlng.lat,

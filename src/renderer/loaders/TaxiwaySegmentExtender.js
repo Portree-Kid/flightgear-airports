@@ -73,26 +73,29 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         this.options.attributes.selected = false;
         this.updateStyle();
         this.getLatLngs().forEach( element => {
-            if (element.__vertex._icon != null) {
-                element.__vertex._icon.style['background-color'] = 'white';
-            } else if (element.vertex.icon != null) {
-                if (element.__vertex.icon.style != null) {
-                    element.__vertex.icon.style['background-color'] = 'white';
-                } else {
-                    element.__vertex.setStyle({ color: 'white' })
-                }
-            } else if (element.__vertex.options.icon != null) {
-                if (element.__vertex.options.icon.style != null) {
-                    element.__vertex.options.icon.style['background-color'] = 'white';
-                } else {
-                    element.__vertex.options.icon._setIconStyles({ color: 'white' })
-                }
-            }    
+            if (element.__vertex!==undefined) {
+                if (element.__vertex._icon != null) {
+                    element.__vertex._icon.style['background-color'] = 'white';
+                } else if (element.__vertex.icon != null) {
+                    if (element.__vertex.icon.style != null) {
+                        element.__vertex.icon.style['background-color'] = 'white';
+                    } else {
+                        element.__vertex.setStyle({ color: 'white' })
+                    }
+                } else if (element.__vertex.options.icon != null) {
+                    if (element.__vertex.options.icon.style != null) {
+                        element.__vertex.options.icon.style['background-color'] = 'white';
+                    } else {
+                        element.__vertex.options.icon._setIconStyles({ color: 'white' })
+                    }
+                }                        
+            }
         });
     };
     taxiwaySegment.__proto__.addListeners = function () {
         this.on('click', function (event) {
-            if (Number(store.default.state.Editable.index) >= 0) {
+            if (Number(store.default.state.Editable.index) >= 0 && 
+            this.featureLookup[store.default.state.Editable.index] !== undefined) {
                 this.featureLookup[store.default.state.Editable.index].forEach(element => {
                     element.deselect();
                 });
@@ -286,14 +289,17 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
             style.color = '#3388ff';
         }
         this.setStyle(style);
-        if (this.options.attributes.direction === 'forward') {
-            this.setText(null);
-            this.setText('  ⮞  ', { repeat: true, attributes: { fill: 'red', size: 30 } })
-        } else if (this.options.attributes.direction === 'backward') {
-            this.setText(null);
-            this.setText('  ⮜  ', { repeat: true, attributes: { fill: 'red', size: 30 } })
-        } else {
-            this.setText(null);
-        }
+        if(this._map !== null) {
+            if (this.options.attributes.direction === 'forward') {
+                this.setText(null);
+                this.setText('  ⮞  ', { repeat: true, attributes: { fill: 'red', size: 30 } })
+            } else if (this.options.attributes.direction === 'backward') {
+                this.setText(null);
+                this.setText('  ⮜  ', { repeat: true, attributes: { fill: 'red', size: 30 } })
+            } else {
+                this.setText(null);
+            }
+    
+        }       
     };
 };

@@ -117,6 +117,8 @@ L.ParkingSpot = L.Circle.extend({
         }     
     },
     select() {
+        store.default.dispatch('setParking', this.options.attributes);
+        store.default.dispatch('setParkingCoords', this.getLatLng().lat.toFixed(5) + ' ' + this.getLatLng().lng.toFixed(5));
         var style = {};
         style['color'] = 'red';
         this.setStyle(style);
@@ -176,8 +178,6 @@ L.ParkingSpot = L.Circle.extend({
                     }
                 });
             }
-            store.default.dispatch('setParking', event.target.options.attributes);
-            store.default.dispatch('setParkingCoords', event.target.getLatLng().lat.toFixed(5) + ' ' + event.target.getLatLng().lng.toFixed(5));
             this.select(); 
         });        
         this.on('editable:vertex:clicked', function (event) {

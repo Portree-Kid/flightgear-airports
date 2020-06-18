@@ -6,7 +6,11 @@ const winURL = process.env.NODE_ENV === 'development'
 var path = require('path');
 const fs = require('fs');
 
-importScripts('dijkstra.js');
+if(process.env.NODE_ENV === 'development') {
+    importScripts('../../../node_modules/dijkstrajs/dijkstra.js');
+} else {
+    importScripts('dijkstra.js');
+}
 
 const homedir = require('os').homedir();
 
@@ -136,7 +140,6 @@ async function checkGroundnet(data) {
                 );
 
 
-
             okNodes = okNodes.filter((v, i) => okNodes.indexOf(v) === i);
             var notOkNodesParkings = parkings.filter(
                 (v, i) => okNodes.indexOf(v) < 0
@@ -165,21 +168,10 @@ async function checkGroundnet(data) {
             ).map(
                 v => { return { id: Number(v[0]), message: 'Node not a legimate end' } }
             );
-            notOkNodes = notOkNodes.concat(danglingEnds);
-            notOkNodes = notOkNodes.concat(notOkNodesParkings);
-            notOkNodes = notOkNodes.concat(notOkNodesRunways);
-
-            // Ends that are not on Runway and not a Parking or Pushback
-            /*var wrongPushbackEnds = pushbackNodes.filter(
-                (v, i) => allEnds.map(a => Number(a[0])).indexOf(Number(v)) < 0
-            ).map(
-                v => { return { id: Number(v), message: 'Pushback node not an end' } }
-            );
-            notOkNodes = notOkNodes.concat(wrongPushbackEnds)*/
-            notOkNodes = notOkNodes.concat(wrongPushbackRoutes);
 
             var parkingNodes = data.map(mapParkingNode).filter(n => n !== undefined);
 
+            var overlappingParkings = [];
             // Check for intersecting radii
             parkingNodes.forEach(parkingNode => {
                 parkingNodes.forEach(parkingNode1 => {
@@ -188,30 +180,30 @@ async function checkGroundnet(data) {
                         var d = distance([parkingNode.lng, parkingNode.lat],
                             [parkingNode1.lng, parkingNode1.lat]);
                         if (d < parkingNode.radius + parkingNode1.radius) {
-                            notOkNodes.push({ id: parkingNode.index, message: 'Overlapping parkings' });
+                            overlappingParkings.push({ id: parkingNode.index, message: 'Overlapping parkings' });
                         }
                     }
                     this.postMessage(['progress', 1]);
                 });
             });
-            // Check for name
-            parkingNodes.forEach(parkingNode => {
-                if (!parkingNode.name) {
-                    notOkNodes.push({ id: parkingNode.index, message: 'Name empty' });
-                    this.postMessage(['progress', 1]);
-                }
-                if (!parkingNode.type) {
-                    notOkNodes.push({ id: parkingNode.index, message: 'Parking type empty' });
-                    this.postMessage(['progress', 1]);
-                }
-            });
+            var invalidParkings = [];
             // Check for name
             parkingNodes.forEach(parkingNode => {
                 if (!parkingNode.name || /^\s*$/.test(parkingNode.name)) {
-                    notOkNodes.push({ id: parkingNode.index, message: 'Empty name' });
+                    invalidParkings.push({ id: parkingNode.index, message: 'Name empty' });
+                    this.postMessage(['progress', 1]);
                 }
-                this.postMessage(['progress', 1]);
+                if (!parkingNode.type) {
+                    invalidParkings.push({ id: parkingNode.index, message: 'Parking type empty' });
+                    this.postMessage(['progress', 1]);
+                }
+                if (['ga','cargo', 'gate', 'mil-fighter', 'mil-cargo' ].indexOf(parkingNode.parkingType)<0) {
+                    //debugger;
+                    invalidParkings.push({ id: parkingNode.index, message: `Parking type ${parkingNode.parkingType} not valid` });
+                    this.postMessage(['progress', 1]);
+                }
             });
+  
             //Check for dual pushback/runway nodes
             runwayNodes.forEach(runwayNode => {
                 if (pushbackNodes.indexOf(runwayNode) >= 0) {
@@ -219,6 +211,12 @@ async function checkGroundnet(data) {
                 }
             });
 
+            notOkNodes = notOkNodes.concat(invalidParkings);
+            notOkNodes = notOkNodes.concat(overlappingParkings);
+            notOkNodes = notOkNodes.concat(danglingEnds);
+            notOkNodes = notOkNodes.concat(notOkNodesParkings);
+            notOkNodes = notOkNodes.concat(notOkNodesRunways);
+            notOkNodes = notOkNodes.concat(wrongPushbackRoutes);
             //        check1(graph);
             //        check2();
             //        this.postMessage(['progress', 1]);
@@ -278,8 +276,9 @@ var mapParkings = function (o) {
 }
 
 var mapParkingNode = function (o) {
+    // debugger;
     if (o.type === 'parking')
-        return { index: o.index, lat: o.lat, lng: o.lng, name: o.name, radius: Number(o.radius), type: o.type };
+        return { index: o.index, lat: o.lat, lng: o.lng, name: o.name, radius: Number(o.radius), type: o.type, parkingType: o.parkingType };
     console.log(o);
 }
 
