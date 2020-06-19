@@ -3,7 +3,7 @@
     <span>
       <el-row>
         <el-col :span="7">
-          <el-select v-model="type" placeholder="Select">
+          <el-select v-model="type" placeholder="Select" :disabled="!editing">
             <el-option
               v-for="type in options"
               :key="type.value"
@@ -38,7 +38,7 @@
     },
     data () {
       return {
-        ok: true
+        ok: true, editLayer: null
       }
     },
     methods: {
@@ -67,11 +67,20 @@
             return false
         }
         return true
+      },
+      initLayer() {
+        var parent = this.$parent
+        while (parent.$refs.editLayer===undefined) {
+          parent = parent.$parent
+        }
+        this.editLayer = parent.$refs.editLayer
       }
     },
     computed: {
       editing: function () {
-        return this.$parent.$parent.$parent.$parent.$parent.$refs.editLayer.editing
+        if(this.editLayer=== null) 
+          this.initLayer()
+        return this.editLayer.editing
       },
       options: function () {
         return [

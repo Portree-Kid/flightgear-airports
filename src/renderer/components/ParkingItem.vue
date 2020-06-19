@@ -22,12 +22,22 @@
     mounted () {
     },
     data () {
-      return {
+      return { editLayer: null
       }
     },
     methods: {
       show (idx) {
-        this.$parent.$parent.$parent.$parent.$parent.$refs.editLayer.show(idx)
+        if (this.editLayer === null) {
+          this.initLayer()
+        }
+        return this.editLayer.show(idx)
+      },
+      initLayer () {
+        var parent = this.$parent
+        while (parent.$refs.editLayer === undefined) {
+          parent = parent.$parent
+        }
+        this.editLayer = parent.$refs.editLayer
       }
     },
     computed: {
@@ -40,14 +50,11 @@
           {value: 'mil-cargo', label: 'military cargo'}
         ]
       },
-      editing: {
-      // getter
-        get: function () {
-          return this.$parent.$parent.$parent.$parent.$parent.$refs.editLayer.getEditing()
-        },
-        // setter
-        set: function (newValue) {
+      editing: function () {
+        if (this.editLayer === null) {
+          this.initLayer()
         }
+        return this.editLayer.editing
       },
       name: {
       // getter

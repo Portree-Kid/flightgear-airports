@@ -5,7 +5,7 @@
         <ul role="tablist"> <!-- top aligned tabs -->
             <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
             <li><a href="#edit" role="tab"><i class="fas fa-edit"></i></a></li>
-            <li><a href="#parking" role="tab"><i class="fas fa-parking"></i></a></li>
+            <!--<li><a href="#parking" role="tab"><i class="fas fa-parking"></i></a></li>-->
             <li><a href="#check" role="tab"><i class="far fa-check-square"></i></a></li>
             <li><a href="#search" role="tab"><i class="fa fa-search"></i></a></li>
             <li><a href="#wip" role="tab"><i class="fas fa-wrench"></i></a></li>
@@ -25,14 +25,16 @@
                 Properties
                 <div class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></div>
             </h1>
-          <AirportEdit></AirportEdit>
           <ParkingEdit></ParkingEdit>
           <ArcEdit></ArcEdit>
           <NodeEdit></NodeEdit>          
+          <AirportEdit></AirportEdit>
         </div>
+        <!--
         <div class="leaflet-sidebar-pane" id="parking">
           <ParkingList></ParkingList>
         </div>
+        -->
         <div class="leaflet-sidebar-pane" id="search">
           <Search></Search>
         </div>
@@ -64,7 +66,7 @@
   import Help from './Help'
   import NodeEdit from './NodeEdit'
   import ParkingEdit from './ParkingEdit'
-  import ParkingList from './ParkingList'
+  // import ParkingList from './ParkingList'
   import RunScan from './RunScan'
   import SettingsPanel from './SettingsPanel'
   import Search from './Search'
@@ -72,7 +74,7 @@
 
   export default {
     name: 'leaflet-sidebar',
-    components: { Help, AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, ParkingList, RunScan, FileSelect, SettingsPanel, Search, WorkInProgress },
+    components: { Help, AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, RunScan, FileSelect, SettingsPanel, Search, WorkInProgress },
     props: [],
     mounted () {
       this.add()

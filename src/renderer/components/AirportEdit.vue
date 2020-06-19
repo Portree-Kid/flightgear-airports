@@ -1,70 +1,87 @@
 <template>
-  <div>
-    <div width="100%" v-if="airport">
-        <el-row>
-          <el-col :span="7">ICAO :</el-col>
-          <el-col :span="17">{{ icao }}</el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="7">Name :</el-col>
-          <el-col :span="17">{{ name }}</el-col>
-        </el-row>
+  <div v-if="airport">
+    <h1 class="leaflet-sidebar-header">{{ icao }} {{ name }}</h1>
+    <div width="100%" >
         <el-row>
           <el-col :span="7">Airlines :</el-col>
           <el-col :span="15">
             <el-tag v-for="item in airlines" :key="item.value">{{item.value}}</el-tag>
           </el-col>
         </el-row>
-        <el-row>
-          <el-col :span="5">Flights :</el-col>
-          <el-col :span="7">{{ flights }}</el-col>
-          <el-col :span="5">Parking :</el-col>
-          <el-col :span="7">{{ parking }}</el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="7">Groundnet :</el-col>
-          <el-col :span="15">{{groundnet}}</el-col>
-        </el-row>
     </div>
-    <el-divider  v-if="airport"></el-divider>  
-    <h3 v-if="airport">Frequencies</h3>  
-    <div v-if="airport">
-        <el-row v-for="f in Frequencies" :key="f.index">
+    <el-tabs v-model="activeTab" >
+    <el-tab-pane label="Frequencies" name="first"> 
+      <div>
+        <el-row v-for="f in frequencyList" :key="f.index">
           <Frequency :frequency="f"></Frequency>
         </el-row>
         <el-button @click="addFrequency" v-if="editing" >Add</el-button>
-    </div>
+        </div>
+    </el-tab-pane>
+    <el-tab-pane label="Parkings" name="second">
+      <ParkingList></ParkingList>
+    </el-tab-pane>
+    <el-tab-pane label="Statistics" name="third">
+            <el-row>
+          <el-col :span="8">Flights :</el-col>
+          <el-col :span="4">{{ flights }}</el-col>
+          <el-col :span="8">Parking Positions :</el-col>
+          <el-col :span="4">{{ parking }}</el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="8">Groundnet Nodes :</el-col>
+          <el-col :span="4">{{groundnet}}</el-col>
+          <el-col :span="8"></el-col>
+          <el-col :span="4"></el-col>
+        </el-row>
+    </el-tab-pane>
+  </el-tabs>
   </div>
 </template>
 
 <script lang="js">
   import Frequency from './Frequency'
-  export default {
+  import ParkingList from './ParkingList'
+
+export default {
     data () {
-      return { }
+      return {activeTab: 'first', editLayer: null}
     },
     components: {
-      Frequency
+      Frequency, ParkingList
     },
     methods: {
       addFrequency () {
         this.$store.dispatch('addFrequency', {type: 'AWOS', value: 0})
+      },
+      initLayer () {
+        var parent = this.$parent
+        while (parent !== undefined && parent.$refs.editLayer === undefined) {
+          parent = parent.$parent
+        }
+        if (parent === undefined) {
+          return
+        }
+        this.editLayer = parent.$refs.editLayer
       }
     },
     computed: {
       editing: {
         get: function () {
-          return this.$parent.$parent.$parent.$refs.editLayer.editing
+          if (this.editLayer === null) {
+            this.initLayer()
+          }
+          return this.editLayer.editing
         }
       },
       icao: function () {
-        return this.$store.state.Editable.data.airport.icao
+        return this.$store.state.Airports.currentAirport.icao
       },
       name: function () {
-        return this.$store.state.Editable.data.airport.name
+        return this.$store.state.Airports.currentAirport.name
       },
       flights: function () {
-        return this.$store.state.Editable.data.airport.flights
+        return this.$store.state.Airports.currentAirport.flights
       },
       airlines: function () {
         var airlineCodes = []
@@ -77,15 +94,17 @@
         return airlineCodes
       },
       groundnet: function () {
-        return this.$store.state.Editable.data.airport.groundnet
+        return this.$store.state.Airports.currentAirport.groundnet
       },
       parking: function () {
-        return this.$store.state.Editable.data.airport.parking
+        return this.$store.state.Airports.currentAirport.parking
       },
-      airport: function () {
-        return this.$store.state.Editable.type === 'airport'
+      airport: {
+        get: function () {
+          return this.$store.state.Airports.currentAirport !== undefined
+        }
       },
-      Frequencies: {
+      frequencyList: {
         // getter
         get: function () {
           return this.$store.state.Frequencies.items
