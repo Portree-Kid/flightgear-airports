@@ -113,7 +113,9 @@ L.ParkingSpot = L.Circle.extend({
         if (parkingSize>=0) {
             var frontWheelEnd = turf.destination([start.lng, start.lat], validN2M[parkingSize] / 1000, this.options.attributes.heading, options);
 
-            this.frontWheel.setLatLng(this.turfToLatLng(frontWheelEnd));    
+            if(this.frontWheel!==undefined) {
+                this.frontWheel.setLatLng(this.turfToLatLng(frontWheelEnd));
+            }
         }     
     },
     select() {
