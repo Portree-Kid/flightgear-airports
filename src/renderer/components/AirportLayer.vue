@@ -1,7 +1,4 @@
 <template>
-  <section class="edit-layer">
-    <h1>edit-layer Component</h1>
-  </section>
 </template>
 
 <script lang="js">

@@ -1,9 +1,4 @@
 <template>
-
-  <section class="ai-layer">
-    <h1>ai-layer Component</h1>
-  </section>
-
 </template>
 
 <script lang="js">
