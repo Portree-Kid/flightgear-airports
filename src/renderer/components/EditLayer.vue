@@ -799,7 +799,7 @@
           return
         }
         const newIndex = (++this.groundnetLayerGroup.maxId)
-        const circle = new L.ParkingSpot(event.latlng, {attributes: {index: newIndex, radius: 26, heading: 0}})
+        const circle = new L.ParkingSpot(event.latlng, {attributes: {index: newIndex, radius: 26, heading: 0, type: 'gate'}})
         circle.id = newIndex
         circle.glueindex = circle.id
         circle.addTo(this.groundnetLayerGroup)
