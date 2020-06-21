@@ -8,8 +8,10 @@
     </h1>
     <div id="panel" width="100%">            
       <el-row v-for="(result,idx) in results" :key="idx">
+        <el-col :span="3" v-if="result.id<0"><i class="far fa-check-circle"></i></el-col>         
+        <el-col :span="3" v-if="result.id>=0"><i class="fas fa-exclamation-triangle"></i></el-col>         
         <el-col :span="15">{{ result.message }}</el-col>
-        <el-col :span="7"><el-button v-on:click="show(result.id)" class="button"><i class="fas fa-bullseye"></i></el-button></el-col>         
+        <el-col :span="7" v-if="result.id>=0"><el-button v-on:click="show(result.id)" class="button"><i class="fas fa-bullseye"></i></el-button></el-col>         
       </el-row>
     </div>
   </div>

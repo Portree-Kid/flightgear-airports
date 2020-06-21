@@ -3,8 +3,9 @@
     <Upload :visible.sync="uploadVisible" ref="upload"></Upload>
     <EditButton icon="fas fa-th" v-on:click="zoomin" :show="true" tooltip="Zoomin"></EditButton>
     <EditButton icon="fas fa-th-large" v-on:click="zoomout" :show="!editing" tooltip="Zoomout"></EditButton>
+
     <EditButton icon="fas fa-upload" v-on:click="upload" :show="!editing" tooltip="Upload"></EditButton>
-    <EditButton icon="fas fa-plane" v-on:click="test" :show="!editing" tooltip="Test"></EditButton>
+    <EditButton icon="fas fa-plane" v-on:click="test" :show="!editing" tooltip="Export"></EditButton>
     <EditButton icon="fas fa-edit" v-on:click="edit" :show="!editing" tooltip="Edit"></EditButton>
     <EditButton
       icon="fas fa-undo"
@@ -24,6 +25,8 @@
     </el-dialog>
 
     <EditButton icon="fas fa-save" v-on:click="save" :show="editing" tooltip="Save"></EditButton>
+    <EditButton icon="far fa-check-square" v-on:click="showCheck" :show="editing" tooltip="Check"></EditButton>
+
     <EditButton
       icon="fas fa-draw-polygon"
       v-on:click="drawPolyline"
@@ -49,7 +52,6 @@
       tooltip="Draw Parking"
     ></EditButton>
     <EditButton icon="fas fa-trash-alt" v-on:click="deleteFeature" :show="editing" tooltip="Remove"></EditButton>
-    <EditButton icon="far fa-check-square" v-on:click="showCheck" :show="editing" tooltip="Check"></EditButton>
     <el-dialog title="Checking" width="30%" center :visible.sync="checkDialogVisible">
       <el-container direction="vertical">
         <el-progress :percentage="Number(((progress / max)*100).toPrecision(3))" v-if="max>0"></el-progress>

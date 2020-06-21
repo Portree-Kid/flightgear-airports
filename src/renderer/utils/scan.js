@@ -435,6 +435,7 @@ async function readGroundnet(f, features) {
                   }
                   feature['properties']['groundnet'] = nodes && nodes.node ? nodes.node.length : 0;
                   var nodes = dat['?xml'].groundnet.parkingList;
+                  //debugger;
                   feature['properties']['parking'] = nodes && nodes.Parking ? nodes.Parking.length : 0;
                 }
               } else if (filename[2] == 'ils') {

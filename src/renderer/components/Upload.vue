@@ -199,10 +199,10 @@
         }
       },
       comittable: function () {
-        return this.$store.state.Check.results.length === 0 && this.gplv2 && this.max === 0
+        return this.$store.state.Check.results.filter(a => a.id>=0).length === 0 && this.gplv2 && this.max === 0
       },
       results: function () {
-        return this.$store.state.Check.results
+        return this.$store.state.Check.results.filter(a => a.id>=0)
       }
 
     }

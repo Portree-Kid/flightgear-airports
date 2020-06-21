@@ -212,11 +212,29 @@ async function checkGroundnet(data) {
             });
 
             notOkNodes = notOkNodes.concat(invalidParkings);
+            if (invalidParkings.length===0) {
+                notOkNodes.push({id:-1, message: 'Parkings valid'});
+            }
             notOkNodes = notOkNodes.concat(overlappingParkings);
+            if (overlappingParkings.length===0) {
+                notOkNodes.push({id:-1, message: 'No parkings overlapping'});
+            }
             notOkNodes = notOkNodes.concat(danglingEnds);
+            if (danglingEnds.length===0) {
+                notOkNodes.push({id:-1, message: 'No invalid ends'});
+            }
             notOkNodes = notOkNodes.concat(notOkNodesParkings);
+            if (notOkNodesParkings.length===0) {
+                notOkNodes.push({id:-1, message: 'Routes from parkings OK'});
+            }
             notOkNodes = notOkNodes.concat(notOkNodesRunways);
+            if (notOkNodesRunways.length===0) {
+                notOkNodes.push({id:-1, message: 'Routes from runways OK'});
+            }
             notOkNodes = notOkNodes.concat(wrongPushbackRoutes);
+            if (wrongPushbackRoutes.length===0) {
+                notOkNodes.push({id:-1, message: 'Pushback routes OK'});
+            }
             //        check1(graph);
             //        check2();
             //        this.postMessage(['progress', 1]);

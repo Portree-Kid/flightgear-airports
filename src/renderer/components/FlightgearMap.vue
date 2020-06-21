@@ -10,9 +10,11 @@
   >
     <!--The backgroundmap-->
     <l-tile-layer :url="url" :attribution="attribution" :options="{maxZoom: 22, maxNativeZoom: 17}"></l-tile-layer>
+    <!--
     <l-control position="topright" >
       <el-button @click="editAirport()">{{ icao }}</el-button>
     </l-control>
+    -->
     <!--<l-marker :lat-lng="marker"></l-marker>-->
     <LeafletSidebar></LeafletSidebar>
     <EditBar></EditBar>
