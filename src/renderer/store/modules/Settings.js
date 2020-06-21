@@ -67,7 +67,9 @@ const actions = {
     context.commit('ZOOM', zoom)
   },
   async setCenter (context, center) {
-    context.commit('CENTER', center)
+    if( center.lat !== context.state.center.lat || center.lng !== context.state.center.lng) {
+      context.commit('CENTER', center)
+    }
   },
   async setBounds (context, bounds) {
     context.commit('BOUNDS', bounds)
