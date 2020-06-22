@@ -3,7 +3,7 @@
     <h1 class="leaflet-sidebar-header">{{ icao }} {{ name }}</h1>
     <div width="100%" >
         <el-row>
-          <el-col :span="7">Airlines :</el-col>
+          <el-col :span="7"><span class="label"> Airlines :</span></el-col>
           <el-col :span="15">
             <el-tag v-for="item in airlines" :key="item.value">{{item.value}}</el-tag>
           </el-col>
@@ -71,7 +71,7 @@ export default {
           if (this.editLayer === null) {
             this.initLayer()
           }
-          return this.editLayer.editing
+          return this.editLayer !== null && this.editLayer.editing
         }
       },
       icao: function () {
@@ -119,4 +119,10 @@ export default {
      padding: 0em;
      margin-bottom: 5px;
    }
+.label {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  font-weight: bold;
+}
 </style>

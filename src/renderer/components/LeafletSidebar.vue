@@ -6,7 +6,7 @@
             <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
             <li><a href="#edit" role="tab"><i class="fas fa-edit"></i></a></li>
             <!--<li><a href="#parking" role="tab"><i class="fas fa-parking"></i></a></li>-->
-            <li><a href="#check" role="tab"><i class="far fa-check-square"></i></a></li>
+            <li :v-if="results"><a href="#check" role="tab"><i class="far fa-check-square"></i></a></li>
             <li><a href="#search" role="tab"><i class="fa fa-search"></i></a></li>
             <li><a href="#wip" role="tab"><i class="fas fa-wrench"></i></a></li>
         </ul>
@@ -126,7 +126,9 @@
       }
     },
     computed: {
-
+      results: function () {
+        return this.$store.state.Check.results.length > 0
+      }
     }
 }
 </script>
