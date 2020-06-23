@@ -2,6 +2,10 @@
 
 import { app, BrowserWindow } from 'electron'
 
+const { ipcMain } = require('electron')
+ipcMain.on('OpenDebugger', (event, arg) => {
+  mainWindow.webContents.openDevTools()
+})
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -29,7 +33,6 @@ function createWindow () {
     width: 1000
   })
   mainWindow.loadURL(winURL)
-  mainWindow.webContents.openDevTools()
 
   mainWindow.onerror = function (message, source, lineno, colno, error) {
     console.error(error)

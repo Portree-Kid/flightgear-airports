@@ -77,7 +77,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         var frequencies = [];
 
         var version = new Date().toUTCString() + ' by FlightgearAirports';
-        var email = store.default.state.Settings.settings.email;        
+        var email = store.default.state.Settings.settings.name;        
 
 
 
@@ -158,7 +158,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
 
         var unicomList = store.default.state.Frequencies.items.filter(f => f.type === 'UNICOM').map(mapFrequency);
 
-        var xmlObj = { groundnet: { version: version, email: email, 
+        var xmlObj = { groundnet: { version: version, name: name, 
             'frequencies': { APPROACH: approachList, DEPARTURE: departureList, AWOS: awosList, CLEARANCE: clearanceList, GROUND: groundList, TOWER: towerList, UNICOM: unicomList },
             parkingList: { Parking: parkings }, TaxiNodes: { node: uniqueNodes }, TaxiWaySegments: { arc: arcList } } };
 

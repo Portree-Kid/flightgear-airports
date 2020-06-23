@@ -38,7 +38,7 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="7" class="label">Test Directory</el-col>
+        <el-col :span="7" class="label">Export Directory</el-col>
         <el-col :span="15" class="file-label">{{ test_directory }}</el-col>
         <el-col :span="2">
           <directory-select @input="testDirectorySelect"></directory-select>
@@ -53,9 +53,41 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="7" class="label">Author : </el-col>
+        <el-popover
+          placement="top-start"
+          title="E-Mail"
+          width="200"
+          trigger="hover"
+          content="Only used as a committer/author for Github. This e-mail is only visible via GIT."
+        >
+
+        <el-col :span="7" class="label">Author E-Mail : </el-col>
         <el-col :span="17">
             <el-input placeholder="Please input your email" v-model="email"></el-input>
+        </el-col>
+        </el-popover>
+      </el-row>
+      <el-row>
+        <el-popover
+          placement="top-start"
+          title="Goto"
+          width="200"
+          trigger="hover"
+          content="This is saved to the file and is therefore distributed via Terrasync."
+        >
+
+        <el-col :span="7" class="label">Author Name : </el-col>
+        <el-col :span="17">
+            <el-input placeholder="Please input your Name" v-model="email"></el-input>
+        </el-col>
+        </el-popover>
+      </el-row>
+      <el-row>
+        <el-col :span="7" class="label"></el-col>
+        <el-col :span="17">
+          <el-button @click="debug" class="button">
+            <i class="fas fa-bug"></i> Debugger
+          </el-button>
         </el-col>
       </el-row>
     </div>
@@ -65,6 +97,9 @@
 <script lang="js">
   import FileSelect from './FileSelect'
   import DirectorySelect from './DirectorySelect'
+
+  const { ipcRenderer } = require('electron')
+
   export default {
     name: 'settings-panel',
     components: { DirectorySelect, FileSelect },
@@ -88,6 +123,9 @@
       testDirectorySelect: function (testDirectory) {
         console.log(testDirectory)
         this.$store.commit('TEST_DIRECTORY', testDirectory.path)
+      },
+      debug: function () {
+        ipcRenderer.send('OpenDebugger', 'ping')
       }
     },
     computed: {
@@ -99,6 +137,16 @@
         // setter
         set: function (newValue) {
           this.$store.commit('SET_EMAIL', newValue)
+        }
+      },
+      name: {
+      // getter
+        get: function () {
+          return this.$store.state.Settings.settings.name
+        },
+        // setter
+        set: function (newValue) {
+          this.$store.commit('SET_NAME', newValue)
         }
       },
       phi_url: {

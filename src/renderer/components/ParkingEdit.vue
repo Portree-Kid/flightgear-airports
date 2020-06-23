@@ -79,9 +79,17 @@
       <el-col :span="7">
         <span class="label">Coordinates :</span>
       </el-col>
+        <el-popover
+          placement="top-start"
+          title="E-Mail"
+          width="200"
+          trigger="hover"
+          content="D.DDD, DMS, DM supported"
+        >
       <el-col :span="17">
         <el-input placeholder="Please input" v-model="coordinates" :disabled="!editing"></el-input>
       </el-col>
+        </el-popover>
     </el-row>
     <el-row>
       <el-col :span="7">

@@ -33,6 +33,9 @@ const mutations = {
   'SET_EMAIL' (state, email) {
     state.settings.email = email
   },
+  'SET_NAME' (state, name) {
+    state.settings.name = name
+  },
   'SET_PHI_URL' (state, phi_url) {
     state.settings.phi_url = phi_url
   },  
