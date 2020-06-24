@@ -1,6 +1,6 @@
 /* eslint-disable */
 const state = {
-  settings: { flightgearDirectory: '.', testDirectory: '.', email: 'x', phi_url: 'http://localhost:8080' },
+  settings: { flightgearDirectory: '.', testDirectory: '.', email: 'flightgearairports@example.org', name: 'unknown', phi_url: 'http://localhost:8080' },
   zoom: 14,
   center: [47.413220, -1.219482],
   bounds: undefined,

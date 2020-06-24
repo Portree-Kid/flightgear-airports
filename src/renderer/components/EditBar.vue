@@ -80,6 +80,7 @@
     methods: {
       upload() {
         this.uploadVisible = true
+        this.$refs.upload.status()
         this.$refs.upload.check()
       },
       zoomout() {

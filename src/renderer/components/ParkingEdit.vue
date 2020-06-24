@@ -79,6 +79,7 @@
       <el-col :span="7">
         <span class="label">Coordinates :</span>
       </el-col>
+      <el-col :span="17">
         <el-popover
           placement="top-start"
           title="E-Mail"
@@ -86,17 +87,23 @@
           trigger="hover"
           content="D.DDD, DMS, DM supported"
         >
-      <el-col :span="17">
-        <el-input placeholder="Please input" v-model="coordinates" :disabled="!editing"></el-input>
-      </el-col>
+          <el-input placeholder="Please input" v-model="coordinates" slot="reference" :disabled="!editing"></el-input>
         </el-popover>
+      </el-col>
     </el-row>
     <el-row>
       <el-col :span="7">
         <span class="label">Heading :</span>
       </el-col>
       <el-col :span="17">
-        <el-input-number v-model="heading" :min="-361" :max="720" :step="0.1" :precision="1" :disabled="!editing"></el-input-number>
+        <el-input-number
+          v-model="heading"
+          :min="-361"
+          :max="720"
+          :step="0.1"
+          :precision="1"
+          :disabled="!editing"
+        ></el-input-number>
       </el-col>
     </el-row>
     <el-row>
@@ -328,5 +335,11 @@
   justify-content: left;
   align-items: center;
   font-weight: bold;
+}
+.el-popover--plain {
+  padding: 10px 10px;
+}
+.el-popover__title {
+  display: none;
 }
 </style>

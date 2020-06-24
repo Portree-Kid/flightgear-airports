@@ -77,7 +77,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         var frequencies = [];
 
         var version = new Date().toUTCString() + ' by FlightgearAirports';
-        var email = store.default.state.Settings.settings.name;        
+        var name = store.default.state.Settings.settings.name;        
 
 
 

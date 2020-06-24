@@ -1,11 +1,13 @@
 <template>
-    <el-dialog title="Upload" :visible.sync="visible" width="30%" center>
-      <el-progress :percentage="Number(((progress / max)*100).toPrecision(3))" v-if="max>0"></el-progress>
+    <el-dialog :title="title" :visible.sync="visible" width="30%" center>
+      <span v-if="max>0">
+        <el-progress :percentage="Number(((progress / max)*100).toPrecision(3))" v-if="max>0"></el-progress>
+      </span>
       <span v-if="results.length>0" style="color: red">{{results.length}} Errors please correct first</span><br/>
-      <span style="center">Upload {{icao}} to groundweb.</span><br/>
       <span style="center">E-Mail : {{this.$store.state.Settings.settings.email}}</span><br/>
       <span style="center"><el-checkbox v-model="gplv2">I agree to release the groundnet under GPL v2</el-checkbox></span><br/>
-      <span style="center" v-if="message.length>0">{{message}}</span><br/>
+      <span style="center" v-if="message">{{message}}</span><br/>
+      <span style="error" v-if="error">{{message}}</span><br/>
       <span slot="footer" class="dialog-footer">
         <el-button @click="upload" :disabled="!comittable">Ok</el-button>
       </span>
@@ -16,6 +18,7 @@
 /* eslint-disable */
   import Vue from 'vue'
   import fileUrl from 'file-url'
+  import axios from 'axios'
   const fs = require('fs')
   const path = require('path')
 
@@ -26,10 +29,26 @@
     },
     data () {
       return {
-        gplv2: false, message: '', progress: 0, max: 0
+        gplv2: false, message: null, error: false, progress: 0, max: 0, azure: false
       }
     },
     methods: {
+      reqListener(e) {
+        if(JSON.parse(e.srcElement.response).status==='OK') {
+          this.message = null;
+          this.azure = true;
+        } else {
+          this.message = 'Azure down';
+        }            
+
+      },
+      status () {
+        var xhr = new XMLHttpRequest();
+        this.message = 'Checking for Groundweb health'
+        xhr.open('GET', 'http://groundweb.azurewebsites.net/groundnets/status', true);
+        xhr.addEventListener("load", this.reqListener); 
+        xhr.send();
+      },
       upload () {
         var f = path.join(this.$store.state.Settings.settings.airportsDirectory, 
         this.icao[0], 
@@ -163,7 +182,7 @@
               worker.terminate()
               worker.view.max = 0
               worker.view.checkDialogVisible = false
-              clearInterval(this.polling)
+              clearInterval(this.polling)              
               this.checking = false
             } else if (e.data.length > 0) {
               if (e.data[0] === 'max') {
@@ -191,6 +210,9 @@
           Vue.set(this.$parent, 'uploadVisible', newValue)
         }
       },
+      title: function () {
+        return `Upload ${this.$parent.$parent.$parent.icao} to groundweb.`
+      },
       icao: {
         get: function () {
           return this.$parent.$parent.$parent.icao
@@ -199,7 +221,7 @@
         }
       },
       comittable: function () {
-        return this.$store.state.Check.results.filter(a => a.id>=0).length === 0 && this.gplv2 && this.max === 0
+        return this.$store.state.Check.results.filter(a => a.id>=0).length === 0 && this.gplv2 && this.max === 0 && this.azure 
       },
       results: function () {
         return this.$store.state.Check.results.filter(a => a.id>=0)
@@ -210,5 +232,6 @@
 </script>
 
 <style scoped lang="scss">
-  .center { text-align: center;}
+  .center { text-align: center; vertical-align: middle;}
+  .error { text-align: center; background-color: red;}
 </style>
