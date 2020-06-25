@@ -2,6 +2,22 @@ osx_image: xcode8.3
 sudo: required
 dist: xenial
 language: node_js
+workspaces:
+  use:
+    - binaries
+cache:
+  directories:
+  - node_modules
+  - "$HOME/.electron"
+  - "$HOME/.cache" 
+addons: 
+before_install: 
+install:
+- source ~/.bashrc
+- npm install -g xvfb-maybe
+- npm install
+script:
+- npm run build
 os: 
 - osx
 - windows
@@ -10,23 +26,6 @@ node_js:
 - 10.15.3
 jobs:
   include:
-    - stage: Build binaries
-      workspaces:
-        use:
-          - binaries
-      cache:
-        directories:
-        - node_modules
-        - "$HOME/.electron"
-        - "$HOME/.cache" 
-      addons: 
-      before_install: 
-      install:
-      - source ~/.bashrc
-      - npm install -g xvfb-maybe
-      - npm install
-      script:
-      - npm run build
     - stage: Deploy
       -os: linux
       workspaces:
