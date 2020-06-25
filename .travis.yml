@@ -4,13 +4,13 @@ dist: xenial
 language: node_js
 node_js:
 - 10.15.3
-matrix:
-  - os: osx
-  - os: windows
-  - os: linux
 jobs:
   include:
     - stage: Build binaries
+      include:
+        - os: osx
+        - os: windows
+        - os: linux
       workspaces:
         use:
           - binaries
