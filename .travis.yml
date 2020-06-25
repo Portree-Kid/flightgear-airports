@@ -25,12 +25,12 @@ script:
 deploy:
   skip_cleanup: true
   overwrite: true
-  name: '0.0.13'
+  name: '0.0.15'
   provider: releases
   api_key:
     secure: Xm3z86gQmpSajvlXSVgG7mxcaS5K7GfE4HrARIDR4pQ4UguQ3/fFOenRyKAQImmH0kLCSIbVE21NMAQ3YI2F9El9I6GU7Wirccsg14TZZiBQAzKOTXZ+JsBloeBxuTOsR84SkO6pV8OT/pRnQd9frqyc1W7wzoX+0sQykMztXCNfI+1MXXGOAgMzlKuDMO1PVENz0V63mWipL/Mae/SyrHa1Bws+4LJKvv42m0HMKdN7ekt41vxcSUvLmN+YLlqUEVr/eUhQXUNCaWlmM0KxmfuzTedca5/1yzLvN8smEt2I2b0DFRM3Mi/QdI22fVRHs6XGpm8yqZRKmhySDXFspXKWBiuCF6AezX6NiIe/ZUh10gIukjkyLtrNk/o29qhj2WE9HJz4xhsGMAx3632cLSMPku5ALN7jv5scWjwCGNHs4ZeZyyePMeGM6Y6pje1uJPbxWGjwoV6iI4Y4esP+z3KcXvZdnzkpYMy2mzdT4gf7A7zieax1YwB6U/MEanXYKFBH4yzYK9+hx3ck2eLT3LcV/ChHN2bKmERJdf18h+zI8e5YKTzd3/kHLiUUv19N2a4TUYloGOyzrLwn2VD1Xm4jJVVLTIQvWbH5YK7cNkHYa4+PnsB+JppSoby7HiBcothw4OLpJO8eCMqXcPRU1n+cRAZTB7VOS7pWh8e8LFE=
   file_glob: true    
   file: build/*
   on:
-    branches: '0.0.13'
+    branches: '0.0.15'
     repo: Portree-Kid/flightgear-airports
