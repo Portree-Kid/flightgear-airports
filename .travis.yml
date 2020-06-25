@@ -25,8 +25,8 @@ jobs:
     - stage: Build binaries
       os: windows
       workspaces:
-      create:
-        name: windows-binaries
+        create:
+          name: windows-binaries
     - os: linux
       workspaces:
         create:
@@ -36,6 +36,7 @@ jobs:
         create:
           name: osx-binaries
     - stage: Deploy
+      install: skip
       script: skip
       workspaces:
         use:
