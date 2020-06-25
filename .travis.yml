@@ -2,15 +2,15 @@ osx_image: xcode8.3
 sudo: required
 dist: xenial
 language: node_js
+os: 
+- osx
+- windows
+- linux
 node_js:
 - 10.15.3
 jobs:
   include:
     - stage: Build binaries
-      include:
-        - os: osx
-        - os: windows
-        - os: linux
       workspaces:
         use:
           - binaries
