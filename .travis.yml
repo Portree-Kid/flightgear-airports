@@ -27,17 +27,17 @@ jobs:
       workspaces:
         create:
           name: windows-binaries
-          paths: build
+          paths: build/*
     - os: linux
       workspaces:
         create:
           name: linux-binaries
-          paths: build
+          paths: build/*
     - os: osx
       workspaces:
         create:
           name: osx-binaries
-          paths: build
+          paths: build/*
     - stage: Deploy
       install: skip
       script: skip
