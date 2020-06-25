@@ -23,7 +23,7 @@ node_js:
 jobs:
   include:
     - stage: Build binaries
-    - os: windows
+      os: windows
       workspaces:
       create:
         name: windows-binaries
@@ -36,7 +36,7 @@ jobs:
         create:
           name: osx-binaries
     - stage: Deploy
-      -os: linux
+      script: skip
       workspaces:
         use:
           - windows-binaries
