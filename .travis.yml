@@ -49,6 +49,10 @@ jobs:
       install: 
         - ls *
       script: skip
+      before_workspaces:
+        - mkdir osx-binaries
+        - mkdir linux-binaries
+        - mkdir windows-binaries
       workspaces:
         use:
           - windows-binaries
