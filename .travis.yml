@@ -40,7 +40,7 @@ jobs:
     - os: osx
       script:
         - npm run build
-        - mkdir windows-binaries; mv build/flightgear-airports* osx-binaries
+        - mkdir osx-binaries; mv build/flightgear-airports* osx-binaries
       workspaces:
         create:
           name: osx-binaries
