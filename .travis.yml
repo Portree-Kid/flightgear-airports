@@ -55,6 +55,8 @@ jobs:
       install:
         - pwd 
         - ls -l | grep "^d"
+        - ls -l "C:"
+        - ls -l "build"
         - cp linux-binaries/* build/
         - cp windows-binaries/* build/
         - cp osx-binaries/* build/
