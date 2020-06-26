@@ -16,29 +16,30 @@ install:
 - source ~/.bashrc
 - npm install -g xvfb-maybe
 - npm install
-script:
-- npm run build
 node_js:
 - 10.15.3
 jobs:
   include:
     - stage: Build binaries
       os: windows
-      after_script:
+      script:
+        - npm run build
         - mkdir windows-binaries; mv build/flightgear-airports* windows-binaries
       workspaces:
         create:
           name: windows-binaries
           paths: windows-binaries
     - os: linux
-      after_script:
+      script:
+        - npm run build
         - mkdir windows-binaries; mv build/flightgear-airports* linux-binaries
       workspaces:
         create:
           name: linux-binaries
           paths: linux-binaries
     - os: osx
-      after_script:
+      script:
+        - npm run build
         - mkdir windows-binaries; mv build/flightgear-airports* osx-binaries
       workspaces:
         create:
