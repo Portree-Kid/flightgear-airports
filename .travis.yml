@@ -24,20 +24,26 @@ jobs:
   include:
     - stage: Build binaries
       os: windows
+      after_script:
+        - mkdir windows-binaries; mv build/flightgear-airports* windows-binaries
       workspaces:
         create:
           name: windows-binaries
-          paths: build/flightgear-airports*
+          paths: windows-binaries
     - os: linux
+      after_script:
+        - mkdir windows-binaries; mv build/flightgear-airports* linux-binaries
       workspaces:
         create:
           name: linux-binaries
-          paths: build/flightgear-airports*
+          paths: linux-binaries
     - os: osx
+      after_script:
+        - mkdir windows-binaries; mv build/flightgear-airports* osx-binaries
       workspaces:
         create:
           name: osx-binaries
-          paths: build/flightgear-airports*
+          paths: osx-binaries
     - stage: Deploy
       install: 
         - ls *
