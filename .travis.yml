@@ -60,8 +60,9 @@ jobs:
         - find -name linux-binaries
         - ls -l | grep "^d"
         - ls -l "C:"
-        - ls -l "build"
         - cp ./C:/Users/travis/build/Portree-Kid/flightgear-airports/windows-binaries/* build/
+        - cp ./linux-binaries/* build/
+        - ls -l "build/"
       script: skip
       workspaces:
         use:
