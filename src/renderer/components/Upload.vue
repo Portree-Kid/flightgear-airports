@@ -100,6 +100,7 @@
             parent.$refs.upload.message = response.message;
           }
         };
+        this.message = "File uploading started!"
 
         // do the uploading
         console.log("File uploading started!");
