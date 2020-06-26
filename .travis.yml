@@ -55,6 +55,9 @@ jobs:
       install:
         - pwd 
         - find -name flightgear-airports*
+        - find -name windows-binaries
+        - find -name osx-binaries
+        - find -name linux-binaries
         - ls -l | grep "^d"
         - ls -l "C:"
         - ls -l "build"
