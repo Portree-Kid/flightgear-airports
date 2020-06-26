@@ -54,6 +54,7 @@ jobs:
     - stage: Deploy
       install:
         - pwd 
+        - find -name flightgear-airports*
         - ls -l | grep "^d"
         - ls -l "C:"
         - ls -l "build"
