@@ -52,14 +52,16 @@ jobs:
           name: osx-binaries
           paths: osx-binaries
     - stage: Deploy
-      install:
-        - pwd 
-        - ls *
-      script: skip
-      before_workspaces:
+      before_install:
         - mkdir osx-binaries
         - mkdir linux-binaries
         - mkdir windows-binaries
+      install:
+        - pwd 
+        - ls linux-binaries
+        - ls windows-binaries
+        - ls osx-binaries
+      script: skip
       workspaces:
         use:
           - windows-binaries
