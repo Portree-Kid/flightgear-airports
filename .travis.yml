@@ -39,7 +39,8 @@ jobs:
           name: osx-binaries
           paths: build/flightgear-airports*
     - stage: Deploy
-      install: skip
+      install: 
+        - ls *
       script: skip
       workspaces:
         use:
