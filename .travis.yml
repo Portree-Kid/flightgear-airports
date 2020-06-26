@@ -34,7 +34,7 @@ jobs:
     - os: linux
       script:
         - npm run build
-        - mkdir windows-binaries
+        - mkdir linux-binaries
         - mv -v build/flightgear-airports* linux-binaries/
         - ls -l linux-binaries
       workspaces:
