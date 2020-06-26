@@ -51,6 +51,24 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         this.getLatLngs().forEach( element => {
             if (Number(element.glueindex) === store.default.state.Editable.index) {
                 if (element.__vertex._icon != null) {
+                    element.__vertex.__proto__.deselect = function () {
+                        if (this._icon != null) {
+                            this._icon.style.setProperty('background-color','white');                    
+                            this._icon.style.setProperty('color','white');                    
+                        } else if (this.icon != null) {
+                            if (this.icon.style != null) {
+                                this.icon.style['background-color'] = 'white';
+                            } else {
+                                this.setStyle({ color: 'white' })
+                            }
+                        } else if (this.options.icon != null) {
+                            if (this.options.icon.style != null) {
+                                this.options.icon.style['background-color'] = 'white';
+                            } else {
+                                this.options.icon._setIconStyles({ color: 'white' })
+                            }
+                        }                        
+                    }
                     element.__vertex._icon.style.setProperty('background-color','red');                    
                     element.__vertex._icon.style.setProperty('color','red');                    
                 } else if (element.__vertex !== undefined && element.__vertex.icon != null) {
@@ -181,17 +199,19 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                     }
                 });
             }
-            var hold = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.HoldNode);
-            if (hold.length > 0) {
-                hold[0].select();
-            }
-            var parking = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.ParkingSpot);
-            if (parking.length > 0) {
-                parking[0].selectParking();
-            } else {
-                this.editLayer.featureLookup[event.vertex.latlng.glueindex].forEach
-                store.default.dispatch('setNode', event.vertex.latlng)
-                this.selectVertex()
+            if (!this.editor.map.editTools.drawing()) {
+                var hold = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.HoldNode);
+                if (hold.length > 0) {
+                    hold[0].select();
+                }
+                var parking = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.ParkingSpot);
+                if (parking.length > 0) {
+                    parking[0].selectParking();
+                } else {
+                    this.editLayer.featureLookup[event.vertex.latlng.glueindex].forEach
+                    store.default.dispatch('setNode', event.vertex.latlng)
+                    this.selectVertex()
+                }                    
             }
         });
         var dragIndex = -1;
