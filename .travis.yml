@@ -54,9 +54,7 @@ jobs:
     - stage: Deploy
       install:
         - pwd 
-        - ls linux-binaries
-        - ls windows-binaries
-        - ls osx-binaries
+        - ls -l | grep "^d"
         - cp linux-binaries/* build/
         - cp windows-binaries/* build/
         - cp osx-binaries/* build/
