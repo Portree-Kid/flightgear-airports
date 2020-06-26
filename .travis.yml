@@ -24,7 +24,9 @@ jobs:
       os: windows
       script:
         - npm run build
-        - mkdir windows-binaries; mv build/flightgear-airports* windows-binaries
+        - mkdir windows-binaries
+        - mv build/flightgear-airports* windows-binaries
+        - ls windows-binaries
       workspaces:
         create:
           name: windows-binaries
@@ -32,7 +34,9 @@ jobs:
     - os: linux
       script:
         - npm run build
-        - mkdir windows-binaries; mv build/flightgear-airports* linux-binaries
+        - mkdir windows-binaries
+        - mv build/flightgear-airports* linux-binaries
+        - ls linux-binaries
       workspaces:
         create:
           name: linux-binaries
@@ -40,13 +44,16 @@ jobs:
     - os: osx
       script:
         - npm run build
-        - mkdir osx-binaries; mv build/flightgear-airports* osx-binaries
+        - mkdir osx-binaries
+        - mv build/flightgear-airports* osx-binaries
+        - ls osx-binaries
       workspaces:
         create:
           name: osx-binaries
           paths: osx-binaries
     - stage: Deploy
-      install: 
+      install:
+        - pwd 
         - ls *
       script: skip
       before_workspaces:
