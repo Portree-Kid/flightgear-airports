@@ -102,7 +102,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
             }).sort();
             
             store.default.dispatch('setParkings', parkingNodes.map( 
-                p => ({index: Number(p.attrs.index), name: String(p.attrs.name), number: p.attrs.number, type: String(p.attrs.type)}
+                p => ({index: Number(p.attrs.index), name: String(p.attrs.name), number: String(p.attrs.number), type: String(p.attrs.type)}
             )).sort((p1, p2) => {
                 if (p1.name === p2.name) {
                     return p1.number - p2.number
