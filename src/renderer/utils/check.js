@@ -117,28 +117,48 @@ async function checkGroundnet(data) {
 
 
             var okPushbacks = [];
+            // Check pushback
+            var multiplePushbackRoutes = {};
+            //debugger;
             parkings.forEach(parkingNode => {
-                if(Object.keys(noPushbackGraph[parkingNode]).length === 0) {
-                    // Not connected to a pushback must be forward push
-                    okPushbacks.push(parkingNode);
-                    return;
-                }
                 pushbackNodes.forEach(pushbackNode => {
-                    var ok = checkRoute(noPushbackGraph, parkingNode, pushbackNode);
-                    if (ok) {
+                    var numRoutes = checkRoute(noPushbackGraph, parkingNode, pushbackNode);
+                    if (numRoutes===0) {
                         okPushbacks.push(parkingNode);
+                    } else if (numRoutes===1){
+                        if (multiplePushbackRoutes[parkingNode]===undefined) {
+                            multiplePushbackRoutes[parkingNode] = [pushbackNode];
+                        } else {
+                            multiplePushbackRoutes[parkingNode].push(pushbackNode);
+                        }                        
+                    } else if (numRoutes>1){
+                        if (multiplePushbackRoutes[parkingNode]===undefined) {
+                            multiplePushbackRoutes[parkingNode] = [pushbackNode];
+                        } else {
+                            multiplePushbackRoutes[parkingNode].push(pushbackNode);
+                        }       
                     }
                     this.postMessage(['progress', 1]);
                 });
             });
             var wrongPushbackRoutes = parkings.filter(
                 function (e) {
-                    return this.indexOf(e) < 0;
+                    //debugger;
+                    return this[e] != undefined && this[e].length != 1;
                 }
-                , okPushbacks).map(
-                    id => { return { id: id, message: 'No way to pushback holdpoint' } }
-                );
+                , multiplePushbackRoutes).map(
 
+                    //multiplePushbackRoutes.push();
+
+                    id => { 
+                        var endPoints = multiplePushbackRoutes[id];
+                        if( endPoints.length<1)
+                          return { id: id, message: 'No way to pushback holdpoint' } 
+                        else 
+                          return { id: id, message: 'Multiple connected pushback points' }
+                    }
+                );
+            wrongPushbackRoutes =wrongPushbackRoutes.concat(multiplePushbackRoutes);
 
             okNodes = okNodes.filter((v, i) => okNodes.indexOf(v) === i);
             var notOkNodesParkings = parkings.filter(
@@ -148,7 +168,7 @@ async function checkGroundnet(data) {
             );            
             var notOkNodesRunways = runwayNodes.filter(
                 (v, i) => okNodes.indexOf(v) < 0
-            ).map(
+            ).map(                
                 id => { return { id: id, message: 'No way from runway to each parking' } }
             );
             
@@ -252,12 +272,12 @@ function checkRoute(graph, from, to) {
         var pathD = this.dijkstra.find_path(graph, from, to);
         if (pathD.length > 0) {
             console.log(pathD);
-            return true;
+            return pathD.length;
         }
-        return false;
+        return 0;
     } catch (error) {
-        console.error(error);
-        return false;
+        // console.error(error);
+        return 0;
     }
 }
 
