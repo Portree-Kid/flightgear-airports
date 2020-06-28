@@ -192,7 +192,8 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
             console.log(event)
         });
         this.on('editable:vertex:clicked', function (event) {
-            if (Number(store.default.state.Editable.index) >= 0) {
+            if (Number(store.default.state.Editable.index) >= 0 &&
+                this.featureLookup[store.default.state.Editable.index] !== undefined) {
                 this.featureLookup[store.default.state.Editable.index].forEach(element => {
                     if(element.deselect !== undefined) {
                         element.deselect();
