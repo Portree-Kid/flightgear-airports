@@ -4,7 +4,7 @@
 <script lang="js">
   import L from 'leaflet'
   export default {
-    name: 'edit-layer',
+    name: 'airport-layer',
     props: [],
     mounted () {
       this.add()

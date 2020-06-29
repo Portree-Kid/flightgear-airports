@@ -1,8 +1,8 @@
 <template>
   <div id="EditBar">
     <Upload :visible.sync="uploadVisible" ref="upload"></Upload>
-    <EditButton icon="fas fa-th" v-on:click="zoomin" :show="true" tooltip="Zoomin"></EditButton>
-    <EditButton icon="fas fa-th-large" v-on:click="zoomout" :show="!editing" tooltip="Zoomout"></EditButton>
+    <ZoomButton icon="fas fa-th" v-on:click="zoomin" :show="true" tooltip="Zoomin"></ZoomButton>
+    <ZoomButton icon="fas fa-th-large" v-on:click="zoomout" :show="!editing" tooltip="Zoomout"></ZoomButton>
 
     <EditButton icon="fas fa-upload" v-on:click="upload" :show="!editing" tooltip="Upload"></EditButton>
     <EditButton icon="fas fa-plane" v-on:click="test" :show="!editing" tooltip="Export"></EditButton>
@@ -63,6 +63,7 @@
 <script lang="js">
 /* eslint-disable */
   import EditButton from './EditButton'
+  import ZoomButton from './ZoomButton';
   import Upload from './Upload'
   import Vue from 'vue'
 
@@ -71,7 +72,7 @@
   const fs = require('fs');
 
   export default {
-    components: { EditButton, Upload },
+    components: { EditButton, Upload, ZoomButton },
     data () {
       return {isEditing: false, uploadVisible: false, centerDialogVisible: false, saveDialogVisible: false, checkDialogVisible: false, checking: false, progress: 0, max: 0}
     },
@@ -92,19 +93,20 @@
         this.$parent.$parent.zoomUpdated(14)
       },
       edit () {
-        this.editing = true
-        this.$parent.$parent.$refs.map.mapObject.options.minZoom = 13;
-        this.$parent.$parent.$refs.editLayer.enableEdit()
+        this.isEditing = true
+        this.$emit('edit')
       },
       undoFirst () {
-        this.editing = false
+        this.isEditing = false
+        this.$emit('edit')
         this.centerDialogVisible = false
         this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         this.$parent.$parent.$refs.editLayer.disableEdit()
         this.$parent.$parent.$refs.editLayer.reload(true)
       },
       undoLast () {
-        this.editing = false
+        this.isEditing = false
+        this.$emit('edit')
         this.centerDialogVisible = false
         this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         this.$parent.$parent.$refs.editLayer.disableEdit()
@@ -112,10 +114,11 @@
       },
       save () {
         this.$parent.$parent.$refs.editLayer.stopDrawing()
-        this.editing = false
+        this.isEditing = false
+        this.$emit('edit')
         this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         Vue.set(this, 'saveDialogVisible', true)
-        this.editing = false
+        this.$emit('edit')
         Vue.nextTick( function () {
             setTimeout( this.saveDefered.bind(this), 100);
           }, this)

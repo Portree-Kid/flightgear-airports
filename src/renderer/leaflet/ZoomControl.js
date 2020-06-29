@@ -1,8 +1,8 @@
 /* eslint-disable */
-L.EditControl = L.Control.extend({
+L.ZoomControl = L.Control.extend({
 
     options: {
-        position: 'topright',
+        position: 'topleft',
         callback: null,
         kind: '',
         html: '<i class="fas fa-draw-polygon"></i>',

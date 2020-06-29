@@ -17,7 +17,6 @@
     -->
     <!--<l-marker :lat-lng="marker"></l-marker>-->
     <LeafletSidebar></LeafletSidebar>
-    <EditBar></EditBar>
     <AiLayer ref="aiLayer"></AiLayer> 
     <PavementLayer ref="pavementLayer"></PavementLayer>    
     <!--<ThresholdLayer ref="thresholdLayer"></ThresholdLayer>-->
@@ -33,6 +32,9 @@
       ></l-circle>
     </l-layer-group>
     <EditLayer ref="editLayer"></EditLayer>
+    <ToolLayer ref="toolLayer"></ToolLayer>
+    <EditBar ref="editBar" @edit="onEdit"></EditBar>
+    <ToolBar ref="toolBar"></ToolBar>
   </l-map>
 </template>
 
@@ -42,7 +44,9 @@
   import LeafletSidebar from './LeafletSidebar'
   import AiLayer from './AiLayer'
   import EditBar from './EditBar'
+  import ToolBar from './ToolBar'
   import EditLayer from './EditLayer'
+  import ToolLayer from './ToolLayer'
   import PavementLayer from './PavementLayer'
   import ThresholdLayer from './ThresholdLayer'
   import L from 'leaflet'
@@ -57,7 +61,7 @@
   })
   export default {
     name: 'flightgear-map',
-    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, AiLayer, EditBar, EditLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer },
+    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, AiLayer, EditBar, ToolBar, EditLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer, ToolLayer },
     props: [],
     mounted () {
       this.$store.dispatch('getAirports')
@@ -76,8 +80,12 @@
             */
             this.editingAirport = airportsToLoad[0]
           }
-          this.$refs.editLayer.setVisible(this.zoom >= 12)
-          this.$refs.airportLayer.setVisible(this.zoom < 12)
+          if (this.$refs.editLayer) {
+            this.$refs.editLayer.setVisible(this.zoom >= 12)
+          }
+          if (this.$refs.airportLayer) {
+            this.$refs.airportLayer.setVisible(this.zoom < 12)
+          }
 
           // console.log(this.groundnet)
         }
@@ -97,6 +105,11 @@
       }
     },
     methods: {
+      onEdit (event) {
+        this.$refs.map.mapObject.options.minZoom = 13
+        this.$refs.editLayer.enableEdit()
+        this.$refs.toolBar.setEdit(this.$refs.editBar.isEditing)
+      },
       editAirport () {
         if (this.editingAirport) {
           let airportsToLoad = this.$store.state.Airports.airports
@@ -196,6 +209,9 @@
     computed: {
       zoom: function () {
         return this.$store.state.Settings.zoom
+      },
+      isEditing: function () {
+        return this.$refs.editLayer !== undefined && this.$refs.editLayer.editing
       },
       center: function () {
         return this.$store.state.Settings.center
