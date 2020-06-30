@@ -75,6 +75,17 @@ L.ParkingSpot = L.Circle.extend({
     removeDirection() {
         this.direction = undefined;
     },
+    updateHeading(heading) {
+        this.options.attributes.heading = heading;
+        this.updateVertexFromDirection();     
+        this.updateWheelPos();       
+    },
+    updateRadius(radius) {
+        this._mRadius = radius;
+        this.updateDirectionFromVertex();     
+        this.updateVertexFromDirection();     
+        this.updateWheelPos();       
+    },
     // Update the direction vertex from the direction
     updateVertexFromDirection() {
         if (this.editEnabled()) {

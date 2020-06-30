@@ -1,3 +1,14 @@
+<!--
+Copyright 2020 Keith Paterson
+
+This file is part of FG Airports.
+
+FG Airports is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+FG Airports is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with FG Airports. If not, see http://www.gnu.org/licenses/.
+-->
 <template>
 <div id="sidebar" class="leaflet-sidebar collapsed">
     <!-- Nav tabs -->
@@ -28,6 +39,7 @@
           <ParkingEdit></ParkingEdit>
           <ArcEdit></ArcEdit>
           <NodeEdit></NodeEdit>          
+          <ParkingGroupEdit ref="parkingGroupEdit"  @edit="(msg) => $emit('edit', msg)"></ParkingGroupEdit>
           <AirportEdit></AirportEdit>
         </div>
         <!--
@@ -66,6 +78,7 @@
   import Help from './Help'
   import NodeEdit from './NodeEdit'
   import ParkingEdit from './ParkingEdit'
+  import ParkingGroupEdit from './ParkingGroupEdit'
   // import ParkingList from './ParkingList'
   import RunScan from './RunScan'
   import SettingsPanel from './SettingsPanel'
@@ -74,7 +87,7 @@
 
   export default {
     name: 'leaflet-sidebar',
-    components: { Help, AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, RunScan, FileSelect, SettingsPanel, Search, WorkInProgress },
+    components: { Help, AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, ParkingGroupEdit, RunScan, FileSelect, SettingsPanel, Search, WorkInProgress },
     props: [],
     mounted () {
       this.add()
@@ -120,6 +133,15 @@
       add () {
         if (this.$parent._isMounted) {
           this.deferredMountedTo(this.$parent.mapObject)
+        }
+      },
+      setEditing (editing) {
+        this.$refs.parkingGroupEdit.setEditing(editing)
+      },
+      setData (data) {
+        if (data.length > 0) {
+          this.sidebar.open('edit')
+          this.$refs.parkingGroupEdit.setData(data)
         }
       },
       scan () {

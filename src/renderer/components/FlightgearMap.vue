@@ -1,3 +1,14 @@
+<!--
+Copyright 2020 Keith Paterson
+
+This file is part of FG Airports.
+
+FG Airports is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+FG Airports is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with FG Airports. If not, see http://www.gnu.org/licenses/.
+-->
 <template>
   <l-map
     :zoom="zoom"
@@ -16,7 +27,7 @@
     </l-control>
     -->
     <!--<l-marker :lat-lng="marker"></l-marker>-->
-    <LeafletSidebar></LeafletSidebar>
+    <LeafletSidebar ref="sidebar" @edit="onEditSidebar"></LeafletSidebar>
     <AiLayer ref="aiLayer"></AiLayer> 
     <PavementLayer ref="pavementLayer"></PavementLayer>    
     <!--<ThresholdLayer ref="thresholdLayer"></ThresholdLayer>-->
@@ -32,7 +43,7 @@
       ></l-circle>
     </l-layer-group>
     <EditLayer ref="editLayer"></EditLayer>
-    <ToolLayer ref="toolLayer"></ToolLayer>
+    <ToolLayer ref="toolLayer" @select-poly="onSelectedPolygon"></ToolLayer>
     <EditBar ref="editBar" @edit="onEdit"></EditBar>
     <ToolBar ref="toolBar"></ToolBar>
   </l-map>
@@ -105,10 +116,20 @@
       }
     },
     methods: {
+      onSelectedPolygon (ring) {
+        var parkings = this.$refs.editLayer.getParkings(ring)
+        console.log(ring)
+        console.log(parkings)
+        this.$refs.sidebar.setData(parkings)
+      },
       onEdit (event) {
         this.$refs.map.mapObject.options.minZoom = 13
         this.$refs.editLayer.enableEdit()
         this.$refs.toolBar.setEdit(this.$refs.editBar.isEditing)
+        this.$refs.sidebar.setEditing(this.$refs.editBar.isEditing)
+      },
+      onEditSidebar (event) {
+        this.$refs.editLayer.onEdit(event)
       },
       editAirport () {
         if (this.editingAirport) {

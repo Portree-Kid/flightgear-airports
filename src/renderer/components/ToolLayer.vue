@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License along with FG 
   import {LMap, LMarker} from 'vue2-leaflet'
   import L from 'leaflet'
   import LEdit from 'leaflet-editable/src/Leaflet.Editable.js'
+  const turf = require('@turf/turf')
+
 
   export default {
     name: 'tool-layer',
@@ -53,9 +55,21 @@ You should have received a copy of the GNU General Public License along with FG 
         });
       },
       drawPolyline () {
-        var polyLine = this.$parent.mapObject.editTools.startPolyline(undefined, {color: 'green'})
+        var polyLine = this.$parent.mapObject.editTools.startPolygon(undefined, {color: 'green'})
         polyLine.addTo(this.toolLayerGroup)
-        polyLine.toolLayerGroup = this.toolLayerGroup;
+        polyLine.on('editable:drawing:end', event => {          
+          console.log(event)
+          var latLngs = event.target.getLatLngs()[0].map( latLng => ([latLng.lat, latLng.lng]));          
+
+          // turf rings must start/end with the same point
+          latLngs.push(latLngs[0]);
+          var ring = [latLngs];
+
+          this.$emit('select-poly', ring);
+
+
+        })
+
       },
 
     },

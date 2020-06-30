@@ -1,3 +1,14 @@
+<!--
+Copyright 2020 Keith Paterson
+
+This file is part of FG Airports.
+
+FG Airports is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+FG Airports is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with FG Airports. If not, see http://www.gnu.org/licenses/.
+-->
 <template></template>
 
 <script lang="js">
@@ -11,6 +22,8 @@
   import L2 from 'leaflet-textpath'
   import Vue from 'vue'
   import { MessageBox } from 'element-ui';
+  const turf = require('@turf/turf')
+
 
   const Coordinates = require('coordinate-parser');
   const path = require('path')
@@ -87,6 +100,21 @@
       }
     },
     methods: {
+      getParkings(ring) {
+          var poly = turf.polygon(ring);
+          var parkings = []
+          this.groundnetLayerGroup.eachLayer(l => {
+            //console.log(l)
+            if (l instanceof L.ParkingSpot) {
+              var tp = turf.point([l.getLatLng().lat, l.getLatLng().lng]);
+              if (turf.booleanPointInPolygon(tp, poly)) {
+                parkings.push(l);
+              }          
+            }
+         })
+         this.selection = parkings;
+         return parkings;
+      },
       load (icao, force) {        
         if (this.groundnetLayerGroup !== undefined) {
           this.groundnetLayerGroup.removeFrom(this.$parent.mapObject)
@@ -151,6 +179,23 @@
       getEditing () {
         return this.editing;
       },
+      onEdit (event) {
+        switch (event.type) {
+          case 'parking-group-angle':
+            this.selection.forEach(element => {
+              element.updateHeading(event.angle)
+            });
+            break;
+          case 'parking-group-wingspan':
+            this.selection.forEach(element => {
+              element.updateRadius(event.wingspan/2)
+            });
+            break;        
+          default:
+            break;
+        }
+      },
+
       enableEdit () {
         this.editable = true
         this.editing = true
@@ -407,6 +452,7 @@
           }    
         });
       },
+      /*
       getParkings (){
         var parkings = []
         this.groundnetLayerGroup.eachLayer(l => {
@@ -416,6 +462,7 @@
         })
         return parkings
       },
+      */
       refreshLookup(index) {
         //element.__vertex
           this.featureLookup[index] = this.featureLookup[index].filter(item => { 
