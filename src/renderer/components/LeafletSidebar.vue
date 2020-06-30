@@ -40,7 +40,7 @@ You should have received a copy of the GNU General Public License along with FG 
           <ArcEdit></ArcEdit>
           <NodeEdit></NodeEdit>          
           <ParkingGroupEdit ref="parkingGroupEdit"  @edit="(msg) => $emit('edit', msg)"></ParkingGroupEdit>
-          <AirportEdit></AirportEdit>
+          <AirportEdit  ref="airportEdit"></AirportEdit>
         </div>
         <!--
         <div class="leaflet-sidebar-pane" id="parking">
@@ -137,6 +137,7 @@ You should have received a copy of the GNU General Public License along with FG 
       },
       setEditing (editing) {
         this.$refs.parkingGroupEdit.setEditing(editing)
+        this.$refs.airportEdit.setEditing(editing)
       },
       setData (data) {
         if (data.length > 0) {

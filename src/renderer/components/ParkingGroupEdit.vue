@@ -175,7 +175,8 @@ const convert = require('geo-coordinates-parser');
     },
     computed: {      
       parking: function () {
-        return this.data !== null
+        return this.data !== null && this.$store.state.Editable.type === 'parking-group'
+
       },
       airlines: function () {
         var airlineCodes = [];

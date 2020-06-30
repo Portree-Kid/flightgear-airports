@@ -13,6 +13,9 @@ const SET_EDIT_ARC = 'SET_EDIT_ARC'
 const SET_EDIT_RUNWAY = 'SET_EDIT_RUNWAY'
 
 const mutations = {
+  SET_EDIT_TYPE (state, type) {
+    state.type = type
+  },
   SET_EDIT (state, editing) {
     state.editing = editing
   },

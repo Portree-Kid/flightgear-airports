@@ -118,8 +118,10 @@ You should have received a copy of the GNU General Public License along with FG 
     methods: {
       onSelectedPolygon (ring) {
         var parkings = this.$refs.editLayer.getParkings(ring)
-        console.log(ring)
-        console.log(parkings)
+        console.debug(ring)
+        console.debug(parkings)
+
+        this.$store.commit('SET_EDIT_TYPE', 'parking-group')
         this.$refs.sidebar.setData(parkings)
       },
       onEdit (event) {

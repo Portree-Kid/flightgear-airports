@@ -45,12 +45,15 @@
 
 export default {
     data () {
-      return {activeTab: 'first', editLayer: null}
+      return {activeTab: 'first', editing: Boolean}
     },
     components: {
       Frequency, ParkingList
     },
     methods: {
+      setEditing (editing) {
+        this.editing = editing
+      },
       addFrequency () {
         this.$store.dispatch('addFrequency', {type: 'AWOS', value: 0})
       },
@@ -66,14 +69,6 @@ export default {
       }
     },
     computed: {
-      editing: {
-        get: function () {
-          if (this.editLayer === null) {
-            this.initLayer()
-          }
-          return this.editLayer !== null && this.editLayer.editing
-        }
-      },
       icao: function () {
         return this.$store.state.Airports.currentAirport.icao
       },
