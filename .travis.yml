@@ -56,20 +56,21 @@ jobs:
         - pwd 
         - tar -xzf ${CASHER_DIR}/osx-binaries-fetch.tgz
         - find -name flightgear-airports*
-        - find -name windows-binaries
-        - find -name osx-binaries
-        - find -name linux-binaries
-        - ls -l | grep "^d"
-        - ls -l "C:"
-        - cp ./C:/Users/travis/build/Portree-Kid/flightgear-airports/windows-binaries/* build/
-        - cp ./linux-binaries/* build/
+#        - find -name windows-binaries
+#        - find -name osx-binaries
+#        - find -name linux-binaries
+#        - ls -l | grep "^d"
+#        - ls -l "C:"
+        - cp ./Users/travis/build/Portree-Kid/flightgear-airports/osx-binaries/*.dmg build/
+        - cp ./C:/Users/travis/build/Portree-Kid/flightgear-airports/windows-binaries/*.exe build/
+        - cp ./linux-binaries/*.AppImage build/
         - ls -l "build/"
       script: skip
       workspaces:
         use:
           - windows-binaries
           - linux-binaries
-          - osx-binaries
+#          - osx-binaries
       deploy:
         skip_cleanup: true
         overwrite: true
