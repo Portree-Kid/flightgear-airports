@@ -63,6 +63,7 @@ jobs:
         - cp ./C:/Users/travis/build/Portree-Kid/flightgear-airports/windows-binaries/* build/
         - cp ./linux-binaries/* build/
         - ls -l "build/"
+        - tar -xzf ${CASHER_DIR}/osx-binaries-fetch.tgz
       script: skip
       workspaces:
         use:
