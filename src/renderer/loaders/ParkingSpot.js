@@ -131,7 +131,7 @@ L.ParkingSpot = L.Circle.extend({
     },
     select() {
         store.default.dispatch('setParking', this.options.attributes);
-        store.default.dispatch('setParkingCoords', this.getLatLng().lat.toFixed(5) + ' ' + this.getLatLng().lng.toFixed(5));
+        store.default.dispatch('setParkingCoords', this.getLatLng().lat.toFixed(6) + ' ' + this.getLatLng().lng.toFixed(6));
         var style = {};
         style['color'] = 'red';
         this.setStyle(style);
@@ -174,7 +174,7 @@ L.ParkingSpot = L.Circle.extend({
         this.on('editable:vertex:dragend', function (event) {
             console.debug("DragEnd Parking : ", event);
             store.default.dispatch('setParking', event.target.options.attributes);
-            store.default.dispatch('setParkingCoords', event.target.getLatLng().lat.toFixed(5) + ' ' + event.target.getLatLng().lng.toFixed(5));
+            store.default.dispatch('setParkingCoords', event.target.getLatLng().lat.toFixed(6) + ' ' + event.target.getLatLng().lng.toFixed(6));
             event.target.updateWheelPos();
             /*
             store.default.dispatch('setParkingHeading', this.options.attributes.heading)
@@ -230,7 +230,7 @@ L.ParkingSpot = L.Circle.extend({
         }
 
         store.default.dispatch('setParking', this.options.attributes);
-        store.default.dispatch('setParkingCoords', this.getLatLng().lat.toFixed(5) + ' ' + this.getLatLng().lng.toFixed(5));
+        store.default.dispatch('setParkingCoords', this.getLatLng().lat.toFixed(6) + ' ' + this.getLatLng().lng.toFixed(6));
 
         this.select();
     },

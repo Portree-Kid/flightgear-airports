@@ -134,7 +134,7 @@ const actions = {
   },
   async setNode (context, node) {
     context.commit('SET_EDIT_NODE', node.attributes)
-    context.commit('SET_EDIT_NODE_COORDS', node.lat.toFixed(5) + ' ' + node.lng.toFixed(5))
+    context.commit('SET_EDIT_NODE_COORDS', node.lat.toFixed(6) + ' ' + node.lng.toFixed(6))
   }
 }
 

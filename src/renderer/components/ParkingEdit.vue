@@ -230,9 +230,8 @@
           if (newValue==='unknown') {
             
           } 
-          if( newValue.match(/,/g).length === 3) {
+          if( newValue.match(/,/g) !== null && newValue.match(/,/g).length === 3) {
             newValue = newValue.replace(', ', ' ').replace(/,/g, '.').replace(' ', ', ');
-
           }                  
           this.$store.commit('SET_EDIT_PARKING_COORDS', newValue)
         }

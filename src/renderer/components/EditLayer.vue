@@ -865,7 +865,7 @@ You should have received a copy of the GNU General Public License along with FG 
               });
         }
         this.$store.dispatch('setParking', circle.options.attributes);
-        this.$store.dispatch('setParkingCoords', circle.getLatLng().lat.toFixed(5) + ' ' + circle.getLatLng().lng.toFixed(5));
+        this.$store.dispatch('setParkingCoords', circle.getLatLng().lat.toFixed(6) + ' ' + circle.getLatLng().lng.toFixed(6));
         circle.select()
         addFeature(circle)
         // console.log(this.groundnetLayerGroup)
