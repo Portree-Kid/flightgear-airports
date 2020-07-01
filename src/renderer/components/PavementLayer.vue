@@ -25,8 +25,7 @@
       this.remove()
     },
     data () {
-      return {
-      }
+      return {groundnet: Object}
     },
     methods: {
       load (icao) {
@@ -57,7 +56,7 @@
         this.layerGroup = L.layerGroup()
       },
       remove () {
-        if (this.layerGroup) {
+        if (this.groundnet) {
           this.$parent.removeLayer(this.layerGroup)
         }
       },
@@ -67,11 +66,11 @@
         }
       },
       setVisible (visible) {
-        if (this.layerGroup !== undefined) {
+        if (this.groundnet !== undefined) {
           if (visible) {
-            this.layerGroup.addTo(this.$parent.mapObject)
+            this.groundnet.addTo(this.$parent.mapObject)
           } else {
-            this.layerGroup.removeFrom(this.$parent.mapObject)
+            this.groundnet.removeFrom(this.$parent.mapObject)
           }
         }
       }

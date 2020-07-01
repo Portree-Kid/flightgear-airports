@@ -14,6 +14,7 @@ You should have received a copy of the GNU General Public License along with FG 
     <Upload :visible.sync="uploadVisible" ref="upload"></Upload>
     <ZoomButton icon="fas fa-th" v-on:click="zoomin" :show="true" tooltip="Zoomin"></ZoomButton>
     <ZoomButton icon="fas fa-th-large" v-on:click="zoomout" :show="!editing" tooltip="Zoomout"></ZoomButton>
+    <ZoomButton icon="far fa-eye-slash" v-on:click="hideAPT" :show="!editing" tooltip="Hide APT"></ZoomButton>
 
     <EditButton icon="fas fa-upload" v-on:click="upload" :show="!editing" tooltip="Upload"></EditButton>
     <EditButton icon="fas fa-plane" v-on:click="test" :show="!editing" tooltip="Export"></EditButton>
@@ -85,7 +86,7 @@ You should have received a copy of the GNU General Public License along with FG 
   export default {
     components: { EditButton, Upload, ZoomButton },
     data () {
-      return {isEditing: false, uploadVisible: false, centerDialogVisible: false, saveDialogVisible: false, checkDialogVisible: false, checking: false, progress: 0, max: 0}
+      return {isEditing: false, uploadVisible: false, centerDialogVisible: false, saveDialogVisible: false, checkDialogVisible: false, checking: false, progress: 0, max: 0, pavementLayerVisible: true}
     },
     created () {
     },
@@ -102,6 +103,10 @@ You should have received a copy of the GNU General Public License along with FG 
       zoomin() {
         this.$parent.$parent.$refs.editLayer.stopDrawing()
         this.$parent.$parent.zoomUpdated(14)
+      },
+      hideAPT() {
+        this.pavementLayerVisible = !this.pavementLayerVisible
+        this.$parent.$parent.$refs.pavementLayer.setVisible(this.pavementLayerVisible)
       },
       edit () {
         this.isEditing = true
