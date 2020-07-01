@@ -724,6 +724,7 @@ You should have received a copy of the GNU General Public License along with FG 
                   iconAnchor: [15, 42]
               });
 
+              element['holdPointType'] =  this.$store.state.Editable.data.node.holdPointType;
               element.setIcon(icon);
             }
             hasHoldPointNode = true;
@@ -787,6 +788,7 @@ You should have received a copy of the GNU General Public License along with FG 
           node.addTo(this.groundnetLayerGroup);
           node.featureLookup = this.featureLookup;
           this.featureLookup[nIndex].push(node);
+          node['holdPointType'] =  this.$store.state.Editable.data.node.holdPointType;
           node.addListeners();
           node.extensions();
         }

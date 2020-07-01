@@ -104,7 +104,7 @@ async function checkGroundnet(data) {
             pushbackNodes.forEach(element => {
                 noPushbackGraph[element] = {};
             });
-            edges.forEach(element => {
+            edges.filter(element => element.isPushBackRoute).forEach(element => {
                 noPushbackGraph[element.start] = {};
                 noPushbackGraph[element.end] = {};
             });
@@ -141,6 +141,20 @@ async function checkGroundnet(data) {
                     this.postMessage(['progress', 1]);
                 });
             });
+            var rogueHoldPoints = pushbackNodes.map(
+
+                //multiplePushbackRoutes.push();
+
+                id => { 
+                    var routes = noPushbackGraph[id];
+                    if(Object.keys(routes).length<1)
+                      return { id: id, message: 'Unconnected Pushbacknode' } 
+                    /*
+                    else if(Object.keys(routes).length>1)
+                      return { id: id, message: 'Multiple connected pushback node' }
+                    */
+                }
+            ).filter(n => n !== undefined);
             var wrongPushbackRoutes = parkings.filter(
                 function (e) {
                     //debugger;
@@ -243,10 +257,11 @@ async function checkGroundnet(data) {
             if (danglingEnds.length===0) {
                 notOkNodes.push({id:-1, message: 'No invalid ends'});
             }
-            notOkNodes = notOkNodes.concat(notOkNodesParkings);
-            if (notOkNodesParkings.length===0) {
+            notOkNodes = notOkNodes.concat(notOkNodesParkings).concat(rogueHoldPoints);
+            if (notOkNodesParkings.length===0 && rogueHoldPoints===0) {
                 notOkNodes.push({id:-1, message: 'Routes from parkings OK'});
             }
+            
             notOkNodes = notOkNodes.concat(notOkNodesRunways);
             if (notOkNodesRunways.length===0) {
                 notOkNodes.push({id:-1, message: 'Routes from runways OK'});
@@ -302,15 +317,14 @@ function check2(params) {
 }
 
 var mapPushbackNodes = function (o) {
-    if (o.type === 'PushBack')
+    if (o.type === 'PushBack') {
         return o.index;
-    console.log(o);
+    }
 }
 
 var mapParkings = function (o) {
     if (o.type === 'parking')
         return o.index;
-    console.log(o);
 }
 
 var mapParkingNode = function (o) {
