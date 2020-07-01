@@ -70,7 +70,7 @@ jobs:
         use:
           - windows-binaries
           - linux-binaries
-#          - osx-binaries
+          - osx-binaries
       deploy:
         skip_cleanup: true
         overwrite: true
