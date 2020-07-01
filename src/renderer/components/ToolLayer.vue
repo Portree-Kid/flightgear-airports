@@ -58,16 +58,37 @@ You should have received a copy of the GNU General Public License along with FG 
         var polyLine = this.$parent.mapObject.editTools.startPolygon(undefined, {color: 'green'})
         polyLine.addTo(this.toolLayerGroup)
         polyLine.on('editable:drawing:end', event => {          
-          console.log(event)
+          console.debug(event)
           var latLngs = event.target.getLatLngs()[0].map( latLng => ([latLng.lat, latLng.lng]));          
+
 
           // turf rings must start/end with the same point
           latLngs.push(latLngs[0]);
+          var longest = 0;
+          var angleLongest = 0;
+          latLngs.forEach((item, index, arr) => {
+            if (index > 0) {
+              var angle = turf.bearing(turf.point([arr[index-1][1], arr[index-1][0]]), turf.point([arr[index][1], arr[index][0]])) + 180;
+              
+              var dist = turf.distance( turf.point(arr[index-1]), turf.point(arr[index]));
+              if (dist>longest) {
+                longest = dist;
+                angleLongest = angle;                
+              }
+            }
+          });
+          var point1 = turf.point([-75.343, 39.984]);
+          var point2 = turf.point([-75.534, 39.123]);
+
+          var bearing = turf.bearing(point1, point2);
+          console.log(bearing);
+          
+
+          event.target.bindTooltip(angleLongest.toFixed(2) + '°', {permanent: true})
+
           var ring = [latLngs];
 
           this.$emit('select-poly', ring);
-
-
         })
 
       },
