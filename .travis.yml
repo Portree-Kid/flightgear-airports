@@ -64,6 +64,7 @@ jobs:
         - cp ./Users/travis/build/Portree-Kid/flightgear-airports/osx-binaries/*.dmg build/
         - cp ./C:/Users/travis/build/Portree-Kid/flightgear-airports/windows-binaries/*.exe build/
         - cp ./linux-binaries/*.AppImage build/
+        - rmdir icons
         - ls -l "build/"
       script: skip
       workspaces:
