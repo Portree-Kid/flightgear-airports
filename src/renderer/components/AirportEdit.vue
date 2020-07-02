@@ -45,7 +45,7 @@
 
 export default {
     data () {
-      return {activeTab: 'first', editing: Boolean}
+      return {activeTab: 'first', editing: false}
     },
     components: {
       Frequency, ParkingList

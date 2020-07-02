@@ -14,7 +14,7 @@ You should have received a copy of the GNU General Public License along with FG 
     <Upload :visible.sync="uploadVisible" ref="upload"></Upload>
     <ZoomButton icon="fas fa-th" v-on:click="zoomin" :show="true" tooltip="Zoomin"></ZoomButton>
     <ZoomButton icon="fas fa-th-large" v-on:click="zoomout" :show="!editing" tooltip="Zoomout"></ZoomButton>
-    <ZoomButton icon="far fa-eye-slash" v-on:click="hideAPT" :show="!editing" tooltip="Hide APT"></ZoomButton>
+    <ZoomButton icon="far fa-eye-slash" v-on:click="hideAPT" :show='true' tooltip="Hide APT"></ZoomButton>
 
     <EditButton icon="fas fa-upload" v-on:click="upload" :show="!editing" tooltip="Upload"></EditButton>
     <EditButton icon="fas fa-plane" v-on:click="test" :show="!editing" tooltip="Export"></EditButton>
