@@ -81,6 +81,16 @@ async function checkGroundnet(data) {
                 var node2 = graph[element.end];
                 node2[Number(element.start)] = 1;
             });
+            var isLegitEnd = function(v) {
+                if( Object.keys(graph[v]).length <= 1 ) {
+                    return true;
+                }
+                return Object.keys(graph[v]).filter( v => runwayNodes[v]).length === 0;
+            }
+            debugger;
+            runwayNodes = runwayNodes.filter(
+                (v, i) => isLegitEnd(v)
+            );
             // Check if there is a route from every parking to every runway node            
             var okNodes = [];
             logger('info', graph);
@@ -142,9 +152,6 @@ async function checkGroundnet(data) {
                 });
             });
             var rogueHoldPoints = pushbackNodes.map(
-
-                //multiplePushbackRoutes.push();
-
                 id => { 
                     var routes = noPushbackGraph[id];
                     if(Object.keys(routes).length<1)
