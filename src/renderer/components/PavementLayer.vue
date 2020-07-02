@@ -69,6 +69,11 @@
         if (this.groundnet !== undefined) {
           if (visible) {
             this.groundnet.addTo(this.$parent.mapObject)
+            this.groundnet.eachLayer(l => {
+              if (l) {
+                l.bringToBack()
+              }
+            })
           } else {
             this.groundnet.removeFrom(this.$parent.mapObject)
           }
