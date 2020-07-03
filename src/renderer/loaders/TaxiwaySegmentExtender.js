@@ -268,6 +268,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                     element.updateMiddleMarker();
                     element.updateVertexFromDirection();
                     element.updateWheelPos();
+                    element.updateBox();
                 }
                 else if (element instanceof L.Polyline) {
                     if (Number(element.begin) === Number(dragIndex)) {

@@ -420,6 +420,7 @@ You should have received a copy of the GNU General Public License along with FG 
               element.updateMiddleMarker();
               element.updateVertexFromDirection();
               element.updateWheelPos();
+              element.updateBox();
           }
           else if (element instanceof L.Polyline) {
               element._latlngs.forEach((e1, index1) => {
@@ -627,7 +628,8 @@ You should have received a copy of the GNU General Public License along with FG 
           if (element instanceof L.ParkingSpot) {
             element.options.attributes = Object.assign({}, this.$store.state.Editable.data.parking)
             element.updateVertexFromDirection();     
-            element.updateWheelPos();      
+            element.updateWheelPos();     
+            element.updateBox(); 
           }
         })
         if (this.$store.state.Editable.data.parking.coords) {

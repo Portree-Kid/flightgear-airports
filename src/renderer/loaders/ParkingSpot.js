@@ -40,6 +40,8 @@ L.ParkingSpot = L.Circle.extend({
             this.frontWheel = L.circleMarker(start, {radius:4, weight: 2 });
             this.frontWheel.addTo(this.editor.editLayer);
             this.updateWheelPos();
+            this.updateBox();
+            this.setStyle({ opacity: 0, fill: false });
         }
     },
     updateMiddleMarker: function() {
@@ -56,7 +58,9 @@ L.ParkingSpot = L.Circle.extend({
                     // console.debug(this.editor._resizeLatLng.__vertex._icon);
                     console.debug(o[key] == this.direction);
                     if (this.editor._resizeLatLng.__vertex!=o[key] &&
-                         o[key] != this.direction) {
+                         o[key] != this.direction &&
+                         o[key] != this.frontWheel && 
+                         o[key] != this.box) {
                             o[key].setLatLng(this.getLatLng());
                     }
                 }
@@ -79,12 +83,14 @@ L.ParkingSpot = L.Circle.extend({
         this.options.attributes.heading = heading;
         this.updateVertexFromDirection();     
         this.updateWheelPos();       
+        this.updateBox();
     },
     updateRadius(radius) {
         this._mRadius = radius;
         this.updateDirectionFromVertex();     
         this.updateVertexFromDirection();     
         this.updateWheelPos();       
+        this.updateBox();
     },
     // Update the direction vertex from the direction
     updateVertexFromDirection() {
@@ -115,6 +121,8 @@ L.ParkingSpot = L.Circle.extend({
             this._mRadius = output;
             this.options.attributes.radius = this._mRadius;
             this.direction.setLatLngs([start, end]);
+
+
         }
     },
     updateWheelPos() {
@@ -129,6 +137,57 @@ L.ParkingSpot = L.Circle.extend({
             }
         }     
     },
+    updateBox() {
+        var start = [this._latlng.lng, this._latlng.lat];
+        var options = { units: 'kilometers' };
+        const parkingSize = validRadii.indexOf(this.options.attributes.radius);
+
+        var backwards = this.normalizeAngle(this.options.attributes.heading + 180);
+        var left = this.normalizeAngle(this.options.attributes.heading - 90);
+        var right = this.normalizeAngle(this.options.attributes.heading + 90);
+
+        var radiusKM = this.options.attributes.radius / 1000;
+        var halfRadiusKM = radiusKM/2;
+        var thirdRadiusKM = radiusKM/3;
+
+        if (parkingSize>=0) {
+            var frontWheelEnd = turf.destination(start, validN2M[parkingSize] / 1000, this.options.attributes.heading, options);
+            var front = turf.destination(start, radiusKM, this.options.attributes.heading, options);
+
+            var back = turf.destination(start, radiusKM, backwards, options);
+
+            var leftBack = turf.destination(back, radiusKM, left, options);
+            var rightBack = turf.destination(back, radiusKM, right, options);
+
+            var leftMiddle = turf.destination(start, radiusKM, left, options);
+            var rightMiddle = turf.destination(start, radiusKM, right, options);
+
+            var leftFront = turf.destination(front, thirdRadiusKM, left, options);
+            var rightFront = turf.destination(front, thirdRadiusKM, right, options);
+
+            var leftIntermediate = turf.destination(leftFront, halfRadiusKM, backwards, options);
+            var rightIntermediate = turf.destination(rightFront, halfRadiusKM, backwards, options);
+
+            if(this.box === undefined ) {
+                var latlngs = [leftBack, rightBack, rightMiddle, rightIntermediate, rightFront, leftFront, leftIntermediate, leftMiddle].map(l => this.turfToLatLng(l));
+                this.box = L.polygon(latlngs);
+                this.box.addTo(this.editor.editLayer);    
+            }
+            if(this.box!==undefined) {
+                var latlngs = [leftBack, rightBack, rightMiddle, rightIntermediate, rightFront, leftFront, leftIntermediate, leftMiddle].map(l => this.turfToLatLng(l));
+                this.box.setLatLngs(latlngs);
+            }
+        }     
+    },
+    normalizeAngle( angle ) {
+      if(angle >= 180) {
+          return angle - 360;
+      }
+      if(angle <= -180) {
+        return angle + 360;
+      }
+      return angle;
+  },
     select() {
         store.default.dispatch('setParking', this.options.attributes);
         store.default.dispatch('setParkingCoords', this.getLatLng().lat.toFixed(6) + ' ' + this.getLatLng().lng.toFixed(6));
@@ -138,8 +197,10 @@ L.ParkingSpot = L.Circle.extend({
         if(this.direction) {
             this.direction.setStyle(style);  
             this.frontWheel.setStyle(style);
+            this.box.setStyle(style);
         }
         this.updateWheelPos();
+        this.updateBox();
     },    
     deselect() {
         var style = {};
@@ -148,8 +209,10 @@ L.ParkingSpot = L.Circle.extend({
         if(this.direction) {
             this.direction.setStyle(style);  
             this.frontWheel.setStyle(style);
+            this.box.setStyle(style);
         }
         this.updateWheelPos();
+        this.updateBox();
     },
     addListeners: function () {
         this.on('editable:drawing:move', function (event) {
@@ -160,12 +223,14 @@ L.ParkingSpot = L.Circle.extend({
                 event.target.setLatLng(event.latlng);
                 event.target.updateVertexFromDirection();
                 event.target.updateWheelPos();
+                event.target.updateBox();
                 this.follow(event.target.id, event);                        
             }
             else if(event.target.editor._resizeLatLng.__vertex._icon === event.sourceTarget._element) {
                 event.target.updateDirectionFromVertex();     
                 event.target.updateVertexFromDirection();     
                 event.target.updateWheelPos();
+                event.target.updateBox();
             }
         });
         this.on('editable:vertex:drag', function (event) { 
@@ -176,6 +241,7 @@ L.ParkingSpot = L.Circle.extend({
             store.default.dispatch('setParking', event.target.options.attributes);
             store.default.dispatch('setParkingCoords', event.target.getLatLng().lat.toFixed(6) + ' ' + event.target.getLatLng().lng.toFixed(6));
             event.target.updateWheelPos();
+            event.target.updateBox();
             /*
             store.default.dispatch('setParkingHeading', this.options.attributes.heading)
             store.default.dispatch('setParkingRadius', this.options.attributes.radius)
@@ -265,6 +331,7 @@ L.ParkingSpot = L.Circle.extend({
                     element.updateMiddleMarker();
                     element.updateVertexFromDirection();
                     element.updateWheelPos();
+                    element.updateBox();
                 }
                 else if (element instanceof L.TaxiwaySegment) {
                     if (element.begin === dragIndex) {
