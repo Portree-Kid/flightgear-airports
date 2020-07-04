@@ -175,6 +175,19 @@ L.ParkingSpot = L.Circle.extend({
                 var latlngs = [leftBack, rightBack, rightMiddle, rightIntermediate, rightFront, leftFront, leftIntermediate, leftMiddle].map(l => this.turfToLatLng(l));
                 this.box = L.polygon(latlngs);
                 this.box.addTo(this.editor.editLayer);    
+                this.box.on('click', function (event) {
+                    console.debug("Click Parking : " + event.target);
+                    if (Number(store.default.state.Editable.index) >= 0 &&
+                    this.featureLookup[store.default.state.Editable.index]!==undefined) {
+                        this.featureLookup[store.default.state.Editable.index].forEach(element => {
+                            if(element.deselect !== undefined) {
+                                element.deselect();
+                            }
+                        });
+                    }
+                    this.select(); 
+                });        
+        
             }
             if(this.box!==undefined) {
                 var latlngs = [leftBack, rightBack, rightMiddle, rightIntermediate, rightFront, leftFront, leftIntermediate, leftMiddle].map(l => this.turfToLatLng(l));
