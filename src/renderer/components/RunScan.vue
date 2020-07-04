@@ -7,6 +7,7 @@
       </div>
     </h1>
     <el-container direction="vertical">
+      <span v-if="scanning" class="center">{{scanName}}</span>
       <el-progress :percentage="Number(((progress / max)*100).toPrecision(3))" v-if="max>0"></el-progress>
       <!--<el-progress :percentage="progress / max"></el-progress>-->
       <!--{{max}}&nbsp;{{progress}}-->
@@ -45,7 +46,8 @@
         progress: 0,
         scanning: false,
         polling: null,
-        worker: null
+        worker: null,
+        scanName: 'unknown'
       }
     },
     methods: {
@@ -64,6 +66,7 @@
       scanAPT () {
         try {
           this.scanning = true
+          this.scanName = 'Scanning APT'
           const winURL = process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/src/renderer/utils/worker.js`
             : `file://${process.resourcesPath}/workers/worker.js`
@@ -110,6 +113,7 @@
       scanGroundnets () {
         try {
           this.scanning = true
+          this.scanName = 'Scanning Groundnets'
           const winURL = process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/src/renderer/utils/worker.js`
             : `file://${process.resourcesPath}/workers/worker.js`
@@ -144,7 +148,6 @@
                 this.max = e.data[1]
               }
               if (e.data[0] === 'progress') {
-                this.scanning = false
                 this.progress += e.data[1]
               }
             }
@@ -158,6 +161,7 @@
         // let flightgearDirectory = this.$store.state.settings.flightgearDirectory
         try {
           this.scanning = true
+          this.scanName = 'Scanning Traffic'
           const winURL = process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/src/renderer/utils/worker.js`
             : `file://${process.resourcesPath}/workers/worker.js`
@@ -211,5 +215,10 @@
 <style>
 .el-button+.el-button {
     margin-left: 0px;
+}
+.center {
+  font-weight: bold;
+  font-size: 12pt;
+  align-self: center;
 }
 </style>
