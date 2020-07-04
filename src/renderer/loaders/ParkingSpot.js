@@ -41,7 +41,10 @@ L.ParkingSpot = L.Circle.extend({
             this.frontWheel.addTo(this.editor.editLayer);
             this.updateWheelPos();
             this.updateBox();
-            this.setStyle({ opacity: 0, fill: false });
+            const parkingSize = validRadii.indexOf(this.options.attributes.radius);
+            if(parkingSize>=0) {
+                this.setStyle({ opacity: 0, fill: false });
+            }
         }
     },
     updateMiddleMarker: function() {

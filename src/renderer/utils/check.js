@@ -5,11 +5,15 @@ const winURL = process.env.NODE_ENV === 'development'
 
 var path = require('path');
 const fs = require('fs');
+//debugger;
+var turf;
 
 if(process.env.NODE_ENV === 'development') {
     importScripts('../../../node_modules/dijkstrajs/dijkstra.js');
+    turf = require('../../../../../@turf/turf');
 } else {
     importScripts('dijkstra.js');
+    turf = require('@turf/turf')
 }
 
 const homedir = require('os').homedir();
@@ -47,10 +51,19 @@ async function checkGroundnet(data) {
             var runwayNodes = data.map(mapRunwayNodes).filter(n => n !== undefined);
             var pushbackNodes = data.map(mapPushbackNodes).filter(n => n !== undefined);
             var edges = data.map(mapEdges).filter(n => n !== undefined);
+
             this.max = 4 * parkings.length * runwayNodes.length +
                 3 * parkings.length;
             this.postMessage(['max', this.max]);
 
+            var boxes = {};
+            //debugger;
+            data.forEach(element => {
+                if(element.box!==undefined && element.box!==null) {
+                    boxes[element.index] = element.box[0].map(latlng => [latlng.lat, latlng.lng] );
+                    boxes[element.index].push(boxes[element.index][0]);
+                }
+            });
             var graph = {};
             parkings.forEach(element => {
                 graph[element] = {};
@@ -87,7 +100,7 @@ async function checkGroundnet(data) {
                 }
                 return Object.keys(graph[v]).filter( v => runwayNodes[v]).length === 0;
             }
-            debugger;
+            //debugger;
             runwayNodes = runwayNodes.filter(
                 (v, i) => isLegitEnd(v)
             );
@@ -220,8 +233,17 @@ async function checkGroundnet(data) {
                     if (parkingNode.index !== parkingNode1.index) {
                         var d = distance([parkingNode.lng, parkingNode.lat],
                             [parkingNode1.lng, parkingNode1.lat]);
-                        if (d < parkingNode.radius + parkingNode1.radius) {
-                            overlappingParkings.push({ id: parkingNode.index, message: 'Overlapping parkings' });
+                        if (d < parkingNode.radius + parkingNode1.radius + 10) {
+                            // If bigger circles intersect we should check the boxes
+                            //debugger;
+                            var poly1 = turf.polygon([boxes[parkingNode.index]]);
+                              
+                            var poly2 = turf.polygon([boxes[parkingNode1.index]]);
+                              
+                            var intersection = turf.intersect(poly1, poly2);
+                            if( intersection !== null ) {
+                                overlappingParkings.push({ id: parkingNode.index, message: 'Overlapping parkings' });
+                            }
                         }
                     }
                     this.postMessage(['progress', 1]);
@@ -338,13 +360,19 @@ var mapParkingNode = function (o) {
     // debugger;
     if (o.type === 'parking')
         return { index: o.index, lat: o.lat, lng: o.lng, name: o.name, radius: Number(o.radius), type: o.type, parkingType: o.parkingType };
-    console.log(o);
+    console.debug(o);
+}
+
+var mapBoxes = function (o) {
+    // debugger;
+    if (o.type === 'parking')
+        return { index: o.index };
 }
 
 var mapRunwayNodes = function (o) {
     if (o.type === 'runway')
         return o.index;
-    console.log(o);
+    console.debug(o);
 }
 
 var mapEdges = function (o) {
@@ -354,5 +382,5 @@ var mapEdges = function (o) {
             start: o.start, end: o.end, isPushBackRoute: o.isPushBackRoute !== undefined &&
                 o.isPushBackRoute !== 0, latLngs: o.latLngs
         };
-    console.log(o);
+    console.debug(o);
 }

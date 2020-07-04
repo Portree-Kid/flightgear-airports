@@ -242,6 +242,10 @@ You should have received a copy of the GNU General Public License along with FG 
       },
       featuresMapper(o) {
         if (o instanceof L.ParkingSpot) {
+          /*
+          if( o.box === undefined ) {
+            debugger;
+          } */         
           return { 'index': Number(o['id']), 
           '_leaflet_id': o._leaflet_id, 
           'type': 'parking', 
@@ -249,7 +253,9 @@ You should have received a copy of the GNU General Public License along with FG 
           'name': o.options.attributes.name, 
           'radius': String(o.options.attributes.radius),
           'lat': o._latlng.lat,
-          'lng': o._latlng.lng };
+          'lng': o._latlng.lng,
+          'box': o.box!==undefined?o.box.getLatLngs():null
+           };
         } else if (o instanceof L.RunwayNode) {
           console.log(o)
           return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'type': 'runway' };
