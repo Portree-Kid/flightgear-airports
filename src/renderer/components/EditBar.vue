@@ -142,7 +142,41 @@ You should have received a copy of the GNU General Public License along with FG 
       saveDefered () {
         this.$parent.$parent.$refs.editLayer.save()
         this.$parent.$parent.$refs.editLayer.disableEdit()
+        this.scanGroundnets()
         Vue.set(this, 'saveDialogVisible', false)              
+      },
+      scanGroundnets () {
+        try {
+          const winURL = process.env.NODE_ENV === 'development'
+            ? `http://localhost:9080/src/renderer/utils/worker.js`
+            : `file://${process.resourcesPath}/workers/worker.js`
+          console.log('make a worker: ', path.resolve(__dirname, 'worker.js'))
+
+          var icao = this.$parent.$parent.$refs.editLayer.icao
+          const worker = new Worker(winURL)
+          
+          var aptDir = path.join(this.$store.state.Settings.settings.airportsDirectory, icao[0], icao[1], icao[2]);
+          worker.postMessage(['scan', aptDir ])
+          // the reply
+          var store = this.$store
+          worker.onmessage = function (e) {
+            if (e.data === 'scanStarted') {
+              this.progress = 0
+              this.max = 0
+            } else if (e.data === 'DONE') {
+              console.log('DONE')
+              store.dispatch('getAirports')
+              worker.terminate()
+            } else if (e.data.length > 0) {
+              if (e.data[0] === 'max') {
+              }
+              if (e.data[0] === 'progress') {
+              }
+            }
+          }
+        } catch (err) {
+          console.error(err)
+        }
       },
       pollData () {
         var workery = this.worker

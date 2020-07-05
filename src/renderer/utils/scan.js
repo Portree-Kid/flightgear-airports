@@ -1,12 +1,15 @@
-/* eslint-disable */
-// const fs = require('fs');
-// const path = require('path');
-// const math = require('mathjs');
-// const util = require('util');
-// const airports = require('./airports.js');
-// const homedir = require('os').homedir();
-// const apt = require('apt.js');
+/*
+Copyright 2020 Keith Paterson
 
+This file is part of FG Airports.
+
+FG Airports is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+FG Airports is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with FG Airports. If not, see http://www.gnu.org/licenses/.
+*/
+/* eslint-disable */
 /**
  * Iterates over an array with a async function and await
  * @param {*} array The array being iterated over 
@@ -342,7 +345,7 @@ function store(icao, airline, value) {
 async function readGroundnet(f, features) {
   var promise = new Promise(function (resolve, reject) {
     try {
-      var filename = path.basename(f).match('^([^.]+)\\.([^.]+)\\.([^.]+)');
+      var filename = path.basename(f).match('^([^.]+)\\.([^.]+)(\\.new)?\\.([^.]+)');
       if (filename == null) {
         resolve("File didn't match");
       }
@@ -430,13 +433,20 @@ async function readGroundnet(f, features) {
                 logger('info', 'groundnet : ' + filename[1]);
                 if (dat['?xml'].groundnet) {
                   var nodes = dat['?xml'].groundnet.TaxiNodes;
+                  var parkingnodes = dat['?xml'].groundnet.parkingList;
                   if (nodes && nodes.node) {
                     logger('info', nodes);
                   }
-                  feature['properties']['groundnet'] = nodes && nodes.node ? nodes.node.length : 0;
-                  var nodes = dat['?xml'].groundnet.parkingList;
-                  //debugger;
-                  feature['properties']['parking'] = nodes && nodes.Parking ? nodes.Parking.length : 0;
+                  if(filename [3] === '.new') {
+                    feature['properties']['wipgroundnet'] = nodes && nodes.node ? nodes.node.length : 0;
+                    //debugger;
+                    feature['properties']['wipparking'] = parkingnodes && parkingnodes.Parking ? parkingnodes.Parking.length : 0;
+  
+                  } else {
+                    feature['properties']['groundnet'] = nodes && nodes.node ? nodes.node.length : 0;
+                    //debugger;
+                    feature['properties']['parking'] = parkingnodes && parkingnodes.Parking ? parkingnodes.Parking.length : 0;  
+                  }
                 }
               } else if (filename[2] == 'ils') {
                 logger('info', 'ils : ' + filename[1]);

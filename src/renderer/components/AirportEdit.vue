@@ -22,17 +22,32 @@
       <ParkingList></ParkingList>
     </el-tab-pane>
     <el-tab-pane label="Statistics" name="third">
-            <el-row>
+        <el-row><el-col :span="8"><span class="label">Traffic :</span></el-col></el-row>
+        <el-row>
           <el-col :span="8">Flights :</el-col>
           <el-col :span="4">{{ flights }}</el-col>
-          <el-col :span="8">Parking Positions :</el-col>
-          <el-col :span="4">{{ parking }}</el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="8">Groundnet Nodes :</el-col>
-          <el-col :span="4">{{groundnet}}</el-col>
           <el-col :span="8"></el-col>
           <el-col :span="4"></el-col>
+        </el-row>
+        <el-row><el-col :span="8"><span class="label">GIT/Terrasync :</span></el-col></el-row>
+        <el-row>
+          <el-col :span="8">Parking Positions :</el-col>
+          <el-col :span="4">{{ parking }}</el-col>
+          <el-col :span="8">Groundnet Nodes :</el-col>
+          <el-col :span="4">{{groundnet}}</el-col>
+        </el-row>
+        <el-row><el-col :span="8"><span class="label">Work :</span></el-col></el-row>
+        <el-row v-if="wip">
+          <el-col :span="8">Work Parking Positions :</el-col>
+          <el-col :span="4">{{ wipparking }}</el-col>
+          <el-col :span="8">Work Groundnet Nodes :</el-col>
+          <el-col :span="4">{{wipgroundnet}}</el-col>
+        </el-row>
+        <el-row v-if="wip">
+          <el-col :span="4">Saved :</el-col>
+          <el-col :span="8" class="text">{{date}}</el-col>
+          <el-col :span="4">Uploaded :</el-col>
+          <el-col :span="8" class="text">{{upload_date}}</el-col>
         </el-row>
     </el-tab-pane>
   </el-tabs>
@@ -93,6 +108,34 @@ export default {
       },
       parking: function () {
         return this.$store.state.Airports.currentAirport.parking
+      },
+      wipgroundnet: function () {
+        return this.$store.state.Airports.currentAirport.wipgroundnet
+      },
+      wipparking: function () {
+        return this.$store.state.Airports.currentAirport.wipparking
+      },
+      wip: function () {
+        // .icao
+        var wip = this.$store.state.Settings.wip.filter(w => w.icao === this.$store.state.Airports.currentAirport.icao)
+        if (wip.length > 0) {
+          return true
+        }
+        return false
+      },
+      date: function () {
+        var wip = this.$store.state.Settings.wip.filter(w => w.icao === this.$store.state.Airports.currentAirport.icao)
+        var d = new Date(wip[0].time)
+        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString()
+      },
+      upload_date: function () {
+        var wip = this.$store.state.Settings.wip.filter(w => w.icao === this.$store.state.Airports.currentAirport.icao)
+        if (wip[0].upload !== undefined) {
+          var d = new Date(wip[0].upload)
+          return d.toLocaleDateString() + ' ' + d.toLocaleTimeString()
+        } else {
+          return '-'
+        }
       },
       airport: {
         get: function () {
