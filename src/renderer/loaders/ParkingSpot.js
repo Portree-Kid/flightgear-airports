@@ -23,21 +23,22 @@ var $ = require('jquery');
 L.ParkingSpot = L.Circle.extend({
     createDirection: function () {
         if (this.direction === undefined ) {
-            var start = this._latlng;
+            var center = this._latlng;
             var options = { units: 'kilometers' };
             
-            var end = turf.destination([start.lng, start.lat], this.options.attributes.radius / 1000, this.options.attributes.heading, options);
+            var start = turf.destination([center.lng, center.lat], this.options.attributes.radius / 1000, this.normalizeAngle(this.options.attributes.heading+180), options);
+            var end = turf.destination([center.lng, center.lat], this.options.attributes.radius / 1000, this.normalizeAngle(this.options.attributes.heading), options);
             // Resize, since leaflet is wrong      
-            var rad2 = start.distanceTo(this.turfToLatLng(end), options);
-            console.debug('Dist ', start, [start.lng, start.lat], end.geometry.coordinates, this.options.attributes.radius, rad2);
+            var rad2 = center.distanceTo(this.turfToLatLng(end), options);
+            console.debug('Dist ', center, [center.lng, center.lat], end.geometry.coordinates, this.options.attributes.radius, rad2);
             this.setRadius(rad2);
             // console.log(util.inspect(this.editor));
             if(this.editor._resizeLatLng.__vertex !== undefined){
                 this.editor._resizeLatLng.__vertex.setLatLng(this.turfToLatLng(end));
             }
-            this.direction = L.polyline([start, this.turfToLatLng(end)]);
+            this.direction = L.polyline([this.turfToLatLng(start), this.turfToLatLng(end)]);
             this.direction.addTo(this.editor.editLayer);
-            this.frontWheel = L.circleMarker(start, {radius:4, weight: 2 });
+            this.frontWheel = L.circleMarker(center, {radius:4, weight: 2 });
             this.frontWheel.addTo(this.editor.editLayer);
             this.updateWheelPos();
             this.updateBox();
