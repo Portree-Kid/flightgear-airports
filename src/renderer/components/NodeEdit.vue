@@ -36,9 +36,11 @@
           </el-select>
         </el-col>
       </el-row>
+      <el-row><el-button @click="link"><i class="fas fa-link"></i></el-button></el-row>
     </div>
   </div>
 </template>
+
 
 <script lang="js">
 /* eslint-disable */
@@ -54,6 +56,11 @@
     data () {
       return {
         coordFocussed: false, runwayFocussed: false, holdFocussed: false
+      }
+    },
+    methods: {
+      link: function () {
+        this.$parent.$parent.$parent.$refs.editLayer.link(this.$store.state.Editable.index)
       }
     },
     computed: {

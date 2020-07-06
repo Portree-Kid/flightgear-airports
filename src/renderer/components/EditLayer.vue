@@ -877,6 +877,87 @@ You should have received a copy of the GNU General Public License along with FG 
       reload (force) {
         this.load(this.icao, force)
       },
+      link (index) {
+        var layers = []
+        var centerLatLng = null        
+        this.featureLookup[index].forEach(layer => {
+            if (layer instanceof L.Polyline) {
+            // console.log(layer._latlngs)
+            layer._latlngs.forEach(latlng => {
+              if (latlng.__vertex) {
+                if (Number.isNaN(latlng.glueindex)) {
+                  console.warn('No glueindex : ' + latlng.__vertex);
+                }
+                
+                if (Number(latlng.glueindex) === index) {
+                  centerLatLng = latlng;
+                }
+              }
+            })}
+          })
+        var newIndex = index
+        var nearest = [];
+        this.featureLookup.forEach(layers => {
+          layers.forEach(layer => {
+            if (layer instanceof L.ParkingSpot) {
+                let distance = layer.getLatLng().distanceTo(centerLatLng);
+                if (Number(layer.glueindex) !== newIndex && distance < 10) {
+                  nearest.push({d: distance, l: layer, glueindex: layer.glueindex })
+                }
+            }
+            else if (layer instanceof L.Polyline) {
+            // console.log(layer._latlngs)
+            layer._latlngs.forEach(latlng => {
+              if (latlng.__vertex) {
+                if (Number.isNaN(latlng.glueindex)) {
+                  console.warn('No glueindex : ' + latlng.__vertex);
+                }
+                let distance = latlng.distanceTo(centerLatLng)
+                if (latlng.glueindex !== newIndex && distance < 10) {
+                  nearest.push({d: distance, l: layer, latlng: latlng.__vertex.latlng, glueindex: latlng.glueindex })
+                }
+              }
+            })
+          }
+          });
+        })
+        var featureLookup = this.featureLookup;
+        nearest = nearest.map(e => e.glueindex).filter((v, i, a) => a.indexOf(v) === i).filter(i => Number(i)!==newIndex)
+        nearest.forEach(glueindex => {
+          featureLookup[glueindex].forEach(layer => {
+            featureLookup[newIndex].push(layer);
+            if (layer instanceof L.RunwayNode) {
+                layer.setLatLng(centerLatLng);
+            }
+            else if (layer instanceof L.HoldNode) {
+                layer.setLatLng(centerLatLng);
+            }
+            else if (layer instanceof L.ParkingSpot) {
+                layer.setLatLng(centerLatLng);
+            }
+            else if (layer instanceof L.Polyline) {
+                layer._latlngs.forEach((e1, index1) => {
+                if (e1.attributes.index===Number(glueindex)) {
+                    if( Number(layer.begin)===Number(glueindex)) {
+                      layer.begin = String(newIndex);
+                    }
+                    if( Number(layer.end)===Number(glueindex)) {
+                      layer.end = String(newIndex);
+                    }
+                    e1.attributes.index = newIndex;
+                    e1.glueindex = newIndex;
+
+                    layer.getLatLngs()[index1].update(centerLatLng);
+                    layer.editor.refresh();
+                    layer.editor.reset();
+                    layer.updateMiddle();
+                }
+                })
+            }
+          })          
+          featureLookup[glueindex] = [];
+        });        
+      },
       save () {
         var xml = []
         this.groundnetLayerGroup.eachLayer(l => {

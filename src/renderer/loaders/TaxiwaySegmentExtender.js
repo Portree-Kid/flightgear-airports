@@ -135,7 +135,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         });
         this.on('editable:drawing:move', function (event) {
             if (dragIndex >= 0) {
-                console.log('GlueDrag' + event.target);
+                console.log('GlueDrag : '+ dragIndex + '\t' + event.target.dragIndex);
                 this.follow(dragIndex, event);
             }
         });
@@ -217,11 +217,11 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         });
         var dragIndex = -1;
         this.on('editable:vertex:dragstart', function (event) {
-            console.log("Event Target : ", event.target);
-            console.log("Middle Marker : ", event.vertex == event.vertex.middleMarker);
-            console.log("Middle Marker : ", event.vertex.latlng.glueindex == undefined);
+            console.log("Drag Start : ", event.target);
+            console.log("Middle Marker : ", event.vertex == event.vertex.middleMarker, event.vertex.latlng.glueindex == undefined);
             if (event.vertex.latlng.glueindex == undefined)
                 return;
+            console.log("Drag Start : ", event.vertex.latlng.glueindex);
             dragIndex = event.vertex.latlng.glueindex;
         });
         this.on('editable:vertex:dragend', function (event) {
