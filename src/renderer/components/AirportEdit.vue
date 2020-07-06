@@ -29,7 +29,7 @@
           <el-col :span="8"></el-col>
           <el-col :span="4"></el-col>
         </el-row>
-        <el-row><el-col :span="8"><span class="label">GIT/Terrasync :</span></el-col></el-row>
+        <el-row><el-col :span="16"><span class="label">GIT/Terrasync :</span></el-col></el-row>
         <el-row>
           <el-col :span="8">Parking Positions :</el-col>
           <el-col :span="4">{{ parking }}</el-col>
