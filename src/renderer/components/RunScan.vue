@@ -80,7 +80,7 @@
           worker.progress = 0
           // var worker = new Worker(fileUrl('src/renderer/utils/worker.js'))
           this.worker = worker
-          worker.postMessage(['scanapt', this.$store.state.Settings.settings.flightgearDirectory_apt])
+          worker.postMessage(['scanapt', this.$store.state.Settings.settings.flightgearDirectory_apt, this.$store.state.Settings.settings.scanLogging])
           this.pollData()
           // the reply
           var store = this.$store
@@ -127,7 +127,7 @@
           worker.progress = 0
 
           this.worker = worker
-          worker.postMessage(['scan', this.$store.state.Settings.settings.airportsDirectory])
+          worker.postMessage(['scan', this.$store.state.Settings.settings.airportsDirectory, this.$store.state.Settings.settings.scanLogging])
           this.pollData()
           // the reply
           var store = this.$store
@@ -174,7 +174,7 @@
           worker.max = this.max
           worker.progress = this.progress
           this.worker = worker
-          worker.postMessage(['scanai', this.$store.state.Settings.settings.flightgearDirectory_traffic])
+          worker.postMessage(['scanai', this.$store.state.Settings.settings.flightgearDirectory_traffic, this.$store.state.Settings.settings.scanLogging])
           this.pollData()
           // the reply
           var store = this.$store

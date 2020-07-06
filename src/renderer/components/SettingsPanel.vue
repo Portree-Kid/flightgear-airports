@@ -83,6 +83,22 @@
         </el-col>
       </el-row>
       <el-row>
+        <el-col :span="7">
+          <span class="label">Scan logging :</span>
+        </el-col>
+        <el-col :span="15">
+          <el-popover
+            placement="top-start"
+            title="Logging"
+            width="200"
+            trigger="hover"
+            content="Switch on logging for scan. Big performance hit"
+          >
+            <el-switch v-model="scanLogging" slot="reference"></el-switch>
+          </el-popover>
+        </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="7" class="label"></el-col>
         <el-col :span="17">
         <el-popover
@@ -184,6 +200,16 @@
       },
       test_directory: function () {
         return this.$store.state.Settings.settings.testDirectory
+      },
+      scanLogging: {
+      // getter
+        get: function () {
+          return this.$store.state.Settings.settings.scanLogging === 1
+        },
+        // setter
+        set: function (newValue) {
+          this.$store.commit('SET_SCAN_LOGGING', newValue ? 1 : 0)
+        }
       }
     }
   }

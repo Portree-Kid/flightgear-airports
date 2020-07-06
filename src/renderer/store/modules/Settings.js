@@ -38,7 +38,10 @@ const mutations = {
   },
   'SET_PHI_URL' (state, phi_url) {
     state.settings.phi_url = phi_url
-  },  
+  }, 
+  'SET_SCAN_LOGGING' (state, scanLogging) {
+    state.settings.scanLogging = scanLogging
+  },
   'ADD_WIP' (state, airport) {
     const item = state.wip.find((e) => e.icao === airport.icao)
     airport.time = Date.now()

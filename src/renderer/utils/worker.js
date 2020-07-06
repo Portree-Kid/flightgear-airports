@@ -19,9 +19,10 @@ function errorReceiver(event) {
 
 onmessage = function (event) {
     postMessage('scanStarted');
-    logger('info', 'Scan Started');      
     console.log(event.data);
     if (event.data[0] === 'scan') {
+        loggerInit(event.data[2]);
+        logger('info', 'Scan Groundnet Started');      
         scanGroundnet(event.data[1]).then(result => {
             console.log("DONE Scanning");
             postMessage('DONE');
@@ -30,9 +31,13 @@ onmessage = function (event) {
         ).catch(result => {
             console.log('Crashed');
             console.log(result);
+            logger('error', 'crashed');      
+            logger('error', result);      
             postMessage('DONE');
         });
     } else if (event.data[0] === 'scanai') {
+        loggerInit(event.data[2]);
+        logger('info', 'Scan AI Started');      
         scanai(event.data[1]).then(result => {
             console.log("DONE Scanning");
             postMessage('DONE');
@@ -41,10 +46,14 @@ onmessage = function (event) {
         ).catch(result => {
             console.log('Crashed');
             console.log(result);
+            logger('error', 'crashed');      
+            logger('error', result);      
             postMessage('DONE');
         });
     }
     else if (event.data[0] === 'scanapt') {
+        loggerInit(event.data[2]);
+        logger('info', 'Scan APT Started');      
         scanAPT(event.data[1]).then(result => {
             console.log("DONE Scanning");
             postMessage('DONE');
@@ -53,6 +62,8 @@ onmessage = function (event) {
         ).catch(result => {
             console.log('Crashed');
             console.log(result);
+            logger('error', 'crashed');      
+            logger('error', result);      
             postMessage('DONE');
         });
 
