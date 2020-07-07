@@ -983,7 +983,7 @@ You should have received a copy of the GNU General Public License along with FG 
         });
       },
       setVisible(visible) {
-        if (this.layerGroup) {
+        if (this.layerGroup) {          
           if (visible) {
             this.layerGroup.addTo(this.$parent.mapObject)
           } else {

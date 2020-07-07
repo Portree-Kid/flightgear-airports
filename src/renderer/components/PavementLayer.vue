@@ -1,8 +1,4 @@
-<template>
-  <section class="edit-layer">
-    <h1>edit-layer Component</h1>
-  </section>
-</template>
+<template></template>
 
 <script lang="js">
   import { LMap, LMarker } from 'vue2-leaflet'
@@ -25,19 +21,26 @@
       this.remove()
     },
     data () {
-      return {groundnet: Object}
+      return {}
     },
     methods: {
+      getLayer () {
+        return this.pavement
+      },
       load (icao) {
         // Callback for add
         readPavement(this.$store.state.Settings.settings.flightgearDirectory_apt, icao, this.read)
       },
       read (layer) {
-        this.groundnet = layer
-        if (this.groundnet) {
-          this.groundnet.addTo(this.$parent.mapObject)
+        this.pavement = layer
+        if (this.pavement) {
+          this.pavement.on('add', this.onAdd)
+          this.pavement.addTo(this.$parent.mapObject)
+          this.visible = true
         }
-        this.groundnet.eachLayer(l => {
+      },
+      onAdd () {
+        this.pavement.eachLayer(l => {
           if (l) {
             l.bringToBack()
           }
@@ -56,7 +59,7 @@
         this.layerGroup = L.layerGroup()
       },
       remove () {
-        if (this.groundnet) {
+        if (this.pavement) {
           this.$parent.removeLayer(this.layerGroup)
         }
       },
@@ -66,16 +69,19 @@
         }
       },
       setVisible (visible) {
-        if (this.groundnet !== undefined) {
-          if (visible) {
-            this.groundnet.addTo(this.$parent.mapObject)
-            this.groundnet.eachLayer(l => {
-              if (l) {
-                l.bringToBack()
-              }
-            })
-          } else {
-            this.groundnet.removeFrom(this.$parent.mapObject)
+        if (this.pavement !== undefined) {
+          if (visible !== this.visible) {
+            if (visible) {
+              this.pavement.addTo(this.$parent.mapObject)
+              this.pavement.eachLayer(l => {
+                if (l) {
+                  l.bringToBack()
+                }
+              })
+            } else {
+              this.pavement.removeFrom(this.$parent.mapObject)
+            }
+            this.visible = visible
           }
         }
       }

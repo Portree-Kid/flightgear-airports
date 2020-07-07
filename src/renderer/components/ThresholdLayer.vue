@@ -1,8 +1,4 @@
-<template>
-  <section class="edit-layer">
-    <h1>edit-layer Component</h1>
-  </section>
-</template>
+<template></template>
 
 <script lang="js">
   import { LMap, LMarker } from 'vue2-leaflet'

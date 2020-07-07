@@ -30,7 +30,7 @@ You should have received a copy of the GNU General Public License along with FG 
     <LeafletSidebar ref="sidebar" @edit="onEditSidebar"></LeafletSidebar>
     <AiLayer ref="aiLayer"></AiLayer> 
     <PavementLayer ref="pavementLayer"></PavementLayer>    
-    <!--<ThresholdLayer ref="thresholdLayer"></ThresholdLayer>-->
+    <ThresholdLayer ref="thresholdLayer"></ThresholdLayer>
     <l-layer-group layerType="overlay" name="airports" ref="airportLayer">
       <l-circle
         v-for="(item, index) in this.$store.state.Airports.airports"
@@ -51,6 +51,7 @@ You should have received a copy of the GNU General Public License along with FG 
 
 <script lang="js">
   import 'leaflet/dist/leaflet.css'
+  import '@/assets/button.css'
   import { LMap, LTileLayer, LMarker, LCircle, LLayerGroup, LControl } from 'vue2-leaflet'
   import LeafletSidebar from './LeafletSidebar'
   import AiLayer from './AiLayer'
@@ -75,6 +76,8 @@ You should have received a copy of the GNU General Public License along with FG 
     components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, AiLayer, EditBar, ToolBar, EditLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer, ToolLayer },
     props: [],
     mounted () {
+      this.$refs.map.mapObject.on('layeradd', this.onLayerAdd)
+
       this.$store.dispatch('getAirports')
       this.$store.subscribe((mutation, state) => {
         if (mutation.type === 'CENTER' || mutation.type === 'SET_AIRPORTS' || mutation.type === 'ZOOM') {
@@ -109,13 +112,31 @@ You should have received a copy of the GNU General Public License along with FG 
         '</A> <A href="https://www.electronjs.org/" target="_blank">Electron</A> ' +
         ' <A href="https://element.eleme.io/#/en-US/" target="_blank">element.io</A> ' +
         ' &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors',
-        marker: L.latLng(47.413220, -1.219482),
         airports: this.$store.state.Airports.airports,
         options: {editable: true},
+        layersControl: null,
         icao: 'TEST'
       }
     },
     methods: {
+      onLayerAdd (e) {
+        if (this.layersControl === null) {
+          this.layersControl = L.control.layers({}, {}, {position: 'topleft'})
+          this.layersControl.addTo(this.$refs.map.mapObject)
+          debugger
+          var icon = this.layersControl._container.ownerDocument.createElement('I')
+          icon.className = 'fas fa-layer-group'
+          icon.style = 'padding-top: 9px; height: 30px; width: 30px; text-align: center; vertical-align: sub;'
+          this.layersControl._container.children[0].appendChild(icon)
+          // this.layersControl.addOverlay(this.$refs.thresholdLayer, 'Threshold Layer')
+        }
+        if (this.$refs.pavementLayer.getLayer() === e.layer) {
+          var l = this.layersControl._layers.filter(l => l.name === 'APT Layer')
+          if (l.length === 0) {
+            this.layersControl.addOverlay(this.$refs.pavementLayer.getLayer(), 'APT Layer')
+          }
+        }
+      },
       onSelectedPolygon (ring) {
         var parkings = this.$refs.editLayer.getParkings(ring)
         console.debug(ring)
@@ -261,5 +282,9 @@ You should have received a copy of the GNU General Public License along with FG 
     padding-top: 0px;
     padding-right: 2px;
     padding-bottom: 0px;
+}
+.leaflet-touch .leaflet-control-layers-toggle {
+  width: 30px;
+  height: 30px;
 }
 </style>
