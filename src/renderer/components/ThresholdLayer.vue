@@ -25,10 +25,14 @@
       }
     },
     methods: {
+      getLayer () {
+        return this.layerGroup
+      },
       load (icao) {
         // Callback for add
         this.layerGroup = readThresholdXML(this.$store.state.Settings.settings.airportsDirectory, icao, this.read)
         this.layerGroup.addTo(this.$parent.mapObject)
+        this.visible = true
         this.icao = icao
       },
       deferredMountedTo (parent) {
@@ -45,10 +49,13 @@
       },
       setVisible (visible) {
         if (this.layerGroup !== undefined) {
-          if (visible) {
-            this.layerGroup.addTo(this.$parent.mapObject)
-          } else {
-            this.layerGroup.removeFrom(this.$parent.mapObject)
+          if (visible !== this.visible) {
+            if (visible) {
+              this.layerGroup.addTo(this.$parent.mapObject)
+            } else {
+              this.layerGroup.removeFrom(this.$parent.mapObject)
+            }
+            this.visible = visible
           }
         }
       }

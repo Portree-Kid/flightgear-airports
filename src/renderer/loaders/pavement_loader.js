@@ -209,7 +209,7 @@ function deCasteljau(pointArray) {
     return intermediates;
 }
 
-function createPoly(currentFeature) {
+function createPoly(currentFeature, layerGroup) {
     switch (module.exports.type) {
         case 110:
             var taxiwayPoly = new L.Polygon(currentFeature);
@@ -231,7 +231,7 @@ function createPoly(currentFeature) {
     }
 }
 
-function createLineString(currentFeature) {
+function createLineString(currentFeature, layerGroup) {
     switch (module.exports.type) {
         case 110:
             var taxiwayPoly = new L.Polyline(currentFeature);
@@ -255,7 +255,7 @@ function createLineString(currentFeature) {
 
 module.exports.readPavement = function (f, icao, cb) {
     console.log(f);
-    layerGroup = L.layerGroup();
+    var pavementLayerGroup = L.layerGroup();
     var currentFeature;
 
     lineReader.createInterface({
@@ -267,7 +267,7 @@ module.exports.readPavement = function (f, icao, cb) {
             return;
         var scanMethod = scanMethods[fields[0]];
         if (scanMethod != null) {
-            currentFeature = scanMethod(fields, icao, layerGroup, currentFeature);
+            currentFeature = scanMethod(fields, icao, pavementLayerGroup, currentFeature);
         }
         else {
             if (fields[0] == '99') {
@@ -280,7 +280,7 @@ module.exports.readPavement = function (f, icao, cb) {
         lr.close();
     }).on('close', function () {
         console.log("End");
-        cb(layerGroup);
+        cb(pavementLayerGroup);
     });
 }
 
@@ -381,7 +381,7 @@ var scanMethods = {
         if (!module.exports.isScanning)
             return undefined;
         if (typeof currentFeature !== 'undefined') {
-            createPoly(currentFeature);
+            createPoly(currentFeature, layerGroup);
         }
         module.exports.colour = 'grey';
         module.exports.type = 110;
@@ -391,7 +391,7 @@ var scanMethods = {
         if (!module.exports.isScanning)
             return undefined;
         if (typeof currentFeature !== 'undefined') {
-            createPoly(currentFeature);
+            createPoly(currentFeature, layerGroup);
         }
         module.exports.colour = 'yellow';
         module.exports.type = 120;
@@ -401,7 +401,7 @@ var scanMethods = {
         if (!module.exports.isScanning)
             return undefined;
         if (typeof currentFeature !== 'undefined') {
-            createPoly(currentFeature);
+            createPoly(currentFeatur, layerGroup);
         }
         module.exports.colour = 'black';
         module.exports.type = 130;
@@ -463,7 +463,7 @@ var scanMethods = {
         else {
             currentFeature.slice(-1)[0].push([line[1], line[2]]);
         }
-        createLineString(currentFeature);
+        createLineString(currentFeature, layerGroup);
         exports.bezierPoint = null;
     },
     // End with Bezier
@@ -472,7 +472,7 @@ var scanMethods = {
             return;
         console.debug(line);
         currentFeature = bezier(line, icao, layerGroup, currentFeature);
-        createLineString(currentFeature);
+        createLineString(currentFeature, layerGroup);
         exports.bezierPoint = null;
         // taxiwayLine.addTo(layerGroup);      
     },

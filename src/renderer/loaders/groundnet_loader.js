@@ -34,7 +34,7 @@ exports.addFeature = function (feature) {
 
 exports.readGroundnetXML = function (fDir, icao, force) {
     try {
-        layerGroup = L.layerGroup();
+        var layerGroup = L.layerGroup();
         layerGroup.maxId = 0;
         var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.xml');
         var fNew = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');

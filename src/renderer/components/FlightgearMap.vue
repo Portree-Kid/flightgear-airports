@@ -14,6 +14,7 @@ You should have received a copy of the GNU General Public License along with FG 
     :zoom="zoom"
     :center="center"
     :options="options"
+    @ready="ready"
     @update:zoom="zoomUpdated"
     @update:center="centerUpdated"
     @update:bounds="boundsUpdated"
@@ -76,8 +77,6 @@ You should have received a copy of the GNU General Public License along with FG 
     components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, AiLayer, EditBar, ToolBar, EditLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer, ToolLayer },
     props: [],
     mounted () {
-      this.$refs.map.mapObject.on('layeradd', this.onLayerAdd)
-
       this.$store.dispatch('getAirports')
       this.$store.subscribe((mutation, state) => {
         if (mutation.type === 'CENTER' || mutation.type === 'SET_AIRPORTS' || mutation.type === 'ZOOM') {
@@ -87,11 +86,9 @@ You should have received a copy of the GNU General Public License along with FG 
             .filter(feature => this.visible(feature))
             .map(feature => feature.properties.icao)
           if (airportsToLoad.length > 0 && airportsToLoad[0] !== this.editingAirport && this.zoom > 12) {
-            this.$refs.editLayer.load(airportsToLoad[0])
             this.$refs.pavementLayer.load(airportsToLoad[0])
-            /*
+            this.$refs.editLayer.load(airportsToLoad[0])
             this.$refs.thresholdLayer.load(airportsToLoad[0])
-            */
             this.editingAirport = airportsToLoad[0]
           }
           if (this.$refs.editLayer) {
@@ -119,11 +116,14 @@ You should have received a copy of the GNU General Public License along with FG 
       }
     },
     methods: {
+      ready (e) {
+        console.log(e)
+        e.on('layeradd', this.onLayerAdd)
+      },
       onLayerAdd (e) {
         if (this.layersControl === null) {
           this.layersControl = L.control.layers({}, {}, {position: 'topleft'})
           this.layersControl.addTo(this.$refs.map.mapObject)
-          debugger
           var icon = this.layersControl._container.ownerDocument.createElement('I')
           icon.className = 'fas fa-layer-group'
           icon.style = 'padding-top: 9px; height: 30px; width: 30px; text-align: center; vertical-align: sub;'
@@ -131,9 +131,16 @@ You should have received a copy of the GNU General Public License along with FG 
           // this.layersControl.addOverlay(this.$refs.thresholdLayer, 'Threshold Layer')
         }
         if (this.$refs.pavementLayer.getLayer() === e.layer) {
+          // debugger
           var l = this.layersControl._layers.filter(l => l.name === 'APT Layer')
           if (l.length === 0) {
             this.layersControl.addOverlay(this.$refs.pavementLayer.getLayer(), 'APT Layer')
+          }
+        }
+        if (this.$refs.thresholdLayer.getLayer() === e.layer) {
+          l = this.layersControl._layers.filter(l => l.name === 'Threshold Layer')
+          if (l.length === 0) {
+            this.layersControl.addOverlay(this.$refs.thresholdLayer.getLayer(), 'Threshold Layer')
           }
         }
       },

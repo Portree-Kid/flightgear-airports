@@ -15,7 +15,7 @@ var $ = require('jquery');
 
 exports.readThresholdXML = function (fDir, icao, force) {
     try {
-        layerGroup = L.layerGroup();
+        var layerGroup = L.layerGroup();
         layerGroup.maxId = 0;
         var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.threshold.xml');
         var fNew = path.join(fDir, icao[0], icao[1], icao[2], icao + '.threshold.new.xml');
