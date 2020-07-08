@@ -50,12 +50,12 @@ const mutations = {
     } else {
       Object.assign(item, airport)
     }
-    state.wip.sort((p, p2) => { return p.date > p2.date })
+    state.wip.sort((w1, w2) => w1.time - w2.time)
   },
   'UPLOAD_WIP' (state, icao) {
     const item = state.wip.find((e) => e.icao === icao)
     item.upload = Date.now()
-    state.wip.sort((p, p2) => { return p.date > p2.date })
+    state.wip.sort((p, p2) => { return p.time - p2.time })
   },
   'REMOVE_WIP' (state, icao) {
     const item = state.wip.find((e) => e.icao === icao)
