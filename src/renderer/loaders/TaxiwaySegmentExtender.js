@@ -49,43 +49,43 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
     };
     taxiwaySegment.__proto__.selectVertex = function () {
         this.getLatLngs().forEach( element => {
-            if (Number(element.glueindex) === store.default.state.Editable.index) {
-                if (element.__vertex._icon != null) {
-                    element.__vertex.__proto__.deselect = function () {
-                        if (this._icon != null) {
-                            this._icon.style.setProperty('background-color','white');                    
-                            this._icon.style.setProperty('color','white');                    
-                        } else if (this.icon != null) {
-                            if (this.icon.style != null) {
-                                this.icon.style['background-color'] = 'white';
-                            } else {
-                                this.setStyle({ color: 'white' })
-                            }
-                        } else if (this.options.icon != null) {
-                            if (this.options.icon.style != null) {
-                                this.options.icon.style['background-color'] = 'white';
-                            } else {
-                                this.options.icon._setIconStyles({ color: 'white' })
-                            }
-                        }                        
-                    }
-                    element.__vertex._icon.style.setProperty('background-color','red');                    
-                    element.__vertex._icon.style.setProperty('color','red');                    
-                } else if (element.__vertex !== undefined && element.__vertex.icon != null) {
-                    if (element.__vertex.icon.style != null) {
-                        element.__vertex.icon.style['background-color'] = 'red';
+            if (Number(element.glueindex) === store.default.state.Editable.index) {                
+        if (element.__vertex._icon != null) {
+            element.__vertex.__proto__.deselect = function () {
+                if (this._icon != null) {
+                    this._icon.style.setProperty('background-color','white');                    
+                    this._icon.style.setProperty('color','white');                    
+                } else if (this.icon != null) {
+                    if (this.icon.style != null) {
+                        this.icon.style['background-color'] = 'white';
                     } else {
-                        element.__vertex.setStyle({ color: 'red' })
+                        this.setStyle({ color: 'white' })
                     }
-                } else if (element.__vertex.options.icon != null) {
-                    if (element.__vertex.options.icon.style != null) {
-                        element.__vertex.options.icon.style['background-color'] = 'red';
+                } else if (this.options.icon != null) {
+                    if (this.options.icon.style != null) {
+                        this.options.icon.style['background-color'] = 'white';
                     } else {
-                        element.__vertex.options.icon._setIconStyles({ color: 'red' })
+                        this.options.icon._setIconStyles({ color: 'white' })
                     }
                 }                        
             }
-        });
+            element.__vertex._icon.style.setProperty('background-color','red');                    
+            element.__vertex._icon.style.setProperty('color','red');                    
+        } else if (element.__vertex !== undefined && element.__vertex.icon != null) {
+            if (element.__vertex.icon.style != null) {
+                element.__vertex.icon.style['background-color'] = 'red';
+            } else {
+                element.__vertex.setStyle({ color: 'red' })
+            }
+        } else if (element.__vertex.options.icon != null) {
+            if (element.__vertex.options.icon.style != null) {
+                element.__vertex.options.icon.style['background-color'] = 'red';
+            } else {
+                element.__vertex.options.icon._setIconStyles({ color: 'red' })
+            }
+        }    
+          }
+       });                    
     };
     taxiwaySegment.__proto__.deselect = function () {
         this.options.attributes.selected = false;
@@ -239,10 +239,23 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
             if (parking.length > 0) {
                 parking[0].selectParking();
             } else {
+                if( Number(event.vertex.latlng.glueindex) !== store.default.state.Editable.index) {
+                    if (Number(store.default.state.Editable.index) >= 0 &&
+                      this.featureLookup[store.default.state.Editable.index] !== undefined) {
+                      this.featureLookup[store.default.state.Editable.index].forEach(element => {
+                            if(element.deselect !== undefined) {
+                                element.deselect();
+                            }
+                        });
+                      }
+                      store.default.dispatch('setNode', event.vertex.latlng)
+                }
+                var lines = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.Polyline);
                 Vue.default.nextTick(function () {
-                    store.default.dispatch('setNode', event.vertex.latlng)
+                    lines.forEach( line => {
+                        line.selectVertex()
+                    });
                 })
-                //              
             }
 
         });

@@ -99,16 +99,17 @@ L.ParkingSpot = L.Circle.extend({
     // Update the direction vertex from the direction
     updateVertexFromDirection() {
         if (this.editEnabled()) {
-            var start = this._latlng;
+            var center = this._latlng;
             var options = { units: 'kilometers' };
-            var end = turf.destination([start.lng, start.lat], this.options.attributes.radius / 1000, this.options.attributes.heading, options);
+            var start = turf.destination([center.lng, center.lat], this.options.attributes.radius / 1000, this.normalizeAngle(this.options.attributes.heading+180), options);
+            var end = turf.destination([center.lng, center.lat], this.options.attributes.radius / 1000, this.normalizeAngle(this.options.attributes.heading), options);
             // Resize, since leaflet is wrong
-            var rad2 = start.distanceTo(this.turfToLatLng(end), options);
+            var rad2 = center.distanceTo(this.turfToLatLng(end), options);
             this.setRadius(rad2);
             if(this.editor._resizeLatLng.__vertex!== undefined){
                 this.editor._resizeLatLng.__vertex.setLatLng(this.turfToLatLng(end));
             }
-            this.direction.setLatLngs([start, this.turfToLatLng(end)]);
+            this.direction.setLatLngs([this.turfToLatLng(start), this.turfToLatLng(end)]);
         }
     },
     // Update the direction from the moved direction vertex
@@ -175,19 +176,20 @@ L.ParkingSpot = L.Circle.extend({
             if(this.box === undefined && this.editor !== undefined) {
                 var latlngs = [leftBack, rightBack, rightMiddle, rightIntermediate, rightFront, leftFront, leftIntermediate, leftMiddle].map(l => this.turfToLatLng(l));
                 this.box = L.polygon(latlngs);
-                this.box.addTo(this.editor.editLayer);    
+                this.box.addTo(this.editor.editLayer);
+                this.box._parkingSpot = this;    
                 this.box.on('click', function (event) {
-                    console.debug("Click Parking : " + event.target);
+                    console.debug("Click Parking Box : " + event.target);
                     if (Number(store.default.state.Editable.index) >= 0 &&
-                    this.featureLookup !== undefined &&
-                    this.featureLookup[store.default.state.Editable.index]!==undefined) {
-                        this.featureLookup[store.default.state.Editable.index].forEach(element => {
+                    event.target._parkingSpot.featureLookup !== undefined &&
+                    event.target._parkingSpot.featureLookup[store.default.state.Editable.index]!==undefined) {
+                        event.target._parkingSpot.featureLookup[store.default.state.Editable.index].forEach(element => {
                             if(element.deselect !== undefined) {
                                 element.deselect();
                             }
                         });
                     }
-                    this.select(); 
+                    event.target._parkingSpot.select(); 
                 });        
         
             }
@@ -215,8 +217,10 @@ L.ParkingSpot = L.Circle.extend({
         if(this.direction) {
             this.direction.setStyle(style);  
             this.frontWheel.setStyle(style);
-            this.box.setStyle(style);
-        }
+            if(this.box) {
+                this.box.setStyle(style);
+            }
+          }
         this.updateWheelPos();
         this.updateBox();
     },    
@@ -227,7 +231,9 @@ L.ParkingSpot = L.Circle.extend({
         if(this.direction) {
             this.direction.setStyle(style);  
             this.frontWheel.setStyle(style);
-            this.box.setStyle(style);
+            if(this.box) {
+              this.box.setStyle(style);
+            }
         }
         this.updateWheelPos();
         this.updateBox();
@@ -275,7 +281,7 @@ L.ParkingSpot = L.Circle.extend({
                     }
                 });
             }
-            this.select(); 
+            event.target.select(); 
         });        
         this.on('editable:vertex:clicked', function (event) {
             console.debug(this.featureLookup[event.vertex.glueindex]);

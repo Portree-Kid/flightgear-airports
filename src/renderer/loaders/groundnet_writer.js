@@ -168,7 +168,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
     } catch (error) {
         console.error(error);
     }
-    return layerGroup;
+    return;
 }
 
 var mapFrequency = function (o) {
