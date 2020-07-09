@@ -15,9 +15,9 @@ const store = require('../store');
  */
 
  // ratchet to known radii
-const validRadii = [7.5, 14, 18, 26, 33, 40];
+const validRadii = [7.5, 10, 14, 18, 26, 33, 40];
 
-const validN2M = [5, 6, 10, 15, 24, 24];
+const validN2M = [5, 5, 6, 10, 15, 24, 24];
 
 var $ = require('jquery');
 L.ParkingSpot = L.Circle.extend({

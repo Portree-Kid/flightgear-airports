@@ -401,7 +401,7 @@ var scanMethods = {
         if (!module.exports.isScanning)
             return undefined;
         if (typeof currentFeature !== 'undefined') {
-            createPoly(currentFeatur, layerGroup);
+            createPoly(currentFeature, layerGroup);
         }
         module.exports.colour = 'black';
         module.exports.type = 130;

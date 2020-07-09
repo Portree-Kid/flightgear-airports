@@ -41,30 +41,37 @@
 
         <el-radio-group v-model="wingspan" :disabled="!editing">
           <el-tooltip content="PIPER PA-31/CESSNA 404 Titan" placement="top" effect="light">
-            <el-radio :label="15">A</el-radio>
+            <el-radio :label="15">A (7.5)</el-radio>
+          </el-tooltip>
+          <el-tooltip
+            content="Beech 200 / Cessna 425"
+            placement="top"
+            effect="light"
+          >
+          <el-radio :label="20">- (10)</el-radio>
           </el-tooltip>
           <el-tooltip
             content="BOMBARDIER Regional Jet CRJ-200/DE HAVILLAND CANADA DHC-6"
             placement="top"
             effect="light"
           >
-            <el-radio :label="28">B</el-radio>
+          <el-radio :label="28">B (14)</el-radio>
           </el-tooltip>
           <el-tooltip
             content="BOEING 737-700/AIRBUS A-320/EMBRAER ERJ 190-100"
             placement="top"
             effect="light"
           >
-            <el-radio :label="36">C</el-radio>
+            <el-radio :label="36">C (18)</el-radio>
           </el-tooltip>
           <el-tooltip content="B767 Series/AIRBUS A-310" placement="top" effect="light">
-            <el-radio :label="52">D</el-radio>
+            <el-radio :label="52">D (27)</el-radio>
           </el-tooltip>
           <el-tooltip content="B777 Series/B787 Series/A330 Family" placement="top" effect="light">
-            <el-radio :label="66">E</el-radio>
+            <el-radio :label="66">E (33)</el-radio>
           </el-tooltip>
           <el-tooltip content="BOEING 747-8/AIRBUS A-380-800" placement="top" effect="light">
-            <el-radio :label="80">F</el-radio>
+            <el-radio :label="80">F (40)</el-radio>
           </el-tooltip>
         </el-radio-group>
       </el-col>
@@ -279,7 +286,9 @@
 
         switch (this.$store.state.Editable.data.parking.radius * 2) {
           case 15:
-            return 'PIPER PA-31/CESSNA 404 Titan'
+            return 'Piper J-3 Cub/Cessna 172'
+          case 20:
+            return 'Beech 200/Cessna 425'
           case 28:
             return 'BOMBARDIER Regional Jet CRJ-200/DE HAVILLAND CANADA DHC-6'
           case 36:
