@@ -226,6 +226,11 @@ async function checkGroundnet(data) {
             var parkingNodes = data.map(mapParkingNode).filter(n => n !== undefined);
 
             var overlappingParkings = [];
+            parkingNodes.forEach(parkingNode => {
+                if (boxes[parkingNode.index] === undefined) {
+                    overlappingParkings.push({ id: parkingNode.index, message: 'Unknown radius' });                                
+                }
+            });
             // Check for intersecting radii
             parkingNodes.forEach(parkingNode => {
                 parkingNodes.forEach(parkingNode1 => {
@@ -236,14 +241,17 @@ async function checkGroundnet(data) {
                         if (d < parkingNode.radius + parkingNode1.radius + 10) {
                             // If bigger circles intersect we should check the boxes
                             //debugger;
-                            var poly1 = turf.polygon([boxes[parkingNode.index]]);
+                            if( boxes[parkingNode.index] !== null && boxes[parkingNode1.index] !== null && 
+                                boxes[parkingNode.index] !== undefined && boxes[parkingNode1.index] !== undefined) {
+                                var poly1 = turf.polygon([boxes[parkingNode.index]]);                            
+                                
+                                var poly2 = turf.polygon([boxes[parkingNode1.index]]);                            
                               
-                            var poly2 = turf.polygon([boxes[parkingNode1.index]]);
-                              
-                            var intersection = turf.intersect(poly1, poly2);
-                            if( intersection !== null ) {
-                                overlappingParkings.push({ id: parkingNode.index, message: 'Overlapping parkings' });
-                            }
+                                var intersection = turf.intersect(poly1, poly2);
+                                if( intersection !== null ) {
+                                    overlappingParkings.push({ id: parkingNode.index, message: 'Overlapping parkings' });
+                                }    
+                            } 
                         }
                     }
                     this.postMessage(['progress', 1]);
