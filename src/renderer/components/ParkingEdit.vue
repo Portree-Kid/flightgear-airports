@@ -98,6 +98,24 @@
         </el-popover>
       </el-col>
     </el-row>
+    <!--
+    <el-row>
+      <el-col :span="7">
+        <span class="label">Nosewheel Coordinates :</span>
+      </el-col>
+      <el-col :span="17">
+        <el-popover
+          placement="top-start"
+          title="E-Mail"
+          width="200"
+          trigger="hover"
+          content="D.DDD, DMS, DM supported"
+        >
+          <el-input placeholder="Please input" v-model="coordinates" slot="reference" :disabled="!editing"></el-input>
+        </el-popover>
+      </el-col>
+    </el-row>
+    -->
     <el-row>
       <el-col :span="7">
         <span class="label">Heading :</span>
@@ -193,7 +211,7 @@
           var codes = this.$store.state.Editable.data.parking.airlineCodes
           if (Array.isArray(codes)) {
             return codes
-          } else if (codes !== undefined && codes instanceof String) {
+          } else if (codes !== undefined) {
             return codes.split(',')            
           } else {
             return []
