@@ -934,6 +934,9 @@ You should have received a copy of the GNU General Public License along with FG 
             }
             else if (layer instanceof L.ParkingSpot) {
                 layer.setLatLng(centerLatLng);
+                layer.glueindex = String(newIndex);
+                layer.id = String(newIndex);
+                layer.options.attributes.index = newIndex;
             }
             else if (layer instanceof L.Polyline) {
                 layer._latlngs.forEach((e1, index1) => {
