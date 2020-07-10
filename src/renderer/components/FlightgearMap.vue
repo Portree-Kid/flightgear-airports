@@ -62,6 +62,8 @@ You should have received a copy of the GNU General Public License along with FG 
   import ToolLayer from './ToolLayer'
   import PavementLayer from './PavementLayer'
   import ThresholdLayer from './ThresholdLayer'
+
+  import { Loading } from 'element-ui'
   import L from 'leaflet'
 
   // https://github.com/KoRiGaN/Vue2Leaflet/issues/103
@@ -86,10 +88,15 @@ You should have received a copy of the GNU General Public License along with FG 
             .filter(feature => this.visible(feature))
             .map(feature => feature.properties.icao)
           if (airportsToLoad.length > 0 && airportsToLoad[0] !== this.editingAirport && this.zoom > 12) {
-            this.$refs.pavementLayer.load(airportsToLoad[0])
-            this.$refs.editLayer.load(airportsToLoad[0])
-            this.$refs.thresholdLayer.load(airportsToLoad[0])
-            this.editingAirport = airportsToLoad[0]
+            let loadingInstance = Loading.service({ fullscreen: true })
+
+            this.$nextTick(() => { // Loading should be closed asynchronously
+              this.$refs.pavementLayer.load(airportsToLoad[0])
+              this.$refs.editLayer.load(airportsToLoad[0])
+              this.$refs.thresholdLayer.load(airportsToLoad[0])
+              loadingInstance.close()
+              this.editingAirport = airportsToLoad[0]
+            })
           }
           if (this.$refs.editLayer) {
             this.$refs.editLayer.setVisible(this.zoom >= 12)

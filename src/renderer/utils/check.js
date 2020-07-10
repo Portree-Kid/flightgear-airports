@@ -10,7 +10,7 @@ var turf;
 
 if(process.env.NODE_ENV === 'development') {
     importScripts('../../../node_modules/dijkstrajs/dijkstra.js');
-    turf = require('../../../../../@turf/turf');
+    turf = require('./node_modules/@turf/turf');
 } else {
     importScripts('dijkstra.js');
     turf = require('@turf/turf')
@@ -119,7 +119,7 @@ async function checkGroundnet(data) {
                     this.postMessage(['progress', 1]);
                 });
             });
-            // Check pushback parkings
+            // Build pushback graph
             var noPushbackGraph = {};
             parkings.forEach(element => {
                 noPushbackGraph[element] = {};
@@ -131,6 +131,7 @@ async function checkGroundnet(data) {
                 noPushbackGraph[element.start] = {};
                 noPushbackGraph[element.end] = {};
             });
+            // add all pushback edges
             edges.filter(element => element.isPushBackRoute).forEach(element => {
                 var node1 = noPushbackGraph[Number(element.start)];
                 node1[Number(element.end)] = 1;
@@ -147,7 +148,16 @@ async function checkGroundnet(data) {
                 pushbackNodes.forEach(pushbackNode => {
                     var numRoutes = checkRoute(noPushbackGraph, parkingNode, pushbackNode);
                     if (numRoutes===0) {
-                        okPushbacks.push(parkingNode);
+                        /*
+                        if(parkingNode===14) {
+                            debugger;
+                        }
+                        */
+                        if (multiplePushbackRoutes[parkingNode]===undefined &&
+                            Object.keys(noPushbackGraph[parkingNode])>0) {
+                            // Only when there is a edge leaving     
+                            multiplePushbackRoutes[parkingNode] = [];
+                        } 
                     } else if (numRoutes===1){
                         if (multiplePushbackRoutes[parkingNode]===undefined) {
                             multiplePushbackRoutes[parkingNode] = [pushbackNode];
@@ -181,9 +191,6 @@ async function checkGroundnet(data) {
                     return this[e] != undefined && this[e].length != 1;
                 }
                 , multiplePushbackRoutes).map(
-
-                    //multiplePushbackRoutes.push();
-
                     id => { 
                         var endPoints = multiplePushbackRoutes[id];
                         if( endPoints.length<1)
