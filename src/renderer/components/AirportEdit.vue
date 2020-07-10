@@ -1,5 +1,22 @@
 <template>
   <div v-if="airport">
+    <el-dialog
+      title="Add Airline"
+      :visible.sync="dialogVisible"
+      width="20%"
+      :before-close="handleClose">
+      <span>Add an selectable airline to {{ icao }} {{ name }}</span>
+          <el-input
+            placeholder="Please input airline"
+            v-model="airlineCode"
+            maxlength="3"
+          ></el-input>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="addAirline">Confirm</el-button>
+      </span>
+    </el-dialog>
     <h1 class="leaflet-sidebar-header">{{ icao }} {{ name }}</h1>
     <div width="100%" >
         <el-row>
@@ -7,6 +24,7 @@
           <el-col :span="15">
             <el-tag v-for="item in airlines" :key="item.value">{{item.value}}</el-tag>
           </el-col>
+          <el-col :span="2"><el-button @click="dialogVisible = true" v-if="editing" ><i class="fas fa-plus"></i></el-button></el-col>
         </el-row>
     </div>
     <el-tabs v-model="activeTab" >
@@ -60,7 +78,7 @@
 
 export default {
     data () {
-      return {activeTab: 'first', editing: false}
+      return {activeTab: 'first', editing: false, dialogVisible: false, airlineCode: ''}
     },
     components: {
       Frequency, ParkingList
@@ -68,6 +86,10 @@ export default {
     methods: {
       setEditing (editing) {
         this.editing = editing
+      },
+      addAirline () {
+        this.dialogVisible = false
+        this.$store.dispatch('addAirline', this.airlineCode)
       },
       addFrequency () {
         this.$store.dispatch('addFrequency', {type: 'AWOS', value: 0})
@@ -81,6 +103,8 @@ export default {
           return
         }
         this.editLayer = parent.$refs.editLayer
+      },
+      handleClose () {
       }
     },
     computed: {
