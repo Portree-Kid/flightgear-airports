@@ -310,7 +310,7 @@ You should have received a copy of the GNU General Public License along with FG 
                 latlng.lat =  e1.lat;
                 latlng.lng =  e1.lng;
                 this.$store.dispatch('setCenter', latlng);
-                if(e1.__vertex._icon.style!=null) {
+                if(e1.__vertex !== undefined && e1.__vertex !== null && e1.__vertex._icon.style!=null) {
                     e1.__vertex._icon.style['background-color'] = 'red';
                 }
                 return;

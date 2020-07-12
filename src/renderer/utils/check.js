@@ -59,6 +59,7 @@ async function checkGroundnet(data) {
             var boxes = {};
             //debugger;
             data.forEach(element => {
+                //debugger;
                 if(element.box!==undefined && element.box!==null) {
                     boxes[element.index] = element.box[0].map(latlng => [latlng.lat, latlng.lng] );
                     boxes[element.index].push(boxes[element.index][0]);

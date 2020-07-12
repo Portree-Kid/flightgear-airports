@@ -126,8 +126,6 @@ L.ParkingSpot = L.Circle.extend({
             this._mRadius = output;
             this.options.attributes.radius = this._mRadius;
             this.direction.setLatLngs([start, end]);
-
-
         }
     },
     updateWheelPos() {
@@ -156,6 +154,7 @@ L.ParkingSpot = L.Circle.extend({
         var thirdRadiusKM = radiusKM/3;
 
         if (parkingSize>=0) {
+            this.setStyle({ opacity: 0, fill: false });
             var frontWheelEnd = turf.destination(start, validN2M[parkingSize] / 1000, this.options.attributes.heading, options);
             var front = turf.destination(start, radiusKM, this.options.attributes.heading, options);
 
@@ -173,10 +172,10 @@ L.ParkingSpot = L.Circle.extend({
             var leftIntermediate = turf.destination(leftFront, halfRadiusKM, backwards, options);
             var rightIntermediate = turf.destination(rightFront, halfRadiusKM, backwards, options);
 
-            if(this.box === undefined && this.editor !== undefined) {
+            if(this.box === undefined) {
                 var latlngs = [leftBack, rightBack, rightMiddle, rightIntermediate, rightFront, leftFront, leftIntermediate, leftMiddle].map(l => this.turfToLatLng(l));
                 this.box = L.polygon(latlngs);
-                this.box.addTo(this.editor.editLayer);
+                //this.box.addTo(this.editor.editLayer);
                 this.box._parkingSpot = this;    
                 this.box.on('click', function (event) {
                     console.debug("Click Parking Box : " + event.target);
@@ -207,7 +206,7 @@ L.ParkingSpot = L.Circle.extend({
         return angle + 360;
       }
       return angle;
-  },
+    },
     select() {
         store.default.dispatch('setParking', this.options.attributes);
         store.default.dispatch('setParkingCoords', this.getLatLng().lat.toFixed(6) + ' ' + this.getLatLng().lng.toFixed(6));
@@ -255,6 +254,19 @@ L.ParkingSpot = L.Circle.extend({
                 event.target.updateVertexFromDirection();     
                 event.target.updateWheelPos();
                 event.target.updateBox();
+            }
+        });
+        this.on('add', function (event) {
+          console.log(event);
+          event.target.updateBox();
+          if(event.target.box !== undefined) {
+            event.target.box.addTo(event.target._map);
+          }
+        });
+        this.on('remove', function (event) {
+            console.log(event);
+            if(event.target.box !== undefined) {
+                event.target.box.removeFrom(event.target._map);
             }
         });
         this.on('editable:vertex:drag', function (event) { 
