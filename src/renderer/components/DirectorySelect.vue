@@ -8,14 +8,21 @@
 </template>
 
 <script>
-export default {
+/* eslint-disable */
+  const path = require('path');
+  const fs = require('fs');
+  
+  export default {
+
   props: {
     value: File
   },
 
   methods: {
     handleFileChange (e) {
-      this.$emit('input', e.target.files[0])
+      var first = e.target.files[0].webkitRelativePath.split("/")[0];
+      var webkitdirectoryPath = e.target.files[0].path.split(first)[0] + first;
+      this.$emit('input', webkitdirectoryPath)
     }
   }
 }

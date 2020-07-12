@@ -138,15 +138,15 @@
     methods: {
       flightgearDirectorySelect: function (flightgearDirectory) {
         console.log(flightgearDirectory)
-        this.$store.commit('FLIGHTGEAR_DIRECTORY', flightgearDirectory.path)
+        this.$store.commit('FLIGHTGEAR_DIRECTORY', flightgearDirectory)
       },
       airportsDirectorySelect: function (flightgearDirectory) {
         console.log(flightgearDirectory)
-        this.$store.commit('AIPORTS_DIRECTORY', flightgearDirectory.path)
+        this.$store.commit('AIPORTS_DIRECTORY', flightgearDirectory)
       },
       testDirectorySelect: function (testDirectory) {
         console.log(testDirectory)
-        this.$store.commit('TEST_DIRECTORY', testDirectory.path)
+        this.$store.commit('TEST_DIRECTORY', testDirectory)
       },
       debug: function () {
         ipcRenderer.send('OpenDebugger', 'ping')
