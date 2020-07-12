@@ -327,10 +327,10 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         if(this._map !== null) {
             if (this.options.attributes.direction === 'forward') {
                 this.setText(null);
-                this.setText('  ⮞  ', { repeat: true, attributes: { fill: 'red', size: 30 } })
+                this.setText('  >  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })
             } else if (this.options.attributes.direction === 'backward') {
                 this.setText(null);
-                this.setText('  ⮜  ', { repeat: true, attributes: { fill: 'red', size: 30 } })
+                this.setText('  <  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })
             } else {
                 this.setText(null);
             }
