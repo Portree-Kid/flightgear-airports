@@ -84,6 +84,18 @@
     </el-row>
     <el-row>
       <el-col :span="7">
+        <span class="label">Calculate :</span>
+      </el-col>
+      <el-col :span="17">
+        <el-radio-group v-model="calculate" size="small">
+          <el-radio-button label="Nose Wheel"></el-radio-button>
+          <el-radio-button label="Center"></el-radio-button>
+        </el-radio-group>
+
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="7">
         <span class="label">Coordinates :</span>
       </el-col>
       <el-col :span="17">
@@ -93,12 +105,12 @@
           width="200"
           trigger="hover"
           content="D.DDD, DMS, DM supported"
+          :disabled="!editing || calculate === 'Center'"
         >
-          <el-input placeholder="Please input" v-model="coordinates" slot="reference" :disabled="!editing"></el-input>
+          <el-input placeholder="Please input" v-model="coordinates" slot="reference" :disabled="!editing || calculate ==='Center'"></el-input>
         </el-popover>
       </el-col>
     </el-row>
-    <!--
     <el-row>
       <el-col :span="7">
         <span class="label">Nosewheel Coordinates :</span>
@@ -110,12 +122,12 @@
           width="200"
           trigger="hover"
           content="D.DDD, DMS, DM supported"
+          :disabled="!editing || calculate === 'Nose Wheel'"
         >
-          <el-input placeholder="Please input" v-model="coordinates" slot="reference" :disabled="!editing"></el-input>
+          <el-input placeholder="Please input" v-model="noseCoordinates" slot="reference" :disabled="!editing || calculate === 'Nose Wheel'"></el-input>
         </el-popover>
       </el-col>
     </el-row>
-    -->
     <el-row>
       <el-col :span="7">
         <span class="label">Heading :</span>
@@ -127,7 +139,7 @@
           :max="720"
           :step="0.1"
           :precision="1"
-          :disabled="!editing"
+          :disabled="!editing || calculate ==='Heading'"
         ></el-input-number>
       </el-col>
     </el-row>
@@ -174,14 +186,33 @@
 <script lang="js">
 /* eslint-disable */
   const convert = require('geo-coordinates-parser');
-  const Coordinates = require('coordinate-parser');
+  
+  const turf = require('@turf/turf');
+
+  const turfOptions = { units: 'kilometers' };
 
   export default {
     methods: {
       show (idx) {
         this.$parent.$parent.$parent.$refs.editLayer.show(idx)
+      },
+      normalizeAngle( angle ) {
+        if(angle >= 180) {
+            return angle - 360;
+        }
+        if(angle <= -180) {
+          return angle + 360;
+        }
+        return angle;
+      },
+      latToTurf (turfPoint) {
+        return [turfPoint.decimalLongitude, turfPoint.decimalLatitude];
+      },
+      turfToLatLng: function (turfPoint) {
+          return '' + turfPoint.geometry.coordinates[1].toFixed(6) + ',' + turfPoint.geometry.coordinates[0].toFixed(6);
       }
     },
+    data () { return {calculate:'Nose Wheel', noseWheel: '', validRadii: [7.5, 10, 14, 18, 26, 33, 40], validN2M: [5, 5, 6, 10, 15, 24, 24] } },
     computed: {
       editing: {
         get: function () {
@@ -261,6 +292,44 @@
           this.$store.commit('SET_EDIT_PARKING_COORDS', newValue)
         }
       },
+      noseCoordinates: {
+      // getter
+        get: function () {
+          if(this.$store.state.Editable.index!==undefined) {            
+            const center = convert(this.$store.state.Editable.data.parking.coords);
+            const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
+            if (parkingSize>=0) {
+                var newWheel = turf.destination(this.latToTurf(center), this.validN2M[parkingSize]/1000, this.normalizeAngle(this.$store.state.Editable.data.parking.heading), turfOptions);
+                var newValue = this.turfToLatLng(newWheel);
+                if( newValue.match(/,/g) !== null && newValue.match(/,/g).length === 1) {
+                  newValue = newValue.replace(',', ' ');
+                }
+                this.noseWheel = newValue;
+                return newValue;
+            }     
+          }
+        },
+        // setter
+        set: function (newValue) {
+          if (newValue==='unknown') {
+            
+          } 
+          if( newValue.match(/,/g) !== null && newValue.match(/,/g).length === 3) {
+            newValue = newValue.replace(', ', ' ').replace(/,/g, '.').replace(' ', ', ');
+          }
+          this.noseWheel = newValue;
+          var centerCoords = convert(this.$store.state.Editable.data.parking.coords);
+          if(this.calculate === 'Center') {            
+          // we change center
+            const noseWheelLatLng = convert(this.noseWheel);
+            const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
+            if (parkingSize>=0) {
+                var newCenter = turf.destination(this.latToTurf(noseWheelLatLng), this.validN2M[parkingSize]/1000, this.$store.state.Editable.data.parking.heading, turfOptions);
+                this.$store.commit('SET_EDIT_PARKING_COORDS', this.turfToLatLng(newCenter));
+            }     
+          }
+        }
+      },
       heading: {
       // getter
         get: function () {
@@ -276,6 +345,16 @@
           }
           if (Number(this.$store.state.Editable.data.parking.heading) !== newValue) {
             this.$store.commit('SET_EDIT_PARKING_HEADING', newValue)
+          }
+          if(this.calculate === 'Center') {            
+          // we change center
+            const noseWheelLatLng = convert(this.noseWheel);
+            const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
+            if (parkingSize>=0) {
+                var reverseHeading = this.normalizeAngle(this.$store.state.Editable.data.parking.heading+180);
+                var newCenter = turf.destination(this.latToTurf(noseWheelLatLng), this.validN2M[parkingSize]/1000, reverseHeading, turfOptions);
+                this.$store.commit('SET_EDIT_PARKING_COORDS', this.turfToLatLng(newCenter));
+            }     
           }
         }
       },
