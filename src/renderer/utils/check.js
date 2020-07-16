@@ -8,9 +8,14 @@ const fs = require('fs');
 //debugger;
 var turf;
 
+console.log(process.resourcesPath);
+
 if(process.env.NODE_ENV === 'development') {
     importScripts('../../../node_modules/dijkstrajs/dijkstra.js');
     turf = require('./node_modules/@turf/turf');
+} else if (process.env.NODE_ENV === 'mocha') {
+    importScripts('../../../node_modules/dijkstrajs/dijkstra.js');
+    turf = require('../../../node_modules/@turf/turf')
 } else {
     importScripts('dijkstra.js');
     turf = require('@turf/turf')
@@ -19,7 +24,7 @@ if(process.env.NODE_ENV === 'development') {
 const homedir = require('os').homedir();
 
 importScripts('logger.js');
-importScripts('haversine.js');
+importScripts('haversine.js');    
 
 function errorReceiver(event) {
     throw event.data;
@@ -66,6 +71,8 @@ async function checkGroundnet(data) {
                 }
             });
             var graph = {};
+
+            console.log(parkings);
             parkings.forEach(element => {
                 graph[element] = {};
             });
@@ -74,26 +81,37 @@ async function checkGroundnet(data) {
             });
             var notOkNodes = [];
 
+            console.log(edges);
+            if(edges===undefined) {
+                resolve({});
+            }
             edges.forEach(edge => {
                 graph[edge.start] = {};
                 graph[edge.end] = {};
-                // Check if there are segments > 2km
-                edge.latLngs.forEach((latLng, index, arr) => {
-                    if (index>0) {
-                        var d = distance([arr[index-1].lng, arr[index-1].lat], [latLng.lng, latLng.lat]);
-                        if(d>2000) {
-                            notOkNodes.push({ id: Number(arr[index-1].index), message: `Start of long route ${d.toFixed(2)}` });
-                            notOkNodes.push({ id: Number(arr[index].index), message: `End of long route ${d.toFixed(2)}` });
-                        }                        
-                        //console.log(d);
-                    }
-                });
+                if(edge.latLngs !== undefined) {
+                    // Check if there are segments > 2km
+                    edge.latLngs.forEach((latLng, index, arr) => {
+                        if (index>0) {
+                            var d = distance([arr[index-1].lng, arr[index-1].lat], [latLng.lng, latLng.lat]);
+                            if(d>2000) {
+                                notOkNodes.push({ id: Number(arr[index-1].index), message: `Start of long route ${d.toFixed(2)}` });
+                                notOkNodes.push({ id: Number(arr[index].index), message: `End of long route ${d.toFixed(2)}` });
+                            }                        
+                            //console.log(d);
+                        }
+                    });
+                }
             });
+            // Add edges to graph
             edges.forEach(element => {
                 var node1 = graph[element.start];
-                node1[Number(element.end)] = 1;
                 var node2 = graph[element.end];
-                node2[Number(element.start)] = 1;
+                if( element.direction === 'bi-directional' || element.direction === 'forward') {
+                    node1[Number(element.end)] = 1;
+                }
+                if( element.direction === 'bi-directional' || element.direction === 'backward') {
+                    node2[Number(element.start)] = 1;
+                }
             });
             var isLegitEnd = function(v) {
                 if( Object.keys(graph[v]).length <= 1 ) {
@@ -396,7 +414,7 @@ var mapEdges = function (o) {
         // debugger;
         return {
             start: o.start, end: o.end, isPushBackRoute: o.isPushBackRoute !== undefined &&
-                o.isPushBackRoute !== 0, latLngs: o.latLngs
+                o.isPushBackRoute !== 0, direction: o.direction, latLngs: o.latLngs
         };
     console.debug(o);
 }

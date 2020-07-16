@@ -300,7 +300,7 @@ You should have received a copy of the GNU General Public License along with FG 
           console.log(o)
           //_latlngs[""0""].__vertex.glueindex
           var latLngs = o.getLatLngs().map(l => ({lat: l.lat, lng: l.lng, index: l.glueindex}));
-          return { 'start': Number(o['begin']), 'end': Number(o['end']), '_leaflet_id': o._leaflet_id, 'type': 'poly', 'isPushBackRoute': o.options.attributes.isPushBackRoute, latLngs: latLngs };
+          return { 'start': Number(o['begin']), 'end': Number(o['end']), '_leaflet_id': o._leaflet_id, 'type': 'poly', 'direction': o.options.attributes.direction, 'isPushBackRoute': o.options.attributes.isPushBackRoute, latLngs: latLngs };
         } else {
           console.log('Unknown Type ')
           console.log(typeof o)
