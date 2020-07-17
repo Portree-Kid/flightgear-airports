@@ -70,14 +70,17 @@ async function checkGroundnet(data) {
                     boxes[element.index].push(boxes[element.index][0]);
                 }
             });
-            var graph = {};
+            var directionalGraph = {};
+            var bidirectionalGraph = {};
 
             console.log(parkings);
             parkings.forEach(element => {
-                graph[element] = {};
+                directionalGraph[element] = {};
+                bidirectionalGraph[element] = {};
             });
             runwayNodes.forEach(element => {
-                graph[element] = {};
+                directionalGraph[element] = {};
+                bidirectionalGraph[element] = {};
             });
             var notOkNodes = [];
 
@@ -86,8 +89,10 @@ async function checkGroundnet(data) {
                 resolve({});
             }
             edges.forEach(edge => {
-                graph[edge.start] = {};
-                graph[edge.end] = {};
+                directionalGraph[edge.start] = {};
+                bidirectionalGraph[edge.start] = {};
+                directionalGraph[edge.end] = {};
+                bidirectionalGraph[edge.end] = {};
                 if(edge.latLngs !== undefined) {
                     // Check if there are segments > 2km
                     edge.latLngs.forEach((latLng, index, arr) => {
@@ -102,22 +107,31 @@ async function checkGroundnet(data) {
                     });
                 }
             });
-            // Add edges to graph
+            // Add edges to directionalGraph
             edges.forEach(element => {
-                var node1 = graph[element.start];
-                var node2 = graph[element.end];
+                var node1 = directionalGraph[element.start];                
+                var node2 = directionalGraph[element.end];
+                if(element.direction === undefined) {
+                    notOkNodes.push({ id: Number(element._leaflet_id), message: `Edge missing direction` });
+                }
+
                 if( element.direction === 'bi-directional' || element.direction === 'forward') {
                     node1[Number(element.end)] = 1;
                 }
                 if( element.direction === 'bi-directional' || element.direction === 'backward') {
                     node2[Number(element.start)] = 1;
                 }
+
+                node1 = bidirectionalGraph[element.start];                
+                node2 = bidirectionalGraph[element.end];
+                node1[Number(element.end)] = 1;
+                node2[Number(element.start)] = 1;
             });
             var isLegitEnd = function(v) {
-                if( Object.keys(graph[v]).length <= 1 ) {
+                if( Object.keys(bidirectionalGraph[v]).length <= 1 ) {
                     return true;
                 }
-                return Object.keys(graph[v]).filter( v => runwayNodes[v]).length === 0;
+                return Object.keys(bidirectionalGraph[v]).filter( v => runwayNodes[v]).length === 0;
             }
             //debugger;
             runwayNodes = runwayNodes.filter(
@@ -125,10 +139,10 @@ async function checkGroundnet(data) {
             );
             // Check if there is a route from every parking to every runway node            
             var okNodes = [];
-            logger('info', graph);
+            logger('info', directionalGraph);
             parkings.forEach(parkingNode => {
                 runwayNodes.forEach(runwayNode => {
-                    var ok = checkRoute(graph, parkingNode, runwayNode);
+                    var ok = checkRoute(directionalGraph, parkingNode, runwayNode);
                     if (ok) {
                         okNodes.push(parkingNode);
                         okNodes.push(runwayNode);
@@ -138,7 +152,7 @@ async function checkGroundnet(data) {
                     this.postMessage(['progress', 1]);
                 });
             });
-            // Build pushback graph
+            // Build pushback directionalGraph
             var noPushbackGraph = {};
             parkings.forEach(element => {
                 noPushbackGraph[element] = {};
@@ -238,7 +252,7 @@ async function checkGroundnet(data) {
             if (runwayNodes.length === 0) {
                 notOkNodes.push({ id: 0, message: 'No Runwaynodes' });
             }
-            var allEnds = Object.entries(graph).filter(
+            var allEnds = Object.entries(directionalGraph).filter(
                 (v, i) => Object.keys(v[1]).length <= 1
             );
             // Ends that are not on Runway and not a Parking or Pushback
@@ -333,7 +347,7 @@ async function checkGroundnet(data) {
             if (wrongPushbackRoutes.length===0) {
                 notOkNodes.push({id:-1, message: 'Pushback routes OK'});
             }
-            //        check1(graph);
+            //        check1(directionalGraph);
             //        check2();
             //        this.postMessage(['progress', 1]);
             resolve(notOkNodes);
@@ -345,9 +359,9 @@ async function checkGroundnet(data) {
     return promise;
 }
 
-function checkRoute(graph, from, to) {
+function checkRoute(directionalGraph, from, to) {
     try {
-        var pathD = this.dijkstra.find_path(graph, from, to);
+        var pathD = this.dijkstra.find_path(directionalGraph, from, to);
         if (pathD.length > 0) {
             console.log(pathD);
             return pathD.length;
@@ -359,8 +373,8 @@ function checkRoute(graph, from, to) {
     }
 }
 
-function check1(graph) {
-    var graph1 = {
+function check1(directionalGraph) {
+    var directionalGraph1 = {
         a: { b: 1, d: 1 },
         b: { a: 1, c: 1, e: 1 },
         c: { b: 1, f: 1 },
@@ -371,7 +385,7 @@ function check1(graph) {
         h: { e: 1, g: 1, i: 1 },
         i: { f: 1, h: 1 }
     };
-    var path = this.dijkstra.find_path(graph, 'a', 'i');
+    var path = this.dijkstra.find_path(directionalGraph, 'a', 'i');
     console.log(path);
 }
 
