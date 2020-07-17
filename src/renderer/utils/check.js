@@ -122,10 +122,10 @@ async function checkGroundnet(data) {
                     node2[Number(element.start)] = 1;
                 }
 
-                node1 = bidirectionalGraph[element.start];                
-                node2 = bidirectionalGraph[element.end];
-                node1[Number(element.end)] = 1;
-                node2[Number(element.start)] = 1;
+                var node3 = bidirectionalGraph[element.start];                
+                var node4 = bidirectionalGraph[element.end];
+                node3[Number(element.end)] = 1;
+                node4[Number(element.start)] = 1;
             });
             var isLegitEnd = function(v) {
                 if( Object.keys(bidirectionalGraph[v]).length <= 1 ) {
@@ -252,7 +252,7 @@ async function checkGroundnet(data) {
             if (runwayNodes.length === 0) {
                 notOkNodes.push({ id: 0, message: 'No Runwaynodes' });
             }
-            var allEnds = Object.entries(directionalGraph).filter(
+            var allEnds = Object.entries(bidirectionalGraph).filter(
                 (v, i) => Object.keys(v[1]).length <= 1
             );
             // Ends that are not on Runway and not a Parking or Pushback
