@@ -82,7 +82,7 @@
       </el-col>
       <el-col :span="17">{{type}}</el-col>
     </el-row>
-    <el-row>
+    <el-row v-if="editing"> 
       <el-col :span="7">
         <span class="label">Calculate :</span>
       </el-col>

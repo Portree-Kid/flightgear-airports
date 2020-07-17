@@ -5,8 +5,9 @@
       <div class="leaflet-sidebar-close">
         <i class="fa fa-caret-left"></i>
       </div>
-    </h1>
-    <div id="panel" width="100%">            
+    </h1>    
+    <div id="panel" width="100%">
+      <el-row v-if="results"><h3>Check not run</h3></el-row>
       <el-row v-for="(result,idx) in results" :key="idx">
         <el-col :span="2" v-if="result.id<0"><span class="label"><i class="far fa-check-circle"></i></span></el-col>         
         <el-col :span="2" v-if="result.id>=0"><span class="label"><i class="fas fa-exclamation-triangle"></i></span></el-col>         
@@ -52,6 +53,9 @@
 .button {
   padding-left: 10px;
   padding-right: 10px;
+}
+h3 {
+  text-align: center;
 }
 .label {
   display: flex;

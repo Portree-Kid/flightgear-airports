@@ -216,12 +216,12 @@ L.ParkingSpot = L.Circle.extend({
         if(this.direction) {
             this.direction.setStyle(style);  
             this.frontWheel.setStyle(style);
-            if(this.box) {
-                this.box.setStyle(style);
-            }
           }
         this.updateWheelPos();
         this.updateBox();
+        if(this.box) {
+            this.box.setStyle(style);
+        }
     },    
     deselect() {
         var style = {};
@@ -230,13 +230,13 @@ L.ParkingSpot = L.Circle.extend({
         if(this.direction) {
             this.direction.setStyle(style);  
             this.frontWheel.setStyle(style);
-            if(this.box) {
-              this.box.setStyle(style);
-            }
         }
         this.updateWheelPos();
         this.updateBox();
-    },
+        if(this.box) {
+            this.box.setStyle(style);
+        }
+  },
     addListeners: function () {
         this.on('editable:drawing:move', function (event) {
             console.debug("Move Parking Spot: ", event);
