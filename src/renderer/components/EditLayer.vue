@@ -305,7 +305,7 @@ You should have received a copy of the GNU General Public License along with FG 
           if (element instanceof L.Polyline) {
             element._latlngs.forEach((e1, index1) => {
               console.log(e1);
-              if (e1.attributes.index===index) {
+              if (e1.attributes.index===Number(index)) {
                 var latlng = {};
                 latlng.lat =  e1.lat;
                 latlng.lng =  e1.lng;
@@ -496,7 +496,7 @@ You should have received a copy of the GNU General Public License along with FG 
                   this.featureLookup[Number(element.end)] = this.featureLookup[Number(element.end)].filter(item => item !== element);
                   this.refreshLookup(Number(element.end))
                 }
-                element.removeFrom(this.groundnetLayerGroup);
+                element.removeFrom(this.$parent.mapObject);
               }
               else {
                 element.getLatLngs().forEach((e1, index1) => {
