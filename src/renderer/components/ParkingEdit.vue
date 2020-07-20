@@ -65,7 +65,7 @@
             <el-radio :label="36">C (18)</el-radio>
           </el-tooltip>
           <el-tooltip content="B767 Series/AIRBUS A-310" placement="top" effect="light">
-            <el-radio :label="52">D (27)</el-radio>
+            <el-radio :label="52">D (26)</el-radio>
           </el-tooltip>
           <el-tooltip content="B777 Series/B787 Series/A330 Family" placement="top" effect="light">
             <el-radio :label="66">E (33)</el-radio>
