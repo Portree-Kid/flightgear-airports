@@ -274,19 +274,23 @@ module.exports.readPavement = function (f, icao, cb) {
     lineReader.createInterface({
         input: fs.createReadStream(f).pipe(zlib.createGunzip())
     }).on('line', function (line) {
-        var fields = line.split(/[ ]+/);
-        // var fields = line.match('([0-9]+)');
-        if (fields == null)
-            return;
-        var scanMethod = scanMethods[fields[0]];
-        if (scanMethod != null) {
-            currentFeature = scanMethod(fields, icao, pavementLayerGroup, currentFeature);
-        }
-        else {
-            if (fields[0] == '99') {
-                lineReader.close();
+        try {
+            var fields = line.split(/[ ]+/);
+            // var fields = line.match('([0-9]+)');
+            if (fields == null)
+                return;
+            var scanMethod = scanMethods[fields[0]];
+            if (scanMethod != null) {
+                currentFeature = scanMethod(fields, icao, pavementLayerGroup, currentFeature);
             }
-            // console.log('Ignored:', line);
+            else {
+                if (fields[0] == '99') {
+                    lineReader.close();
+                }
+                // console.log('Ignored:', line);
+            }                
+        } catch (error) {
+            console.error('Error reading : ' + line + error);
         }
     }).on('error', function (err) {
         console.error(err);
