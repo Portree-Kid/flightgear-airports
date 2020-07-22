@@ -1,9 +1,22 @@
+/*
+Copyright 2020 Keith Paterson
+
+This file is part of FG Airports.
+
+FG Airports is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+FG Airports is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with FG Airports. If not, see http://www.gnu.org/licenses/.
+*/
 /* eslint-disable */
 const lineReader = require('readline');
 const zlib = require('zlib');
 // const geodesy = require('geodesy');
 const LatLonEllipsoidal = require('geodesy/latlon-ellipsoidal-vincenty.js').default;
 const fs = require('fs');
+
+const buildRunwayPoly = require('../leaflet/Runway.js');
 
 /**
  * 
@@ -304,22 +317,14 @@ var scanMethods = {
     // APTDAT 715 Segment
     10: (line, icao, layerGroup) => {
         if (module.exports.isScanning) {
-          //var marker = new L.marker([line[1], line[2]], { title: '10 Point', color: 'fuchsia' });
-          //marker.bindTooltip(String(line), { className: "my-label", offset: [0, 0] });
-          //marker.addTo(layerGroup);
           var pointMiddle = new LatLonEllipsoidal(Number(line[1]), Number(line[2]));
           var point1 = pointMiddle.destinationPoint(line[5]/6.562, line[4]);
           var point2 = pointMiddle.destinationPoint(line[5]/6.562, line[4]-180);
 
-          //var runwayPoly2 = new L.Polygon([point1, point2]);
-          //var marker2 = new L.marker(point2, { title: '10 Point 2', color: 'fuchsia' });
-          //marker2.bindTooltip(String(line), { className: "my-label", offset: [0, 0] });
-          //marker2.addTo(layerGroup);
-          //runwayPoly2.setStyle({ color: 'red', interactive: false });
-          //runwayPoly2.addTo(layerGroup);
           var runwayPoints = [];
 
           var bearing = point1.initialBearingTo(point2);
+          // Width in ft
           var runwayWidth = Number(line[8])/3.281;
 
           runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing + 90)));
@@ -327,8 +332,7 @@ var scanMethods = {
           runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (bearing - 90)));
           runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing - 90)));            
 
-          var runwayPoly = new L.Polygon(runwayPoints);
-          runwayPoly.setStyle({ color: 'grey', fillColor: 'grey', opacity: 0.5, fillOpacity: 0.5, interactive: false });
+          var runwayPoly = buildRunwayPoly(runwayPoints);
           runwayPoly.addTo(layerGroup);
       }
     },
@@ -350,10 +354,9 @@ var scanMethods = {
             runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (bearing - 90)));
             runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing - 90)));            
 
-            var runwayPoly = new L.Polygon(runwayPoints);
-            runwayPoly.setStyle({ color: 'grey', interactive: false });
+            var runwayPoly = buildRunwayPoly(runwayPoints);
             runwayPoly.addTo(layerGroup);
-
+  
             var displacedEnd1 = point1.destinationPoint(Number(line[20]), bearing)
             var displacedEnd2 = point2.destinationPoint(Number(line[20]), bearing-180)
 

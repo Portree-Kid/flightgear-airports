@@ -21,6 +21,7 @@
   import axios from 'axios'
   const fs = require('fs')
   const path = require('path')
+  const mapper = require('../check/mapper');
 
   export default {
     name: 'upload',
@@ -118,33 +119,6 @@
           }
         }, 1000)
       },
-      featuresMapper(o) {
-        if (o instanceof L.ParkingSpot) {
-          return { 'index': Number(o['id']), 
-          '_leaflet_id': o._leaflet_id, 
-          'type': 'parking', 
-          'parkingType': o.options.attributes.type, 
-          'name': o.options.attributes.name, 
-          'radius': String(o.options.attributes.radius),
-          'lat': o._latlng.lat,
-          'lng': o._latlng.lng,
-          'box': o.box!==undefined?o.box.getLatLngs():null
-          };
-        } else if (o instanceof L.RunwayNode) {
-          console.log(o)
-          return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'type': 'runway' };
-        } else if (o instanceof L.HoldNode) {
-          console.log(o)
-          return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'type': o.holdPointType };
-        } else if (o instanceof L.Polyline) {
-          console.log(o)
-          var latLngs = o.getLatLngs().map(l => ({lat: l.lat, lng: l.lng, index: l.attributes.index}));
-          return { 'start': Number(o['begin']), 'end': Number(o['end']), '_leaflet_id': o._leaflet_id, 'type': 'poly', 'direction': o.options.attributes.direction, 'isPushBackRoute': o.options.attributes.isPushBackRoute, latLngs: latLngs };
-        } else {
-          console.log('Unknown Type ')
-          console.log(typeof o)
-        }
-      },
       check () {
         try {
           this.scanning = true
@@ -169,7 +143,7 @@
             xml.push(l)
           })
 
-          var features = xml.map(this.featuresMapper).filter(n => n)
+          var features = xml.map(mapper.checkMapper).filter(n => n)
 
           worker.postMessage(['check', features ] )
           this.pollData()

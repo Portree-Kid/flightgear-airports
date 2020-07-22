@@ -10,7 +10,7 @@ var turf;
 
 console.log(process.resourcesPath);
 
-if(process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development') {
     importScripts('../../../node_modules/dijkstrajs/dijkstra.js');
     turf = require('./node_modules/@turf/turf');
 } else if (process.env.NODE_ENV === 'mocha') {
@@ -24,7 +24,7 @@ if(process.env.NODE_ENV === 'development') {
 const homedir = require('os').homedir();
 
 importScripts('logger.js');
-importScripts('haversine.js');    
+importScripts('haversine.js');
 
 function errorReceiver(event) {
     throw event.data;
@@ -48,16 +48,27 @@ onmessage = function (event) {
     }
 };
 
+/**
+ * Implements the checks of the groundnet
+ * @param {*} data 
+ */
+
 async function checkGroundnet(data) {
     var promise = new Promise(function (resolve, reject) {
         try {
             //debugger;
             var parkings = data.map(mapParkings).filter(n => n !== undefined);
-            var runwayNodes = data.map(mapRunwayNodes).filter(n => n !== undefined);
+            var runwayNodeIDs = data.map(mapRunwayNodeId).filter(n => n !== undefined);
+            var runwayNodes = data.map(mapRunwayNode).filter(n => n !== undefined);
             var pushbackNodes = data.map(mapPushbackNodes).filter(n => n !== undefined);
             var edges = data.map(mapEdges).filter(n => n !== undefined);
 
-            this.max = 4 * parkings.length * runwayNodes.length +
+            var normalNodes = data.map(mapEdges).filter(n => n !== undefined)
+            .flatMap(m => m.latLngs).filter(n => runwayNodeIDs.indexOf(Number(n.index)) < 0);
+
+            var runways = data.map(mapRunways).filter(n => n !== undefined);
+
+            this.max = 4 * parkings.length * runwayNodeIDs.length +
                 3 * parkings.length;
             this.postMessage(['max', this.max]);
 
@@ -65,8 +76,8 @@ async function checkGroundnet(data) {
             //debugger;
             data.forEach(element => {
                 //debugger;
-                if(element.box!==undefined && element.box!==null) {
-                    boxes[element.index] = element.box[0].map(latlng => [latlng.lat, latlng.lng] );
+                if (element.box !== undefined && element.box !== null) {
+                    boxes[element.index] = element.box[0].map(latlng => [latlng.lat, latlng.lng]);
                     boxes[element.index].push(boxes[element.index][0]);
                 }
             });
@@ -78,14 +89,14 @@ async function checkGroundnet(data) {
                 directionalGraph[element] = {};
                 bidirectionalGraph[element] = {};
             });
-            runwayNodes.forEach(element => {
+            runwayNodeIDs.forEach(element => {
                 directionalGraph[element] = {};
                 bidirectionalGraph[element] = {};
             });
             var notOkNodes = [];
 
             console.log(edges);
-            if(edges===undefined) {
+            if (edges === undefined) {
                 resolve({});
             }
             edges.forEach(edge => {
@@ -93,15 +104,15 @@ async function checkGroundnet(data) {
                 bidirectionalGraph[edge.start] = {};
                 directionalGraph[edge.end] = {};
                 bidirectionalGraph[edge.end] = {};
-                if(edge.latLngs !== undefined) {
+                if (edge.latLngs !== undefined) {
                     // Check if there are segments > 2km
                     edge.latLngs.forEach((latLng, index, arr) => {
-                        if (index>0) {
-                            var d = distance([arr[index-1].lng, arr[index-1].lat], [latLng.lng, latLng.lat]);
-                            if(d>2000) {
-                                notOkNodes.push({ id: Number(arr[index-1].index), message: `Start of long route ${d.toFixed(2)}` });
+                        if (index > 0) {
+                            var d = distance([arr[index - 1].lng, arr[index - 1].lat], [latLng.lng, latLng.lat]);
+                            if (d > 2000) {
+                                notOkNodes.push({ id: Number(arr[index - 1].index), message: `Start of long route ${d.toFixed(2)}` });
                                 notOkNodes.push({ id: Number(arr[index].index), message: `End of long route ${d.toFixed(2)}` });
-                            }                        
+                            }
                             //console.log(d);
                         }
                     });
@@ -109,39 +120,39 @@ async function checkGroundnet(data) {
             });
             // Add edges to directionalGraph
             edges.forEach(element => {
-                var node1 = directionalGraph[element.start];                
+                var node1 = directionalGraph[element.start];
                 var node2 = directionalGraph[element.end];
-                if(element.direction === undefined) {
+                if (element.direction === undefined) {
                     notOkNodes.push({ id: Number(element._leaflet_id), message: `Edge missing direction` });
                 }
 
-                if( element.direction === 'bi-directional' || element.direction === 'forward') {
+                if (element.direction === 'bi-directional' || element.direction === 'forward') {
                     node1[Number(element.end)] = 1;
                 }
-                if( element.direction === 'bi-directional' || element.direction === 'backward') {
+                if (element.direction === 'bi-directional' || element.direction === 'backward') {
                     node2[Number(element.start)] = 1;
                 }
 
-                var node3 = bidirectionalGraph[element.start];                
+                var node3 = bidirectionalGraph[element.start];
                 var node4 = bidirectionalGraph[element.end];
                 node3[Number(element.end)] = 1;
                 node4[Number(element.start)] = 1;
             });
-            var isLegitEnd = function(v) {
-                if( Object.keys(bidirectionalGraph[v]).length <= 1 ) {
+            var isLegitEnd = function (v) {
+                if (Object.keys(bidirectionalGraph[v]).length <= 1) {
                     return true;
                 }
-                return Object.keys(bidirectionalGraph[v]).filter( v => runwayNodes[v]).length === 0;
+                return Object.keys(bidirectionalGraph[v]).filter(v => runwayNodeIDs[v]).length === 0;
             }
             //debugger;
-            runwayNodes = runwayNodes.filter(
+            runwayNodeIDs = runwayNodeIDs.filter(
                 (v, i) => isLegitEnd(v)
             );
             // Check if there is a route from every parking to every runway node            
             var okNodes = [];
             logger('info', directionalGraph);
             parkings.forEach(parkingNode => {
-                runwayNodes.forEach(runwayNode => {
+                runwayNodeIDs.forEach(runwayNode => {
                     var ok = checkRoute(directionalGraph, parkingNode, runwayNode);
                     if (ok) {
                         okNodes.push(parkingNode);
@@ -180,38 +191,38 @@ async function checkGroundnet(data) {
             parkings.forEach(parkingNode => {
                 pushbackNodes.forEach(pushbackNode => {
                     var numRoutes = checkRoute(noPushbackGraph, parkingNode, pushbackNode);
-                    if (numRoutes===0) {
+                    if (numRoutes === 0) {
                         /*
                         if(parkingNode===14) {
                             debugger;
                         }
                         */
-                        if (multiplePushbackRoutes[parkingNode]===undefined &&
-                            Object.keys(noPushbackGraph[parkingNode])>0) {
+                        if (multiplePushbackRoutes[parkingNode] === undefined &&
+                            Object.keys(noPushbackGraph[parkingNode]) > 0) {
                             // Only when there is a edge leaving     
                             multiplePushbackRoutes[parkingNode] = [];
-                        } 
-                    } else if (numRoutes===1){
-                        if (multiplePushbackRoutes[parkingNode]===undefined) {
+                        }
+                    } else if (numRoutes === 1) {
+                        if (multiplePushbackRoutes[parkingNode] === undefined) {
                             multiplePushbackRoutes[parkingNode] = [pushbackNode];
                         } else {
                             multiplePushbackRoutes[parkingNode].push(pushbackNode);
-                        }                        
-                    } else if (numRoutes>1){
-                        if (multiplePushbackRoutes[parkingNode]===undefined) {
+                        }
+                    } else if (numRoutes > 1) {
+                        if (multiplePushbackRoutes[parkingNode] === undefined) {
                             multiplePushbackRoutes[parkingNode] = [pushbackNode];
                         } else {
                             multiplePushbackRoutes[parkingNode].push(pushbackNode);
-                        }       
+                        }
                     }
                     this.postMessage(['progress', 1]);
                 });
             });
             var rogueHoldPoints = pushbackNodes.map(
-                id => { 
+                id => {
                     var routes = noPushbackGraph[id];
-                    if(Object.keys(routes).length<1)
-                      return { id: id, message: 'Unconnected Pushbacknode' } 
+                    if (Object.keys(routes).length < 1)
+                        return { id: id, message: 'Unconnected Pushbacknode' }
                     /*
                     else if(Object.keys(routes).length>1)
                       return { id: id, message: 'Multiple connected pushback node' }
@@ -224,39 +235,39 @@ async function checkGroundnet(data) {
                     return this[e] != undefined && this[e].length != 1;
                 }
                 , multiplePushbackRoutes).map(
-                    id => { 
+                    id => {
                         var endPoints = multiplePushbackRoutes[id];
-                        if( endPoints.length<1)
-                          return { id: id, message: 'No way to pushback holdpoint' } 
-                        else 
-                          return { id: id, message: 'Multiple connected pushback points' }
+                        if (endPoints.length < 1)
+                            return { id: id, message: 'No way to pushback holdpoint' }
+                        else
+                            return { id: id, message: 'Multiple connected pushback points' }
                     }
                 );
-            wrongPushbackRoutes =wrongPushbackRoutes.concat(multiplePushbackRoutes);
+            wrongPushbackRoutes = wrongPushbackRoutes.concat(multiplePushbackRoutes);
 
             okNodes = okNodes.filter((v, i) => okNodes.indexOf(v) === i);
             var notOkNodesParkings = parkings.filter(
                 (v, i) => okNodes.indexOf(v) < 0
             ).map(
                 id => { return { id: id, message: 'No way from parking to each runway' } }
-            );            
-            var notOkNodesRunways = runwayNodes.filter(
+            );
+            var notOkNodesRunways = runwayNodeIDs.filter(
                 (v, i) => okNodes.indexOf(v) < 0
-            ).map(                
+            ).map(
                 id => { return { id: id, message: 'No way from runway to each parking' } }
             );
-            
+
             if (parkings.length === 0) {
                 notOkNodes.push({ id: 0, message: 'No parkings' });
             }
-            if (runwayNodes.length === 0) {
+            if (runwayNodeIDs.length === 0) {
                 notOkNodes.push({ id: 0, message: 'No Runwaynodes' });
             }
             var allEnds = Object.entries(bidirectionalGraph).filter(
                 (v, i) => Object.keys(v[1]).length <= 1
             );
             // Ends that are not on Runway and not a Parking or Pushback
-            var allLegitimateEndNodes = parkings.concat(runwayNodes).concat(pushbackNodes);
+            var allLegitimateEndNodes = parkings.concat(runwayNodeIDs).concat(pushbackNodes);
             var danglingEnds = allEnds.filter(
                 (v, i) => allLegitimateEndNodes.indexOf(Number(v[0])) < 0
             ).map(
@@ -268,7 +279,7 @@ async function checkGroundnet(data) {
             var overlappingParkings = [];
             parkingNodes.forEach(parkingNode => {
                 if (boxes[parkingNode.index] === undefined) {
-                    overlappingParkings.push({ id: parkingNode.index, message: 'Unknown radius' });                                
+                    overlappingParkings.push({ id: parkingNode.index, message: 'Unknown radius' });
                 }
             });
             // Check for intersecting radii
@@ -281,17 +292,17 @@ async function checkGroundnet(data) {
                         if (d < parkingNode.radius + parkingNode1.radius + 10) {
                             // If bigger circles intersect we should check the boxes
                             //debugger;
-                            if( boxes[parkingNode.index] !== null && boxes[parkingNode1.index] !== null && 
+                            if (boxes[parkingNode.index] !== null && boxes[parkingNode1.index] !== null &&
                                 boxes[parkingNode.index] !== undefined && boxes[parkingNode1.index] !== undefined) {
-                                var poly1 = turf.polygon([boxes[parkingNode.index]]);                            
-                                
-                                var poly2 = turf.polygon([boxes[parkingNode1.index]]);                            
-                              
+                                var poly1 = turf.polygon([boxes[parkingNode.index]]);
+
+                                var poly2 = turf.polygon([boxes[parkingNode1.index]]);
+
                                 var intersection = turf.intersect(poly1, poly2);
-                                if( intersection !== null ) {
+                                if (intersection !== null) {
                                     overlappingParkings.push({ id: parkingNode.index, message: 'Overlapping parkings' });
-                                }    
-                            } 
+                                }
+                            }
                         }
                     }
                     this.postMessage(['progress', 1]);
@@ -308,44 +319,60 @@ async function checkGroundnet(data) {
                     invalidParkings.push({ id: parkingNode.index, message: 'Parking type empty' });
                     this.postMessage(['progress', 1]);
                 }
-                if (['ga','cargo', 'gate', 'mil-fighter', 'mil-cargo' ].indexOf(parkingNode.parkingType)<0) {
+                if (['ga', 'cargo', 'gate', 'mil-fighter', 'mil-cargo'].indexOf(parkingNode.parkingType) < 0) {
                     //debugger;
                     invalidParkings.push({ id: parkingNode.index, message: `Parking type ${parkingNode.parkingType} not valid` });
                     this.postMessage(['progress', 1]);
                 }
             });
-  
+
             //Check for dual pushback/runway nodes
-            runwayNodes.forEach(runwayNode => {
+            runwayNodeIDs.forEach(runwayNode => {
                 if (pushbackNodes.indexOf(runwayNode) >= 0) {
                     notOkNodes.push({ id: runwayNode, message: 'Dual runway/ pushback node' });
                 }
             });
+            //Check if runwaynodes are on runway
+            runwayNodes.forEach(runwayNode => {
+                //debugger;                
+                if( runways.filter(r => turf.booleanContains(r, latToTurf(runwayNode))).length === 0 ) {
+                    notOkNodes.push({ id: runwayNode.index, message: 'Runwaynode not on runway' });
+                } 
+            });
+
+            //Check if nodes no normal nodes are on runway
+            // debugger;                
+            normalNodes.forEach(normalNode => {
+                if( runways.filter(r => turf.booleanContains(r, latToTurf(normalNode))).length > 0 ) {
+                    //debugger;
+                    notOkNodes.push({ id: normalNode.index, message: 'Non Runwaynode on runway' });
+                } 
+            });
 
             notOkNodes = notOkNodes.concat(invalidParkings);
-            if (invalidParkings.length===0) {
-                notOkNodes.push({id:-1, message: 'Parkings valid'});
+            if (invalidParkings.length === 0) {
+                notOkNodes.push({ id: -1, message: 'Parkings valid' });
             }
             notOkNodes = notOkNodes.concat(overlappingParkings);
-            if (overlappingParkings.length===0) {
-                notOkNodes.push({id:-1, message: 'No parkings overlapping'});
+            if (overlappingParkings.length === 0) {
+                notOkNodes.push({ id: -1, message: 'No parkings overlapping' });
             }
             notOkNodes = notOkNodes.concat(danglingEnds);
-            if (danglingEnds.length===0) {
-                notOkNodes.push({id:-1, message: 'No invalid ends'});
+            if (danglingEnds.length === 0) {
+                notOkNodes.push({ id: -1, message: 'No invalid ends' });
             }
             notOkNodes = notOkNodes.concat(notOkNodesParkings).concat(rogueHoldPoints);
-            if (notOkNodesParkings.length===0 && rogueHoldPoints===0) {
-                notOkNodes.push({id:-1, message: 'Routes from parkings OK'});
+            if (notOkNodesParkings.length === 0 && rogueHoldPoints === 0) {
+                notOkNodes.push({ id: -1, message: 'Routes from parkings OK' });
             }
-            
+
             notOkNodes = notOkNodes.concat(notOkNodesRunways);
-            if (notOkNodesRunways.length===0) {
-                notOkNodes.push({id:-1, message: 'Routes from runways OK'});
+            if (notOkNodesRunways.length === 0) {
+                notOkNodes.push({ id: -1, message: 'Routes from runways OK' });
             }
             notOkNodes = notOkNodes.concat(wrongPushbackRoutes);
-            if (wrongPushbackRoutes.length===0) {
-                notOkNodes.push({id:-1, message: 'Pushback routes OK'});
+            if (wrongPushbackRoutes.length === 0) {
+                notOkNodes.push({ id: -1, message: 'Pushback routes OK' });
             }
             //        check1(directionalGraph);
             //        check2();
@@ -417,10 +444,24 @@ var mapBoxes = function (o) {
         return { index: o.index };
 }
 
-var mapRunwayNodes = function (o) {
+var mapRunwayNodeId = function (o) {
     if (o.type === 'runway')
         return o.index;
     console.debug(o);
+}
+
+var mapRunwayNode = function (o) {
+    if (o.type === 'runway') {
+        return {index:o.index, lat: o.lat, lng: o.lng};
+    }
+}
+
+var mapRunways = function (o) {
+    if (o.type === 'runway_poly') {
+        var pts = o.pavement[0].map(latLngToArray);
+        pts.push(pts[0]);
+        return turf.polygon([pts]);
+    }
 }
 
 var mapEdges = function (o) {
@@ -432,3 +473,17 @@ var mapEdges = function (o) {
         };
     console.debug(o);
 }
+
+var latToTurf = function (turfPoint) {
+    return turf.point([turfPoint.lng, turfPoint.lat]);
+};
+
+var latLngToArray = function (turfPoint) {
+    //debugger;
+
+    return [turfPoint.lng, turfPoint.lat];
+};
+
+var turfToLatLng = function (turfPoint) {
+    return '' + turfPoint.geometry.coordinates[1].toFixed(6) + ',' + turfPoint.geometry.coordinates[0].toFixed(6);
+};

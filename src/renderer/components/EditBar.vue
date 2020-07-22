@@ -74,14 +74,16 @@ You should have received a copy of the GNU General Public License along with FG 
 
 <script lang="js">
 /* eslint-disable */
+  const path = require('path')
+  const fs = require('fs');
+  const mapper = require('../check/mapper');
+
   import EditButton from './EditButton'
   import ZoomButton from './ZoomButton';
   import Upload from './Upload'
   import Vue from 'vue'
 
   import fileUrl from 'file-url'
-  const path = require('path')
-  const fs = require('fs');
 
   export default {
     components: { EditButton, Upload, ZoomButton },
@@ -211,15 +213,20 @@ You should have received a copy of the GNU General Public License along with FG 
           worker.progress = 0
           // var worker = new Worker(fileUrl('src/renderer/utils/worker.js'))
           this.worker = worker
-          var xml = []
+          var groundnet = []
           this.$parent.$parent.$refs.editLayer.groundnetLayerGroup.eachLayer(l => {
             console.log(l)
-            xml.push(l)
+            groundnet.push(l)
           })
+          var features = groundnet.map(mapper.checkMapper).filter(n => n)
+          var pavement = []
+          this.$parent.$parent.$refs.pavementLayer.pavement.eachLayer(l => {
+            console.log(l)
+            pavement.push(l)
+          })
+          var features2 = pavement.map(mapper.checkMapper).filter(n => n)          
 
-          var features = xml.map(this.featuresMapper).filter(n => n)
-
-          worker.postMessage(['check', features ] )
+          worker.postMessage(['check', features.concat(features2) ] )
           this.pollData()
           // the reply
           var store = this.$store
@@ -244,6 +251,12 @@ You should have received a copy of the GNU General Public License along with FG 
               }
             }
             // console.log(e.data)
+          }
+          worker.onError = function(e) {
+            worker.terminate()
+            worker.view.max = 0
+            worker.view.checkDialogVisible = false
+            e.preventDefault(); // <-- "Hey browser, I handled it!"
           }
         } catch (err) {
           console.error(err)
@@ -273,38 +286,6 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$parent.$parent.$refs.editLayer.stopDrawing()
         Vue.set(this, 'checkDialogVisible', true)
         this.check()
-      },
-      featuresMapper(o) {
-        if (o instanceof L.ParkingSpot) {
-          /*
-          if( o.box === undefined ) {
-            debugger;
-          } */         
-          return { 'index': Number(o['id']), 
-          '_leaflet_id': o._leaflet_id, 
-          'type': 'parking', 
-          'parkingType': o.options.attributes.type, 
-          'name': o.options.attributes.name, 
-          'radius': String(o.options.attributes.radius),
-          'lat': o._latlng.lat,
-          'lng': o._latlng.lng,
-          'box': o.box!==undefined?o.box.getLatLngs():null
-           };
-        } else if (o instanceof L.RunwayNode) {
-          console.log(o)
-          return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'type': 'runway' };
-        } else if (o instanceof L.HoldNode) {
-          console.log(o)
-          return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'type': o.holdPointType };
-        } else if (o instanceof L.Polyline) {
-          console.log(o)
-          //_latlngs[""0""].__vertex.glueindex
-          var latLngs = o.getLatLngs().map(l => ({lat: l.lat, lng: l.lng, index: l.glueindex}));
-          return { 'start': Number(o['begin']), 'end': Number(o['end']), '_leaflet_id': o._leaflet_id, 'type': 'poly', 'direction': o.options.attributes.direction, 'isPushBackRoute': o.options.attributes.isPushBackRoute, latLngs: latLngs };
-        } else {
-          console.log('Unknown Type ')
-          console.log(typeof o)
-        }
       }
     },
     computed: {

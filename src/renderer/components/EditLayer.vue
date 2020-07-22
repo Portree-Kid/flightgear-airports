@@ -810,6 +810,8 @@ You should have received a copy of the GNU General Public License along with FG 
                 if (distance > 0 && distance < snap) {
                   layers.push({d: distance, l: layer, latlng: latlng.__vertex.latlng, glueindex: latlng.glueindex})
                 }
+              } else {
+                console.log(latlng);
               }
             })
           } else if (layer instanceof L.RunwayNode) {
@@ -913,9 +915,11 @@ You should have received a copy of the GNU General Public License along with FG 
                   console.warn('No glueindex : ' + latlng.__vertex);
                 }
                 let distance = latlng.distanceTo(centerLatLng)
-                if (latlng.glueindex !== newIndex && distance < 10) {
+                if (Number(latlng.glueindex) !== Number(newIndex) && distance < 10) {
                   nearest.push({d: distance, l: layer, latlng: latlng.__vertex.latlng, glueindex: latlng.glueindex })
                 }
+              } else {
+                console.error("No __Vertex");
               }
             })
           }
