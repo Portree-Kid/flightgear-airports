@@ -36,7 +36,17 @@
           </el-select>
         </el-col>
       </el-row>
-      <el-row><el-button @click="link"><i class="fas fa-link"></i></el-button></el-row>
+      <el-row>
+        <el-popover
+          placement="top-start"
+          title="Goto"
+          width="200"
+          trigger="hover"
+          content="Weld/Link nodes"
+        >
+          <el-button @click="link" slot="reference"><i class="fas fa-link"></i></el-button>
+        </el-popover>
+        </el-row>
     </div>
   </div>
 </template>
