@@ -8,7 +8,7 @@ const fs = require('fs');
 //debugger;
 var turf;
 
-console.log(process.resourcesPath);
+var check_msg;
 
 if (process.env.NODE_ENV === 'development') {
     importScripts('../../../node_modules/dijkstrajs/dijkstra.js');
@@ -56,6 +56,7 @@ onmessage = function (event) {
 async function checkGroundnet(data) {
     var promise = new Promise(function (resolve, reject) {
         try {
+            check_msg = JSON.parse(fs.readFileSync('./src/renderer/utils/check_msg.json', 'utf8').toString());
             //debugger;
             var parkings = data.map(mapParkings).filter(n => n !== undefined);
             var runwayNodeIDs = data.map(mapRunwayNodeId).filter(n => n !== undefined);
@@ -94,6 +95,7 @@ async function checkGroundnet(data) {
                 bidirectionalGraph[element] = {};
             });
             var notOkNodes = [];
+            debugger;
 
             console.log(edges);
             if (edges === undefined) {
@@ -110,8 +112,8 @@ async function checkGroundnet(data) {
                         if (index > 0) {
                             var d = distance([arr[index - 1].lng, arr[index - 1].lat], [latLng.lng, latLng.lat]);
                             if (d > 2000) {
-                                notOkNodes.push({ id: Number(arr[index - 1].index), message: `Start of long route ${d.toFixed(2)}` });
-                                notOkNodes.push({ id: Number(arr[index].index), message: `End of long route ${d.toFixed(2)}` });
+                                notOkNodes.push({ id: Number(arr[index - 1].index), message: check_msg.LONG_ROUTE_START });
+                                notOkNodes.push({ id: Number(arr[index].index), message: check_msg.LONG_ROUTE_END });
                             }
                             //console.log(d);
                         }
@@ -123,7 +125,7 @@ async function checkGroundnet(data) {
                 var node1 = directionalGraph[element.start];
                 var node2 = directionalGraph[element.end];
                 if (element.direction === undefined) {
-                    notOkNodes.push({ id: Number(element._leaflet_id), message: `Edge missing direction` });
+                    notOkNodes.push({ id: Number(element._leaflet_id), message: check_msg.EDGE_MISSING_DIRECTION });
                 }
 
                 if (element.direction === 'bi-directional' || element.direction === 'forward') {
@@ -222,7 +224,7 @@ async function checkGroundnet(data) {
                 id => {
                     var routes = noPushbackGraph[id];
                     if (Object.keys(routes).length < 1)
-                        return { id: id, message: 'Unconnected Pushbacknode' }
+                        return { id: id, message: check_msg.UNCONNECTED_PUSHBACK }
                     /*
                     else if(Object.keys(routes).length>1)
                       return { id: id, message: 'Multiple connected pushback node' }
@@ -238,30 +240,30 @@ async function checkGroundnet(data) {
                     id => {
                         var endPoints = multiplePushbackRoutes[id];
                         if (endPoints.length < 1)
-                            return { id: id, message: 'No way to pushback holdpoint' }
+                            return { id: id, message: check_msg.NO_WAY_TO_HOLDPOINT }
                         else
-                            return { id: id, message: 'Multiple connected pushback points' }
+                            return { id: id, message: check_msg.MULTIPLE_PUSHBACK }
                     }
                 );
-            wrongPushbackRoutes = wrongPushbackRoutes.concat(multiplePushbackRoutes);
+            //wrongPushbackRoutes = wrongPushbackRoutes.concat(multiplePushbackRoutes);
 
             okNodes = okNodes.filter((v, i) => okNodes.indexOf(v) === i);
             var notOkNodesParkings = parkings.filter(
                 (v, i) => okNodes.indexOf(v) < 0
             ).map(
-                id => { return { id: id, message: 'No way from parking to each runway' } }
+                id => { return { id: id, message: check_msg.NO_RUNWAY_ROUTE } }
             );
             var notOkNodesRunways = runwayNodeIDs.filter(
                 (v, i) => okNodes.indexOf(v) < 0
             ).map(
-                id => { return { id: id, message: 'No way from runway to each parking' } }
+                id => { return { id: id, message: check_msg.NO_RUNWAY_ROUTE } }
             );
 
             if (parkings.length === 0) {
-                notOkNodes.push({ id: 0, message: 'No parkings' });
+                notOkNodes.push({ id: 0, message: check_msg.NO_PARKINGS });
             }
             if (runwayNodeIDs.length === 0) {
-                notOkNodes.push({ id: 0, message: 'No Runwaynodes' });
+                notOkNodes.push({ id: 0, message: check_msg.NO_RUNWAY_NODES });
             }
             var allEnds = Object.entries(bidirectionalGraph).filter(
                 (v, i) => Object.keys(v[1]).length <= 1
@@ -271,7 +273,7 @@ async function checkGroundnet(data) {
             var danglingEnds = allEnds.filter(
                 (v, i) => allLegitimateEndNodes.indexOf(Number(v[0])) < 0
             ).map(
-                v => { return { id: Number(v[0]), message: 'Node not a legimate end' } }
+                v => { return { id: Number(v[0]), message: check_msg.NOT_LEGIT_END } }
             );
 
             var parkingNodes = data.map(mapParkingNode).filter(n => n !== undefined);
@@ -279,7 +281,7 @@ async function checkGroundnet(data) {
             var overlappingParkings = [];
             parkingNodes.forEach(parkingNode => {
                 if (boxes[parkingNode.index] === undefined) {
-                    overlappingParkings.push({ id: parkingNode.index, message: 'Unknown radius' });
+                    overlappingParkings.push({ id: parkingNode.index, message: check_msg.UNKNOWN_RADIUS });
                 }
             });
             // Check for intersecting radii
@@ -300,7 +302,7 @@ async function checkGroundnet(data) {
 
                                 var intersection = turf.intersect(poly1, poly2);
                                 if (intersection !== null) {
-                                    overlappingParkings.push({ id: parkingNode.index, message: 'Overlapping parkings' });
+                                    overlappingParkings.push({ id: parkingNode.index, message: check_msg.OVERLAPPING_PARKINGS });
                                 }
                             }
                         }
@@ -312,16 +314,16 @@ async function checkGroundnet(data) {
             // Check for name
             parkingNodes.forEach(parkingNode => {
                 if (!parkingNode.name || /^\s*$/.test(parkingNode.name)) {
-                    invalidParkings.push({ id: parkingNode.index, message: 'Name empty' });
+                    invalidParkings.push({ id: parkingNode.index, message: check_msg.NAME_EMPTY });
                     this.postMessage(['progress', 1]);
                 }
                 if (!parkingNode.type) {
-                    invalidParkings.push({ id: parkingNode.index, message: 'Parking type empty' });
+                    invalidParkings.push({ id: parkingNode.index, message: check_msg.TYPE_EMPTY });
                     this.postMessage(['progress', 1]);
                 }
                 if (['ga', 'cargo', 'gate', 'mil-fighter', 'mil-cargo'].indexOf(parkingNode.parkingType) < 0) {
                     //debugger;
-                    invalidParkings.push({ id: parkingNode.index, message: `Parking type ${parkingNode.parkingType} not valid` });
+                    invalidParkings.push({ id: parkingNode.index, message: check_msg.PARKING_TYPE_INVALID });
                     this.postMessage(['progress', 1]);
                 }
             });
@@ -329,14 +331,14 @@ async function checkGroundnet(data) {
             //Check for dual pushback/runway nodes
             runwayNodeIDs.forEach(runwayNode => {
                 if (pushbackNodes.indexOf(runwayNode) >= 0) {
-                    notOkNodes.push({ id: runwayNode, message: 'Dual runway/ pushback node' });
+                    notOkNodes.push({ id: runwayNode, message: check_msg.DUAL_PUSHBACK });
                 }
             });
             //Check if runwaynodes are on runway
             runwayNodes.forEach(runwayNode => {
                 //debugger;                
                 if( runways.filter(r => turf.booleanContains(r, latToTurf(runwayNode))).length === 0 ) {
-                    notOkNodes.push({ id: runwayNode.index, message: 'Runwaynode not on runway' });
+                    notOkNodes.push({ id: runwayNode.index, message: check_msg.RUNWAY_NODE_NOT_ON_RUNWAY });
                 } 
             });
 
@@ -345,38 +347,39 @@ async function checkGroundnet(data) {
             normalNodes.forEach(normalNode => {
                 if( runways.filter(r => turf.booleanContains(r, latToTurf(normalNode))).length > 0 ) {
                     //debugger;
-                    notOkNodes.push({ id: normalNode.index, message: 'Non Runwaynode on runway' });
+                    notOkNodes.push({ id: normalNode.index, message: check_msg.NON_RUNWAYNODE_ON_RUNWAY });
                 } 
             });
 
             notOkNodes = notOkNodes.concat(invalidParkings);
             if (invalidParkings.length === 0) {
-                notOkNodes.push({ id: -1, message: 'Parkings valid' });
+                notOkNodes.push({ id: -1, message: check_msg.PARKINGS_VALID });
             }
             notOkNodes = notOkNodes.concat(overlappingParkings);
             if (overlappingParkings.length === 0) {
-                notOkNodes.push({ id: -1, message: 'No parkings overlapping' });
+                notOkNodes.push({ id: -1, message: check_msg.NO_OVERLAPPING_PARKINGS });
             }
             notOkNodes = notOkNodes.concat(danglingEnds);
             if (danglingEnds.length === 0) {
-                notOkNodes.push({ id: -1, message: 'No invalid ends' });
+                notOkNodes.push({ id: -1, message: check_msg.NO_INVALID_ENDS });
             }
             notOkNodes = notOkNodes.concat(notOkNodesParkings).concat(rogueHoldPoints);
             if (notOkNodesParkings.length === 0 && rogueHoldPoints === 0) {
-                notOkNodes.push({ id: -1, message: 'Routes from parkings OK' });
+                notOkNodes.push({ id: -1, message: check_msg.ROUTES_FROM_PARKINGS_OK });
             }
 
             notOkNodes = notOkNodes.concat(notOkNodesRunways);
             if (notOkNodesRunways.length === 0) {
-                notOkNodes.push({ id: -1, message: 'Routes from runways OK' });
+                notOkNodes.push({ id: -1, message: check_msg.ROUTES_FROM_RUNWAYS_OK });
             }
             notOkNodes = notOkNodes.concat(wrongPushbackRoutes);
             if (wrongPushbackRoutes.length === 0) {
-                notOkNodes.push({ id: -1, message: 'Pushback routes OK' });
+                notOkNodes.push({ id: -1, message: check_msg.PUSHBACK_ROUTES_OK });
             }
             //        check1(directionalGraph);
             //        check2();
             //        this.postMessage(['progress', 1]);
+            debugger;
             resolve(notOkNodes);
 
         } catch (error) {
