@@ -43,7 +43,7 @@ onmessage = function (event) {
         ).catch(result => {
             console.error('Crashed');
             console.error(result);
-            postMessage(['DONE', []]);
+            postMessage(['DONE', [{id: -1, message: ['Crashed', result ]}]]);
         });
     }
 };
@@ -69,8 +69,7 @@ async function checkGroundnet(data) {
 
             var runways = data.map(mapRunways).filter(n => n !== undefined);
 
-            this.max = 4 * parkings.length * runwayNodeIDs.length +
-                3 * parkings.length;
+            this.max = 30;
             this.postMessage(['max', this.max]);
 
             var boxes = {};
@@ -95,12 +94,17 @@ async function checkGroundnet(data) {
                 bidirectionalGraph[element] = {};
             });
             var notOkNodes = [];
-            debugger;
+            //debugger;
 
             console.log(edges);
             if (edges === undefined) {
-                resolve({});
+                resolve({ id: -1, message: check_msg.NO_EDGES });
             }
+            this.postMessage(['progress', 1]);
+            if (runways.length === 0) {
+                resolve({ id: -1, message: check_msg.NO_RUNWAYS });
+            }
+            this.postMessage(['progress', 1]);
             edges.forEach(edge => {
                 directionalGraph[edge.start] = {};
                 bidirectionalGraph[edge.start] = {};
@@ -120,14 +124,15 @@ async function checkGroundnet(data) {
                     });
                 }
             });
-            // Add edges to directionalGraph
+            this.postMessage(['progress', 1]);
+            this.postMessage(['progress', 1]);
+            // Add edges to graphs
             edges.forEach(element => {
                 var node1 = directionalGraph[element.start];
                 var node2 = directionalGraph[element.end];
                 if (element.direction === undefined) {
                     notOkNodes.push({ id: Number(element._leaflet_id), message: check_msg.EDGE_MISSING_DIRECTION });
-                }
-
+                }                
                 if (element.direction === 'bi-directional' || element.direction === 'forward') {
                     node1[Number(element.end)] = 1;
                 }
@@ -140,13 +145,13 @@ async function checkGroundnet(data) {
                 node3[Number(element.end)] = 1;
                 node4[Number(element.start)] = 1;
             });
+            this.postMessage(['progress', 1]);
             var isLegitEnd = function (v) {
                 if (Object.keys(bidirectionalGraph[v]).length <= 1) {
                     return true;
                 }
                 return Object.keys(bidirectionalGraph[v]).filter(v => runwayNodeIDs[v]).length === 0;
             }
-            //debugger;
             runwayNodeIDs = runwayNodeIDs.filter(
                 (v, i) => isLegitEnd(v)
             );
@@ -162,7 +167,7 @@ async function checkGroundnet(data) {
                     } else {
                         console.log(`No route from Parking ${parkingNode} to Runwaynode ${runwayNode}`);
                     }
-                    this.postMessage(['progress', 1]);
+                    
                 });
             });
             // Build pushback directionalGraph
@@ -189,16 +194,10 @@ async function checkGroundnet(data) {
             var okPushbacks = [];
             // Check pushback
             var multiplePushbackRoutes = {};
-            //debugger;
             parkings.forEach(parkingNode => {
                 pushbackNodes.forEach(pushbackNode => {
                     var numRoutes = checkRoute(noPushbackGraph, parkingNode, pushbackNode);
                     if (numRoutes === 0) {
-                        /*
-                        if(parkingNode===14) {
-                            debugger;
-                        }
-                        */
                         if (multiplePushbackRoutes[parkingNode] === undefined &&
                             Object.keys(noPushbackGraph[parkingNode]) > 0) {
                             // Only when there is a edge leaving     
@@ -217,9 +216,38 @@ async function checkGroundnet(data) {
                             multiplePushbackRoutes[parkingNode].push(pushbackNode);
                         }
                     }
-                    this.postMessage(['progress', 1]);
+                    
                 });
             });
+            var notConnectedToPushback = pushbackNodes.map(
+                id => {
+                var normalRoutes = bidirectionalGraph[id];
+                var pushbackRoutes = noPushbackGraph[id];
+                if (Object.keys(pushbackRoutes).length < 1)
+                  return { id: id, message: check_msg.PUSHBACK_NOT_CONNECTED }        
+            }).filter(n => n !== undefined);
+            this.postMessage(['progress', 1]);
+            var multipleTaxiRoutes = pushbackNodes.map(
+                id => {
+                var normalRoutes = bidirectionalGraph[id];
+                var pushbackRoutes = noPushbackGraph[id];
+                var nonPushbackRoutes = Object.keys(normalRoutes).filter(r => pushbackRoutes[r] === undefined);
+                if (nonPushbackRoutes.length > 1)
+                  return { id: id, message: check_msg.TO_MANY_PUSHBACK_TAXI_ROUTES }        
+            }).filter(n => n !== undefined);
+            this.postMessage(['progress', 1]);
+            var pushbackExitNotBidirectional = pushbackNodes.map(
+                id => {
+                var normalRoutes = bidirectionalGraph[id];
+                var pushbackRoutes = noPushbackGraph[id];
+                var nonPushbackRoutes = Object.keys(normalRoutes).filter(r => pushbackRoutes[r] === undefined);
+                if(nonPushbackRoutes.length > 0) {
+                    var returnRoute = Object.keys(bidirectionalGraph[nonPushbackRoutes[0]]).map(id => Number(id)).filter(retId =>id === retId);
+                    if (returnRoute.length === 0)
+                      return { id: id, message: check_msg.PUSHBACK_EXIT_NOT_BIDRECTIONAL }            
+                }
+            }).filter(n => n !== undefined);
+            this.postMessage(['progress', 1]);
             var rogueHoldPoints = pushbackNodes.map(
                 id => {
                     var routes = noPushbackGraph[id];
@@ -231,9 +259,9 @@ async function checkGroundnet(data) {
                     */
                 }
             ).filter(n => n !== undefined);
+            this.postMessage(['progress', 1]);
             var wrongPushbackRoutes = parkings.filter(
                 function (e) {
-                    //debugger;
                     return this[e] != undefined && this[e].length != 1;
                 }
                 , multiplePushbackRoutes).map(
@@ -245,26 +273,32 @@ async function checkGroundnet(data) {
                             return { id: id, message: check_msg.MULTIPLE_PUSHBACK }
                     }
                 );
-            //wrongPushbackRoutes = wrongPushbackRoutes.concat(multiplePushbackRoutes);
 
+
+            this.postMessage(['progress', 1]);
             okNodes = okNodes.filter((v, i) => okNodes.indexOf(v) === i);
             var notOkNodesParkings = parkings.filter(
                 (v, i) => okNodes.indexOf(v) < 0
             ).map(
                 id => { return { id: id, message: check_msg.NO_RUNWAY_ROUTE } }
             );
+            this.postMessage(['progress', 1]);
+
             var notOkNodesRunways = runwayNodeIDs.filter(
                 (v, i) => okNodes.indexOf(v) < 0
             ).map(
                 id => { return { id: id, message: check_msg.NO_RUNWAY_ROUTE } }
             );
+            this.postMessage(['progress', 1]);
 
             if (parkings.length === 0) {
                 notOkNodes.push({ id: 0, message: check_msg.NO_PARKINGS });
             }
+            this.postMessage(['progress', 1]);
             if (runwayNodeIDs.length === 0) {
                 notOkNodes.push({ id: 0, message: check_msg.NO_RUNWAY_NODES });
             }
+            this.postMessage(['progress', 1]);
             var allEnds = Object.entries(bidirectionalGraph).filter(
                 (v, i) => Object.keys(v[1]).length <= 1
             );
@@ -275,6 +309,7 @@ async function checkGroundnet(data) {
             ).map(
                 v => { return { id: Number(v[0]), message: check_msg.NOT_LEGIT_END } }
             );
+            this.postMessage(['progress', 1]);
 
             var parkingNodes = data.map(mapParkingNode).filter(n => n !== undefined);
 
@@ -293,7 +328,6 @@ async function checkGroundnet(data) {
                             [parkingNode1.lng, parkingNode1.lat]);
                         if (d < parkingNode.radius + parkingNode1.radius + 10) {
                             // If bigger circles intersect we should check the boxes
-                            //debugger;
                             if (boxes[parkingNode.index] !== null && boxes[parkingNode1.index] !== null &&
                                 boxes[parkingNode.index] !== undefined && boxes[parkingNode1.index] !== undefined) {
                                 var poly1 = turf.polygon([boxes[parkingNode.index]]);
@@ -307,26 +341,27 @@ async function checkGroundnet(data) {
                             }
                         }
                     }
-                    this.postMessage(['progress', 1]);
+                    
                 });
             });
+            this.postMessage(['progress', 1]);
             var invalidParkings = [];
             // Check for name
             parkingNodes.forEach(parkingNode => {
                 if (!parkingNode.name || /^\s*$/.test(parkingNode.name)) {
                     invalidParkings.push({ id: parkingNode.index, message: check_msg.NAME_EMPTY });
-                    this.postMessage(['progress', 1]);
+                    
                 }
                 if (!parkingNode.type) {
                     invalidParkings.push({ id: parkingNode.index, message: check_msg.TYPE_EMPTY });
-                    this.postMessage(['progress', 1]);
+                    
                 }
                 if (['ga', 'cargo', 'gate', 'mil-fighter', 'mil-cargo'].indexOf(parkingNode.parkingType) < 0) {
-                    //debugger;
-                    invalidParkings.push({ id: parkingNode.index, message: check_msg.PARKING_TYPE_INVALID });
-                    this.postMessage(['progress', 1]);
+                    invalidParkings.push({ id: parkingNode.index, message: check_msg.PARKING_TYPE_INVALID });                    
                 }
             });
+            this.postMessage(['progress', 1]);
+            this.postMessage(['progress', 1]);
 
             //Check for dual pushback/runway nodes
             runwayNodeIDs.forEach(runwayNode => {
@@ -334,22 +369,22 @@ async function checkGroundnet(data) {
                     notOkNodes.push({ id: runwayNode, message: check_msg.DUAL_PUSHBACK });
                 }
             });
+            this.postMessage(['progress', 1]);
             //Check if runwaynodes are on runway
             runwayNodes.forEach(runwayNode => {
-                //debugger;                
                 if( runways.filter(r => turf.booleanContains(r, latToTurf(runwayNode))).length === 0 ) {
                     notOkNodes.push({ id: runwayNode.index, message: check_msg.RUNWAY_NODE_NOT_ON_RUNWAY });
                 } 
             });
+            this.postMessage(['progress', 1]);
 
             //Check if nodes no normal nodes are on runway
-            // debugger;                
             normalNodes.forEach(normalNode => {
                 if( runways.filter(r => turf.booleanContains(r, latToTurf(normalNode))).length > 0 ) {
-                    //debugger;
                     notOkNodes.push({ id: normalNode.index, message: check_msg.NON_RUNWAYNODE_ON_RUNWAY });
                 } 
             });
+            this.postMessage(['progress', 1]);
 
             notOkNodes = notOkNodes.concat(invalidParkings);
             if (invalidParkings.length === 0) {
@@ -373,15 +408,17 @@ async function checkGroundnet(data) {
                 notOkNodes.push({ id: -1, message: check_msg.ROUTES_FROM_RUNWAYS_OK });
             }
             notOkNodes = notOkNodes.concat(wrongPushbackRoutes);
-            if (wrongPushbackRoutes.length === 0) {
+            notOkNodes = notOkNodes.concat(notConnectedToPushback);
+            notOkNodes = notOkNodes.concat(multipleTaxiRoutes);
+            notOkNodes = notOkNodes.concat(pushbackExitNotBidirectional);
+            if (wrongPushbackRoutes.length === 0 &&             
+                notConnectedToPushback.length === 0 && 
+                multipleTaxiRoutes.length === 0 &&
+                pushbackExitNotBidirectional.length === 0
+            ) {
                 notOkNodes.push({ id: -1, message: check_msg.PUSHBACK_ROUTES_OK });
             }
-            //        check1(directionalGraph);
-            //        check2();
-            //        this.postMessage(['progress', 1]);
-            debugger;
             resolve(notOkNodes);
-
         } catch (error) {
             reject(error);
         }
