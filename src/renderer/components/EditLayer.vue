@@ -638,7 +638,7 @@ You should have received a copy of the GNU General Public License along with FG 
       },
       editedParkings() {
         if (this.featureLookup===undefined) {
-          console.warn("Lookup undefinded");          
+          console.warn("Lookup undefined");          
           this.buildLookup()
         }
         if (this.featureLookup===undefined) {
