@@ -89,6 +89,12 @@ You should have received a copy of the GNU General Public License along with FG 
     name: 'leaflet-sidebar',
     components: { Help, AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, ParkingGroupEdit, RunScan, FileSelect, SettingsPanel, Search, WorkInProgress },
     props: [],
+    created () {
+      window.addEventListener('keydown', this.doCommand)
+    },
+    destroyed () {
+      window.removeEventListener('keydown', this.doCommand)
+    },
     mounted () {
       this.add()
     },
@@ -100,6 +106,13 @@ You should have received a copy of the GNU General Public License along with FG 
       }
     },
     methods: {
+      doCommand (e) {
+        let cmd = String.fromCharCode(e.keyCode).toLowerCase()
+        if (e.keyCode === 46 /** DEL */) {
+          this.$parent.$parent.$refs.editLayer.deleteFeature()
+        }
+        console.log(cmd)
+      },
       deferredMountedTo (parent) {
         this.sidebar = L.control.sidebar({
           autopan: false, // whether to maintain the centered map point when opening the sidebar

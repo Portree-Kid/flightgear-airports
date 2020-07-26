@@ -204,6 +204,13 @@ You should have received a copy of the GNU General Public License along with FG 
           console.log('make a check worker: ', path.resolve(__dirname, 'check.js'))
 
           const worker = new Worker(winURL)
+          worker.onError = function(e) {
+            worker.terminate() 
+            worker.view.max = 0
+            worker.view.checkDialogVisible = false
+            e.preventDefault(); // <-- "Hey browser, I handled it!"
+          }
+
           console.log(fileUrl('src/renderer/utils/check.js'))
 
           worker.checking = this.checking
@@ -251,12 +258,6 @@ You should have received a copy of the GNU General Public License along with FG 
               }
             }
             // console.log(e.data)
-          }
-          worker.onError = function(e) {
-            worker.terminate()
-            worker.view.max = 0
-            worker.view.checkDialogVisible = false
-            e.preventDefault(); // <-- "Hey browser, I handled it!"
           }
         } catch (err) {
           console.error(err)
