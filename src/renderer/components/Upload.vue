@@ -4,12 +4,11 @@
         <el-progress :percentage="Number(((progress / max)*100).toPrecision(3))" v-if="max>0"></el-progress>
       </span>
       <span v-if="results.length>0" style="color: red">{{results.length}} Errors please correct first</span><br/>
-      <span style="center">E-Mail : {{this.$store.state.Settings.settings.email}}</span><br/>
-      <span style="center"><el-checkbox v-model="gplv2">I agree to release the groundnet under GPL v2</el-checkbox></span><br/>
-      <span style="center" v-if="message">{{message}}</span><br/>
-      <span style="error" v-if="error">{{message}}</span><br/>
+      <span class="center">E-Mail : {{this.$store.state.Settings.settings.email}}</span><br/>
+      <span class="center"><el-checkbox v-model="gplv2" class="center">I agree to release the groundnet under GPL v2</el-checkbox></span><br/>
+      <span :class="textClass" v-if="message">{{message}}</span><br/>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="upload" :disabled="!comittable">Ok</el-button>
+        <el-button @click="handleOkClicked" :disabled="!comittable">{{buttonText}}</el-button>
       </span>
     </el-dialog>
 </template>
@@ -30,7 +29,7 @@
     },
     data () {
       return {
-        gplv2: false, message: null, error: false, progress: 0, max: 0, azure: false
+        gplv2: false, message: null, error: false, progress: 0, max: 0, azure: false, success: false, uploading: false, buttonText: 'Upload'
       }
     },
     methods: {
@@ -38,6 +37,7 @@
         if(JSON.parse(e.srcElement.response).status==='OK') {
           this.message = null;
           this.azure = true;
+          this.error = false;
         } else {
           this.message = 'Azure down';
         }            
@@ -45,12 +45,32 @@
       },
       status () {
         var xhr = new XMLHttpRequest();
+        var parent = this.$parent;
+
         this.message = 'Checking for Groundweb health'
         xhr.open('GET', 'http://groundweb.azurewebsites.net/groundnets/status', true);
+        xhr.onreadystatechange = function () {
+  	    	if (xhr.status !== 200){
+            parent.$refs.upload.message = 'Azure down';
+            parent.$refs.upload.error = true;
+            console.error(xhr);                      
+	       	}
+	      }
         xhr.addEventListener("load", this.reqListener); 
-        xhr.send();
+        try {
+          xhr.send();          
+        } catch (err) {
+          console.error(err);
+          this.error = true;          
+        }
       },
-      upload () {
+      handleOkClicked () {
+        if( this.success ) {
+          // Upload success close 
+          Vue.set(this.$parent, 'uploadVisible', false)
+          return;
+        }        
+        this.uploading = true;
         var f = path.join(this.$store.state.Settings.settings.airportsDirectory, 
         this.icao[0], 
         this.icao[1], 
@@ -78,13 +98,23 @@
         var parent = this.$parent;
         var messageField = this.message;
         // action after uploading happens
+        xhr.onreadystatechange = function () {
+  	    	if (xhr.status !== 200){
+            parent.$refs.upload.message = 'Upload Error'
+            parent.$refs.upload.error = true;
+            console.error(xhr);                      
+	       	}
+	      }
         xhr.onload = function(e) {
           console.log("File uploading completed! ");
           console.log(e);
+          parent.$refs.upload.uploading = false
           if (e.srcElement.status===500) {
             parent.$refs.upload.message == e.srcElement.statusText
           } else if(JSON.parse(e.srcElement.response).message.match('[A-Z0-9]* Imported Successfully')) {
-            Vue.set(parent, 'uploadVisible', false)
+            parent.$refs.upload.success = true
+            parent.$refs.upload.message = 'Uploaded Successfully'
+            parent.$refs.upload.buttonText = 'Ok'
             parent.$store.commit('UPLOAD_WIP', parent.$store.state.Airports.currentAirport.icao)
             
           } else if(JSON.parse(e.srcElement.response).message === 'XML Errors') {
@@ -105,7 +135,7 @@
 
         // do the uploading
         console.log("File uploading started!");
-        xhr.send(formData);
+        xhr.send(formData);          
       },
       pollData () {
         var workery = this.worker
@@ -139,14 +169,19 @@
           this.worker = worker
           var groundnet = []
 
+          if (!this.$parent.$parent.$parent.$refs.editLayer.groundnetLayerGroup) {
+            this.message = 'Groundnet not visible'
+          }
+          if (!this.$parent.$parent.$parent.$refs.pavementLayer.pavement) {
+            this.message = 'Pavement not visible'
+          }
           this.$parent.$parent.$parent.$refs.editLayer.groundnetLayerGroup.eachLayer(l => {
             console.log(l)
-          if (l instanceof L.Polyline) {
-            l._latlngs[0].glueindex = this.begin;
-            l._latlngs.slice(-1)[0].glueindex = this.end;
-            l.extensions(this)
-          }
-
+            if (l instanceof L.Polyline) {
+              l._latlngs[0].glueindex = this.begin;
+              l._latlngs.slice(-1)[0].glueindex = this.end;
+              l.extensions(this)
+            }
             groundnet.push(l)
           })
           var features = groundnet.map(mapper.checkMapper).filter(n => n)
@@ -199,6 +234,9 @@
           Vue.set(this.$parent, 'uploadVisible', newValue)
         }
       },
+      textClass: function () {
+        return !this.error?'center':'error'
+      },
       title: function () {
         return `Upload ${this.$parent.$parent.$parent.icao} to groundweb.`
       },
@@ -210,17 +248,17 @@
         }
       },
       comittable: function () {
-        return this.$store.state.Check.results.filter(a => a.id>=0).length === 0 && this.gplv2 && this.max === 0 && this.azure 
+        return this.$store.state.Check.results.filter(a => a.id>=0).length === 0 && this.gplv2 && this.max === 0 && this.azure && !this.uploading
       },
       results: function () {
         return this.$store.state.Check.results.filter(a => a.id>=0)
       }
-
     }
 }
 </script>
 
 <style scoped lang="scss">
-  .center { text-align: center; vertical-align: middle;}
-  .error { text-align: center; background-color: red;}
+  .center { text-align: center; vertical-align: middle; padding: 5px; font-size: 12pt; font-weight: normal;}
+  .error { text-align: center; color: red; padding: 5px; font-size: 12pt; font-weight: normal;}
+  .el-dialog--center .el-dialog__body { padding: 5px;}
 </style>
