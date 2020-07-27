@@ -33,15 +33,17 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         this.editLayer = editLayer;
         this._latlngs[0].glueindex = this.begin;
         this._latlngs.slice(-1)[0].glueindex = this.end;
-        if (typeof this.featureLookup[this.begin] === 'undefined') {
-            this.featureLookup[this.begin] = new Array();
+        if(this.featureLookup) {
+            if (typeof this.featureLookup[this.begin] === 'undefined') {
+                this.featureLookup[this.begin] = new Array();
+            }
+            if (typeof this.featureLookup[this.end] === 'undefined') {
+                this.featureLookup[this.end] = new Array();
+            }
+            this.featureLookup[this.begin].push(this);
+            this.featureLookup[this.end].push(this);
+            this.bidirectional = true;    
         }
-        if (typeof this.featureLookup[this.end] === 'undefined') {
-            this.featureLookup[this.end] = new Array();
-        }
-        this.featureLookup[this.begin].push(this);
-        this.featureLookup[this.end].push(this);
-        this.bidirectional = true;
     };
     taxiwaySegment.__proto__.select = function () {
         this.options.attributes.selected = true;

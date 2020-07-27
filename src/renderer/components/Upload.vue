@@ -117,7 +117,7 @@
             view.scanning = Boolean(workery.checking)
             workery.view = view
           }
-        }, 1000)
+        }, 500)
       },
       check () {
         try {
@@ -137,15 +137,27 @@
           worker.progress = 0
           // var worker = new Worker(fileUrl('src/renderer/utils/worker.js'))
           this.worker = worker
-          var xml = []
+          var groundnet = []
+
           this.$parent.$parent.$parent.$refs.editLayer.groundnetLayerGroup.eachLayer(l => {
             console.log(l)
-            xml.push(l)
+          if (l instanceof L.Polyline) {
+            l._latlngs[0].glueindex = this.begin;
+            l._latlngs.slice(-1)[0].glueindex = this.end;
+            l.extensions(this)
+          }
+
+            groundnet.push(l)
           })
+          var features = groundnet.map(mapper.checkMapper).filter(n => n)
+          var pavement = []
+          this.$parent.$parent.$parent.$refs.pavementLayer.pavement.eachLayer(l => {
+            console.log(l)
+            pavement.push(l)
+          })
+          var features2 = pavement.map(mapper.checkMapper).filter(n => n)          
 
-          var features = xml.map(mapper.checkMapper).filter(n => n)
-
-          worker.postMessage(['check', features ] )
+          worker.postMessage(['check', features.concat(features2) ] )
           this.pollData()
           // the reply
           var store = this.$store

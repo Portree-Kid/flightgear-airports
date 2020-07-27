@@ -190,7 +190,7 @@ You should have received a copy of the GNU General Public License along with FG 
             view.scanning = Boolean(workery.checking)
             workery.view = view
           }
-        }, 1000)
+        }, 500)
       },
       test() {
         this.$parent.$parent.$refs.editLayer.test()

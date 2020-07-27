@@ -31,9 +31,8 @@ export function checkMapper(o) {
             'box': o.box !== undefined ? o.box.getLatLngs() : null
         };
     } else if (o instanceof L.RunwayNode) {
-        console.log(o)
-        
-    return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'lat': o._latlng.lat, 'lng': o._latlng.lng, 'type': 'runway' };
+        console.log(o)        
+        return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'lat': o._latlng.lat, 'lng': o._latlng.lng, 'type': 'runway' };
     } else if (o instanceof L.HoldNode) {
         console.log(o)
         return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'type': o.holdPointType };
@@ -44,7 +43,6 @@ export function checkMapper(o) {
         }
     } else if (o instanceof L.Polyline) {
         console.log(o)
-        //_latlngs[""0""].__vertex.glueindex
         var latLngs = o.getLatLngs().map(l => ({ lat: l.lat, lng: l.lng, index: l.glueindex }));
         if (o.options.attributes===undefined) {
           return null;

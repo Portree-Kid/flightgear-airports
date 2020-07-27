@@ -98,11 +98,11 @@ async function checkGroundnet(data) {
 
             console.log(edges);
             if (edges === undefined) {
-                resolve({ id: -1, message: check_msg.NO_EDGES });
+                resolve([{ id: -1, message: check_msg.NO_EDGES }]);
             }
             this.postMessage(['progress', 1]);
             if (runways.length === 0) {
-                resolve({ id: -1, message: check_msg.NO_RUNWAYS });
+                resolve([{ id: -1, message: check_msg.NO_RUNWAYS }]);
             }
             this.postMessage(['progress', 1]);
             edges.forEach(edge => {
@@ -380,6 +380,7 @@ async function checkGroundnet(data) {
 
             //Check if nodes no normal nodes are on runway
             normalNodes.forEach(normalNode => {
+                //debugger;
                 if( runways.filter(r => turf.booleanContains(r, latToTurf(normalNode))).length > 0 ) {
                     notOkNodes.push({ id: normalNode.index, message: check_msg.NON_RUNWAYNODE_ON_RUNWAY });
                 } 
