@@ -74,6 +74,16 @@
 
           const worker = new Worker(winURL)
           console.log(fileUrl('src/renderer/utils/worker.js'))
+          worker.onerror = function (e) {
+            console.error(e)
+            worker.terminate()
+            worker.scanning = false
+            worker.view.progress = 0
+            worker.view.max = 0
+            worker.view.worker = null
+            clearInterval(this.polling)
+            e.preventDefault()
+          }
 
           worker.scanning = this.scanning
           worker.max = this.max
@@ -121,6 +131,16 @@
 
           const worker = new Worker(winURL)
           console.log(fileUrl('src/renderer/utils/worker.js'))
+          worker.onerror = function (e) {
+            console.error(e)
+            worker.terminate()
+            worker.scanning = false
+            worker.view.progress = 0
+            worker.view.max = 0
+            worker.view.worker = null
+            clearInterval(this.polling)
+            e.preventDefault()
+          }
 
           worker.scanning = this.scanning
           worker.max = this.max
@@ -169,6 +189,16 @@
 
           const worker = new Worker(winURL)
           console.log(fileUrl('src/renderer/utils/worker.js'))
+          worker.onerror = function (e) {
+            console.error(e)
+            worker.terminate()
+            worker.scanning = false
+            worker.view.progress = 0
+            worker.view.max = 0
+            worker.view.worker = null
+            clearInterval(this.polling)
+            e.preventDefault()
+          }
           this.scanning = true
           worker.scanning = this.scanning
           worker.max = this.max

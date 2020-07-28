@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License along with FG 
  * @param {*} callback 
  */
 
+const { Debugger } = require("electron");
+
 async function asyncForEach(array, callback) {
   logger('info', "AsyncForEach Len " + array.length);
   for (let index = 0; index < array.length; index++) {
@@ -46,7 +48,7 @@ async function scanGroundnetFiles(p, features) {
     try {
       logger('info', 'Start Groundnets ' + p);
       var files = traverseDir(p);
-      this.postMessage(['max', files.length]);
+      this.postMessage(['max', files.length*2]);
       logger('info', files);
 
       asyncForEach(files, async f => {
@@ -376,6 +378,7 @@ function store(icao, airlines, value) {
 async function readGroundnet(f, features) {
   var promise = new Promise(function (resolve, reject) {
     try {
+      var thisPostMessage = this.postMessage;
       var filename = path.basename(f).match('^([^.]+)\\.([^.]+)(\\.new)?\\.([^.]+)');
       if (filename == null) {
         resolve("File didn't match");
@@ -470,12 +473,10 @@ async function readGroundnet(f, features) {
                   }
                   if(filename [3] === '.new') {
                     feature['properties']['wipgroundnet'] = nodes && nodes.node ? nodes.node.length : 0;
-                    //debugger;
                     feature['properties']['wipparking'] = parkingnodes && parkingnodes.Parking ? parkingnodes.Parking.length : 0;
   
                   } else {
                     feature['properties']['groundnet'] = nodes && nodes.node ? nodes.node.length : 0;
-                    //debugger;
                     feature['properties']['parking'] = parkingnodes && parkingnodes.Parking ? parkingnodes.Parking.length : 0;  
                   }
                 }
@@ -490,6 +491,7 @@ async function readGroundnet(f, features) {
               // report on the success of the transaction completing, when everything is done
               transaction.oncomplete = function (event) {
                 logger('info', 'Write Transaction complete ' + event);
+                thisPostMessage(['progress', 1]);
                 resolve("Stored " + filename[1]);
               };
 
@@ -512,7 +514,7 @@ async function readGroundnet(f, features) {
               };
             }
             objectStoreRequest.onerror = function (event) {
-              logger('info', "Read Errpr : " + event);
+              logger('info', "Read Error : " + event);
               resolve(event);
             }
           }
