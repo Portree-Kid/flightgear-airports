@@ -94,7 +94,7 @@ const mutations = {
     Vue.set(state.data.arc, 'name', arcName)
   },
   'SET_EDIT_PUSHBACK' (state, isPushBackRoute) {
-    Vue.set(state.data.arc, 'isPushBackRoute', isPushBackRoute)
+    Vue.set(state.data.arc, 'isPushBackRoute', Number(isPushBackRoute))
   },
   'SET_EDIT_DIRECTION' (state, direction) {
     Vue.set(state.data.arc, 'direction', direction)
