@@ -78,6 +78,64 @@ You should have received a copy of the GNU General Public License along with FG 
     name: 'flightgear-map',
     components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, AiLayer, EditBar, ToolBar, EditLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer, ToolLayer },
     props: [],
+    created () {
+      this.loadingInstance = null
+      this.$store.watch(
+        function (state) {
+          return state.Loading.groundnetLoaded
+        },
+        (newValue, oldValue) => {
+          // debugger
+          console.log('groundnetLoaded ' + oldValue + ' => ' + newValue + ' ' + this.groundnetLoaded + ' ' + this.pavementLoaded + ' ' + this.loadingInstance)
+          if (newValue !== oldValue) {
+            this.groundnetLoaded = newValue
+            if (!(this.groundnetLoaded &&
+                this.pavementLoaded) &&
+                (this.loadingInstance === null || this.loadingInstance === undefined)) {
+              this.loadingInstance = Loading.service({ fullscreen: false })
+            }
+            if (this.groundnetLoaded &&
+                this.pavementLoaded &&
+                this.loadingInstance !== null) {
+              this.loadingInstance.close()
+              this.loadingInstance = null
+            }
+          }
+        }
+        ,
+        {
+          deep: false,
+          immediate: true
+        }
+      )
+      this.$store.watch(
+        function (state) {
+          return state.Loading.pavementLoaded
+        },
+        (newValue, oldValue) => {
+          console.log('pavementLoaded ' + oldValue + ' => ' + newValue + ' ' + this.groundnetLoaded + ' ' + this.pavementLoaded + ' ' + this.loadingInstance)
+          if (newValue !== oldValue) {
+            this.pavementLoaded = newValue
+            if (!(this.groundnetLoaded &&
+                this.pavementLoaded) &&
+                (this.loadingInstance === null || this.loadingInstance === undefined)) {
+              this.loadingInstance = Loading.service({ fullscreen: false })
+            }
+            if (this.groundnetLoaded &&
+                this.pavementLoaded &&
+                this.loadingInstance !== null) {
+              this.loadingInstance.close()
+              this.loadingInstance = null
+            }
+          }
+        }
+        ,
+        {
+          deep: false,
+          immediate: true
+        }
+      )
+    },
     mounted () {
       this.$store.dispatch('getAirports')
       this.$store.subscribe((mutation, state) => {
@@ -88,13 +146,10 @@ You should have received a copy of the GNU General Public License along with FG 
             .filter(feature => this.visible(feature))
             .map(feature => feature.properties.icao)
           if (airportsToLoad.length > 0 && airportsToLoad[0] !== this.editingAirport && this.zoom > 12) {
-            let loadingInstance = Loading.service({ fullscreen: true })
-
             this.$nextTick(() => { // Loading should be closed asynchronously
               this.$refs.pavementLayer.load(airportsToLoad[0])
               this.$refs.editLayer.load(airportsToLoad[0])
               this.$refs.thresholdLayer.load(airportsToLoad[0])
-              loadingInstance.close()
               this.editingAirport = airportsToLoad[0]
             })
           }
@@ -111,6 +166,9 @@ You should have received a copy of the GNU General Public License along with FG 
     },
     data () {
       return {
+        loadingInstance: Object,
+        groundnetLoaded: false,
+        pavementLoaded: false,
         url: 'https://a.tile.openstreetmap.de/{z}/{x}/{y}.png',
         attribution: '<A href="https://github.com/Portree-Kid/flightgear-airports" target="_blank">Flightgear Airports ' + require('electron').remote.app.getVersion() +
         '</A> <A href="https://www.electronjs.org/" target="_blank">Electron</A> ' +

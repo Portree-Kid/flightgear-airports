@@ -26,6 +26,31 @@
     name: 'upload',
     props: [],
     mounted () {
+      this.$store.watch(
+        function (state) {
+          return state.Loading.groundnetLoaded;
+        },
+              () => { if(this.$store.state.Loading.groundnetLoaded && 
+              this.$store.state.Loading.pavementLoaded && 
+              this.visible) this.check() }
+              ,
+              {
+                deep: false
+              }
+        );
+      this.$store.watch(
+        function (state) {
+          return state.Loading.pavementLoaded;
+        },
+              () => { if(this.$store.state.Loading.groundnetLoaded && 
+              this.$store.state.Loading.pavementLoaded && 
+              this.visible) this.check() }
+              ,
+              {
+                deep: false
+              }
+        );
+
     },
     data () {
       return {
@@ -44,6 +69,7 @@
 
       },
       status () {
+        this.azure = false;
         var xhr = new XMLHttpRequest();
         var parent = this.$parent;
 
@@ -151,14 +177,18 @@
       },
       check () {
         try {
+          if(!(this.$store.state.Loading.groundnetLoaded && 
+              this.$store.state.Loading.pavementLoaded)) {
+                return
+              }
           this.scanning = true
           const winURL = process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/src/renderer/utils/check.js`
             : `file://${process.resourcesPath}/workers/check.js`
-          console.log('make a check worker: ', path.resolve(__dirname, 'check.js'))
+          console.debug('make a check worker: ', path.resolve(__dirname, 'check.js'))
 
           const worker = new Worker(winURL)
-          console.log(fileUrl('src/renderer/utils/check.js'))
+          console.debug(fileUrl('src/renderer/utils/check.js'))
 
           worker.checking = this.checking
           worker.max = this.max
@@ -169,13 +199,13 @@
           this.worker = worker
           var groundnet = []
 
-          if (!this.$parent.$parent.$parent.$refs.editLayer.groundnetLayerGroup) {
+          if (!this.editLayer().groundnetLayerGroup) {
             this.message = 'Groundnet not visible'
           }
-          if (!this.$parent.$parent.$parent.$refs.pavementLayer.pavement) {
+          if (!this.pavementLayer().pavement) {
             this.message = 'Pavement not visible'
           }
-          this.$parent.$parent.$parent.$refs.editLayer.groundnetLayerGroup.eachLayer(l => {
+          this.editLayer().groundnetLayerGroup.eachLayer(l => {
             console.log(l)
             if (l instanceof L.Polyline) {
               l._latlngs[0].glueindex = this.begin;
@@ -186,7 +216,7 @@
           })
           var features = groundnet.map(mapper.checkMapper).filter(n => n)
           var pavement = []
-          this.$parent.$parent.$parent.$refs.pavementLayer.pavement.eachLayer(l => {
+          this.pavementLayer().pavement.eachLayer(l => {
             console.log(l)
             pavement.push(l)
           })
@@ -221,7 +251,21 @@
         } catch (err) {
           console.error(err)
         }
-      }
+      },
+      editLayer () {
+        if(this.$parent.$parent.$parent.icao) {
+           return this.$parent.$parent.$parent.$refs.editLayer
+        } else {
+           return this.$parent.$parent.$parent.$parent.$parent.$parent.$refs.editLayer
+        }
+      },      
+      pavementLayer () {
+        if(this.$parent.$parent.$parent.icao) {
+           return this.$parent.$parent.$parent.$refs.pavementLayer
+        } else {
+           return this.$parent.$parent.$parent.$parent.$parent.$parent.$refs.pavementLayer
+        }
+      }      
     },
     computed: {
       visible: {
@@ -238,7 +282,11 @@
         return !this.error?'center':'error'
       },
       title: function () {
-        return `Upload ${this.$parent.$parent.$parent.icao} to groundweb.`
+        if(this.$parent.$parent.$parent.icao !== undefined) {
+           return `Upload ${this.$parent.$parent.$parent.icao} to groundweb.`
+        } else if (this.$parent.$parent.$parent.$refs.editLayer !== undefined) {
+           return `Upload ${this.$parent.$parent.$parent.$refs.editLayer.icao} to groundweb.`
+        }
       },
       icao: {
         get: function () {
@@ -253,7 +301,7 @@
       results: function () {
         return this.$store.state.Check.results.filter(a => a.id>=0)
       }
-    }
+    },
 }
 </script>
 

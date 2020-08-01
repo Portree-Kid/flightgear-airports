@@ -22,6 +22,8 @@ You should have received a copy of the GNU General Public License along with FG 
   import L2 from 'leaflet-textpath'
   import Vue from 'vue'
   import { MessageBox } from 'element-ui';
+  import { EventBus } from './event-bus.js';
+
   const turf = require('@turf/turf')
 
 
@@ -131,24 +133,12 @@ You should have received a copy of the GNU General Public License along with FG 
             l.addListeners()
           }
         })
-        /*
-        this.groundnetLayerGroup.eachLayer(l => {
-          if (l instanceof L.TaxiwaySegment) {
-            var decorator = L.polylineDecorator(l, {
-              pattern: [
-              // defines a pattern of 10px-wide dashes, repeated every 20px on the line
-                {offset: 5, repeat: 50, symbol: L.Symbol.arrowHead({pixelSize: 15, pathOptions: {fillOpacity: 1, weight: 0}})}
-              ]
-            })
-            decorator.addTo(this.$parent.mapObject)
-          }
-        })
-        */
-
         console.log(this.groundnetLayerGroup.maxId)
 
         this.groundnetLayerGroup.addTo(this.$parent.mapObject)
         this.icao = icao
+        console.log(EventBus)
+        EventBus.$emit('i-got-clicked', 1);        
       },
       visible (feature) {
         let bounds = this.$store.state.Settings.bounds
@@ -644,7 +634,7 @@ You should have received a copy of the GNU General Public License along with FG 
         if (this.featureLookup===undefined) {
           return
         }
-        console.log('Edited Parkings : ' + this.$store.state.Parkings.items)
+        console.debug('Edited Parkings : ' + this.$store.state.Parkings.items)
         this.$store.state.Parkings.items.forEach( newElement => {
           console.debug(newElement);
           if(this.featureLookup[newElement.index]) {

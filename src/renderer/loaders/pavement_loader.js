@@ -16,6 +16,8 @@ const zlib = require('zlib');
 const LatLonEllipsoidal = require('geodesy/latlon-ellipsoidal-vincenty.js').default;
 const fs = require('fs');
 
+const store = require('../store');
+
 const buildRunwayPoly = require('../leaflet/Runway.js');
 
 /**
@@ -271,6 +273,8 @@ module.exports.readPavement = function (f, icao, cb) {
     var pavementLayerGroup = L.layerGroup();
     var currentFeature;
 
+    store.default.dispatch('setPavementLoaded', false);
+
     lineReader.createInterface({
         input: fs.createReadStream(f).pipe(zlib.createGunzip())
     }).on('line', function (line) {
@@ -293,9 +297,11 @@ module.exports.readPavement = function (f, icao, cb) {
             console.error('Error reading : ' + line + error);
         }
     }).on('error', function (err) {
+        store.default.dispatch('setPavementLoaded', true);
         console.error(err);
         lr.close();
     }).on('close', function () {
+        store.default.dispatch('setPavementLoaded', true);
         console.log("End");
         cb(pavementLayerGroup);
     });

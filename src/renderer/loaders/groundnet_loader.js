@@ -34,6 +34,7 @@ exports.addFeature = function (feature) {
 
 exports.readGroundnetXML = function (fDir, icao, force) {
     try {
+        store.default.dispatch('setGroundnetLoaded', false);
         var layerGroup = L.layerGroup();
         layerGroup.maxId = 0;
         var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.xml');
@@ -84,7 +85,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
             store.default.dispatch('setFrequencies', frequencies);
         
             var parkingNodes = xml.find('groundnet/parkingList/Parking');
-            console.log("Parking Nodes" + parkingNodes.length);
+            console.debug("Parking Nodes length" + parkingNodes.length);
 
             var merged = new Array();
 
@@ -174,6 +175,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                     if (!bidirectional) {
                         var beginlatlon = convert(beginNode.attr('lat') + " " + beginNode.attr('lon'));
                         var endlatlon = convert(endNode.attr('lat') + " " + endNode.attr('lon'));
+                        
                         var polyline = new L.Polyline([[beginlatlon.decimalLatitude, beginlatlon.decimalLongitude], [endlatlon.decimalLatitude, endlatlon.decimalLongitude]], { attributes: {} }).addTo(layerGroup);
                         extendTaxiSegment(polyline);
                         polyline.addListeners();
@@ -224,7 +226,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                     }
                 }
             }).sort();
-
+            store.default.dispatch('setGroundnetLoaded', true);
 
             return layerGroup;
         });

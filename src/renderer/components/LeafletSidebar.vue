@@ -11,6 +11,7 @@ You should have received a copy of the GNU General Public License along with FG 
 -->
 <template>
 <div id="sidebar" class="leaflet-sidebar collapsed">
+    <Upload :visible.sync="uploadVisible" ref="upload"></Upload>
     <!-- Nav tabs -->
     <div class="leaflet-sidebar-tabs">
         <ul role="tablist"> <!-- top aligned tabs -->
@@ -83,11 +84,12 @@ You should have received a copy of the GNU General Public License along with FG 
   import RunScan from './RunScan'
   import SettingsPanel from './SettingsPanel'
   import Search from './Search'
+  import Upload from './Upload'
   import WorkInProgress from './WorkInProgress'
 
   export default {
     name: 'leaflet-sidebar',
-    components: { Help, AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, ParkingGroupEdit, RunScan, FileSelect, SettingsPanel, Search, WorkInProgress },
+    components: { Help, AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, ParkingGroupEdit, RunScan, FileSelect, SettingsPanel, Search, Upload, WorkInProgress },
     props: [],
     created () {
       window.addEventListener('keydown', this.doCommand)
@@ -102,7 +104,7 @@ You should have received a copy of the GNU General Public License along with FG 
       this.remove()
     },
     data () {
-      return {
+      return { uploadVisible: false
       }
     },
     methods: {

@@ -58,9 +58,12 @@ You should have received a copy of the GNU General Public License along with FG 
   const $ = require('jquery');
   import 'element-ui/lib/theme-chalk/index.css'
   import {removeWip} from '../loaders/groundnet_functions'
+  import Vue from 'vue'
+  import { EventBus } from './event-bus.js';
 
   export default  {
     name: 'airport',
+    components: { },
     props: {airport: Object, editing: Boolean},
     mounted () {
       this.$forceUpdate();
@@ -83,7 +86,14 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$store.dispatch('removeWip', this.airport.icao);
       },
       upload() {
-
+        let airports = this.$store.state.Airports.airports
+          .filter(a => a.properties.icao.match(this.airport.icao))
+        if (airports.length > 0) {
+          this.$store.commit('CENTER', [airports[0].geometry.coordinates[1], airports[0].geometry.coordinates[0]])
+        }
+        Vue.set(this.$parent.$parent.$parent, 'uploadVisible', true)
+        this.$parent.$parent.$parent.$refs.upload.status()
+        this.$parent.$parent.$parent.$refs.upload.check()
       }
     },
     computed: {
