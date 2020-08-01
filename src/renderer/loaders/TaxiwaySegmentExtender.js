@@ -11,11 +11,13 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
     taxiwaySegment.__proto__.updateBeginVertex = function (latlng) {
         if (this._latlngs[0].__vertex) {
             this._latlngs[0].__vertex.setLatLng(latlng);
+            this.selectVertex(Number(this._latlngs[0].glueindex));
         }
     };
     taxiwaySegment.__proto__.updateEndVertex = function (latlng) {
         if (this._latlngs[1].__vertex) {
             this._latlngs[1].__vertex.setLatLng(latlng);
+            this.selectVertex(Number(this._latlngs[1].glueindex));
         }
     };
 
@@ -49,9 +51,9 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         this.options.attributes.selected = true;
         this.updateStyle();
     };
-    taxiwaySegment.__proto__.selectVertex = function () {
+    taxiwaySegment.__proto__.selectVertex = function (index) {
         this.getLatLngs().forEach( element => {
-            if (Number(element.glueindex) === store.default.state.Editable.index) {                
+            if (Number(element.glueindex) === index) {                
         if (element.__vertex._icon != null) {
             element.__vertex.__proto__.deselect = function () {
                 if (this._icon != null) {
@@ -137,12 +139,13 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         });
         this.on('editable:drawing:move', function (event) {
             if (dragIndex >= 0) {
+                this.selectVertex(dragIndex);
                 console.log('GlueDrag : '+ dragIndex + '\t' + event.target.dragIndex);
                 this.follow(dragIndex, event);
             }
         });
         this.on('editable:vertex:new', event => {
-            console.log(event)
+            console.debug('Vertex Move ' + event)
             // Find nearest node
             let closest = this.editLayer.closestLayerSnap(event.latlng, 5)
             let taxiwaySegment = event.latlng.__vertex.editor.feature;
@@ -213,7 +216,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                 } else {
                     this.editLayer.featureLookup[event.vertex.latlng.glueindex].forEach
                     store.default.dispatch('setNode', event.vertex.latlng)
-                    this.selectVertex()
+                    this.selectVertex(store.default.state.Editable.index)
                 }                    
             }
         });
@@ -225,6 +228,26 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                 return;
             console.log("Drag Start : ", event.vertex.latlng.glueindex);
             dragIndex = event.vertex.latlng.glueindex;
+            if (Number(store.default.state.Editable.index) >= 0 &&
+                this.featureLookup[store.default.state.Editable.index] !== undefined) {
+                this.featureLookup[store.default.state.Editable.index].forEach(element => {
+                    if(element.deselect !== undefined) {
+                        element.deselect();
+                    }
+                });
+            }
+            if (!this.editor.map.editTools.drawing()) {
+                var hold = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.HoldNode);
+                if (hold.length > 0) {
+                    hold[0].select();
+                }
+                var parking = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.ParkingSpot);
+                if (parking.length > 0) {
+                    parking[0].selectParking();
+                } else {
+                    this.selectVertex(Number(dragIndex))
+                }                    
+            }
         });
         this.on('editable:vertex:dragend', function (event) {
             console.log("Dragend : ", event.vertex);
@@ -255,7 +278,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                 var lines = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.Polyline);
                 Vue.default.nextTick(function () {
                     lines.forEach( line => {
-                        line.selectVertex()
+                        line.selectVertex(store.default.state.Editable.index)
                     });
                 })
             }
