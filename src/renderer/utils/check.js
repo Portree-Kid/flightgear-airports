@@ -56,7 +56,10 @@ onmessage = function (event) {
 async function checkGroundnet(data) {
     var promise = new Promise(function (resolve, reject) {
         try {
-            check_msg = JSON.parse(fs.readFileSync('./src/renderer/utils/check_msg.json', 'utf8').toString());
+            const fName = process.env.NODE_ENV === 'development'
+            ? './src/renderer/utils/check_msg.json'
+            : path.join(`${process.resourcesPath}`, 'workers','check_msg.json');
+            check_msg = JSON.parse(fs.readFileSync(fName, 'utf8').toString());
             //debugger;
             var parkings = data.map(mapParkings).filter(n => n !== undefined);
             var runwayNodeIDs = data.map(mapRunwayNodeId).filter(n => n !== undefined);
