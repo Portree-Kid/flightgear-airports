@@ -228,7 +228,11 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$refs.sidebar.setData(parkings)
       },
       onEdit (event) {
-        this.$refs.map.mapObject.options.minZoom = 13
+        if (this.$refs.editBar.isEditing) {
+          this.$refs.map.mapObject.options.minZoom = 13
+        } else {
+          this.$refs.map.mapObject.options.minZoom = 1
+        }
         this.$refs.editLayer.enableEdit()
         this.$refs.toolBar.setEdit(this.$refs.editBar.isEditing)
         this.$refs.sidebar.setEditing(this.$refs.editBar.isEditing)
