@@ -17,14 +17,41 @@
         <el-button type="primary" @click="addAirline">Confirm</el-button>
       </span>
     </el-dialog>
+    <el-dialog
+      title="Import File"
+      :visible.sync="showImportFile"
+      width="20%"
+      :before-close="handleClose">
+        <span>Beware wip will be overwritten</span>
+        <el-row>
+          <el-col :span="20">
+            <el-input
+            placeholder="Please input file"
+            v-model="fileImportName">
+            </el-input>
+          </el-col>
+          <el-col :span="4">
+            <file-select @input="fileImportFileName"></file-select>
+          </el-col>
+        </el-row>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showImportFile = false">Cancel</el-button>
+        <el-button type="primary" @click="importFile">Confirm</el-button>
+      </span>
+    </el-dialog>
     <h1 class="leaflet-sidebar-header">{{ icao }} {{ name }}</h1>
     <div width="100%" >
+        <el-row>
+            <el-button @click="showImportFile = true" v-if="!editing" ><i class="fas fa-file-import"></i></el-button>
+        </el-row>
         <el-row>
           <el-col :span="7"><span class="label"> Airlines :</span></el-col>
           <el-col :span="15">
             <el-tag v-for="item in airlines" :key="item.value">{{item.value}}</el-tag>
           </el-col>
-          <el-col :span="2"><el-button @click="dialogVisible = true" v-if="editing" ><i class="fas fa-plus"></i></el-button></el-col>
+          <el-col :span="2">
+            <el-button @click="dialogVisible = true" v-if="editing" ><i class="fas fa-plus"></i></el-button>
+          </el-col>
         </el-row>
     </div>
     <el-tabs v-model="activeTab" >
@@ -73,17 +100,35 @@
 </template>
 
 <script lang="js">
+  import EditButton from './EditButton'
+  import FileSelect from './FileSelect'
   import Frequency from './Frequency'
   import ParkingList from './ParkingList'
+  
+  const fs = require('fs')
+  const path = require('path')
 
 export default {
     data () {
-      return {activeTab: 'first', editing: false, dialogVisible: false, airlineCode: ''}
+      return {showImportFile: false, activeTab: 'first', editing: false, dialogVisible: false, airlineCode: '', fileImport: null}
     },
     components: {
-      Frequency, ParkingList
+      EditButton, FileSelect, Frequency, ParkingList
     },
     methods: {
+      fileImportFileName (f) {
+        this.fileImport = f
+      },
+      importFile () {
+        this.showImportFile = false
+        var fDir = this.$store.state.Settings.settings.airportsDirectory
+        var fNew = path.join(fDir, this.icao[0], this.icao[1], this.icao[2], this.icao + '.groundnet.new.xml')
+
+        var editLayer = this.$parent.$parent.$parent.$refs.editLayer
+        fs.copyFile(this.fileImport.path, fNew, () => {
+          editLayer.reload(false)
+        })
+      },
       setEditing (editing) {
         this.editing = editing
       },
@@ -108,6 +153,13 @@ export default {
       }
     },
     computed: {
+      fileImportName: function () {
+        if (this.fileImport !== null) {
+          console.log(this.fileImport)
+          return this.fileImport.path
+        }
+        return 'Please select'
+      },
       icao: function () {
         return this.$store.state.Airports.currentAirport.icao
       },

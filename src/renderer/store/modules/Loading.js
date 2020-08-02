@@ -12,9 +12,12 @@ You should have received a copy of the GNU General Public License along with FG 
 
 import Vue from 'vue'
 
-const state = { groundnetLoaded: false, pavementLoaded: false }
+const state = { icao: '', groundnetLoaded: false, pavementLoaded: false }
 
 const mutations = {
+  SET_ICAO_LOADING (state, icao) {
+    Vue.set(state, 'icao', icao)
+  },
   SET_GROUNDNET_LOADED (state, loaded) {
     Vue.set(state, 'groundnetLoaded', loaded)
   },
@@ -24,6 +27,9 @@ const mutations = {
 }
 
 const actions = {
+  async setIcaoLoading (context, p) {
+    context.commit('SET_ICAO_LOADING', p)
+  },
   async setGroundnetLoaded (context, p) {
     context.commit('SET_GROUNDNET_LOADED', p)
   },

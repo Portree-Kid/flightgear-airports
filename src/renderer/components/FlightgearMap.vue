@@ -68,7 +68,6 @@ You should have received a copy of the GNU General Public License along with FG 
 
   // https://github.com/KoRiGaN/Vue2Leaflet/issues/103
   delete L.Icon.Default.prototype._getIconUrl
-
   L.Icon.Default.mergeOptions({
     iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
     iconUrl: require('leaflet/dist/images/marker-icon.png'),
@@ -82,6 +81,26 @@ You should have received a copy of the GNU General Public License along with FG 
       this.loadingInstance = null
       this.$store.watch(
         function (state) {
+          return state.Loading.icao
+        },
+        (newValue, oldValue) => {
+          // debugger
+          console.log('setIcaoLoading ' + oldValue + ' => ' + newValue + ' ' + this.groundnetLoaded + ' ' + this.pavementLoaded + ' ' + this.loadingInstance)
+          if (newValue !== oldValue && newValue !== '') {
+            this.groundnetLoaded = newValue
+            if ((this.loadingInstance === null || this.loadingInstance === undefined)) {
+              this.loadingInstance = Loading.service({ fullscreen: false })
+            }
+          }
+        }
+        ,
+        {
+          deep: false,
+          immediate: true
+        }
+      )
+      this.$store.watch(
+        function (state) {
           return state.Loading.groundnetLoaded
         },
         (newValue, oldValue) => {
@@ -89,11 +108,6 @@ You should have received a copy of the GNU General Public License along with FG 
           console.log('groundnetLoaded ' + oldValue + ' => ' + newValue + ' ' + this.groundnetLoaded + ' ' + this.pavementLoaded + ' ' + this.loadingInstance)
           if (newValue !== oldValue) {
             this.groundnetLoaded = newValue
-            if (!(this.groundnetLoaded &&
-                this.pavementLoaded) &&
-                (this.loadingInstance === null || this.loadingInstance === undefined)) {
-              this.loadingInstance = Loading.service({ fullscreen: false })
-            }
             if (this.groundnetLoaded &&
                 this.pavementLoaded &&
                 this.loadingInstance !== null) {
@@ -116,11 +130,6 @@ You should have received a copy of the GNU General Public License along with FG 
           console.log('pavementLoaded ' + oldValue + ' => ' + newValue + ' ' + this.groundnetLoaded + ' ' + this.pavementLoaded + ' ' + this.loadingInstance)
           if (newValue !== oldValue) {
             this.pavementLoaded = newValue
-            if (!(this.groundnetLoaded &&
-                this.pavementLoaded) &&
-                (this.loadingInstance === null || this.loadingInstance === undefined)) {
-              this.loadingInstance = Loading.service({ fullscreen: false })
-            }
             if (this.groundnetLoaded &&
                 this.pavementLoaded &&
                 this.loadingInstance !== null) {
@@ -146,6 +155,7 @@ You should have received a copy of the GNU General Public License along with FG 
             .filter(feature => this.visible(feature))
             .map(feature => feature.properties.icao)
           if (airportsToLoad.length > 0 && airportsToLoad[0] !== this.editingAirport && this.zoom > 12) {
+            this.$store.dispatch('setIcaoLoading', airportsToLoad[0])
             this.$nextTick(() => { // Loading should be closed asynchronously
               this.$refs.pavementLayer.load(airportsToLoad[0])
               this.$refs.editLayer.load(airportsToLoad[0])
