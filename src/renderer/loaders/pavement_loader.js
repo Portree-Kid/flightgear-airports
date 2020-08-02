@@ -19,6 +19,7 @@ const fs = require('fs');
 const store = require('../store');
 
 const buildRunwayPoly = require('../leaflet/Runway.js');
+const buildTaxiwayPoly = require('../leaflet/Taxiway.js');
 
 /**
  * 
@@ -342,7 +343,7 @@ var scanMethods = {
           runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (bearing - 90)));
           runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing - 90)));            
 
-          var runwayPoly = buildRunwayPoly(runwayPoints);
+          var runwayPoly = buildTaxiwayPoly(runwayPoints);
           runwayPoly.addTo(layerGroup);
       }
     },
