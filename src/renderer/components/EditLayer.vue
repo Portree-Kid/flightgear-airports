@@ -847,9 +847,12 @@ You should have received a copy of the GNU General Public License along with FG 
         circle.glueindex = circle.id
         circle.addTo(this.groundnetLayerGroup)
         circle.featureLookup = this.featureLookup
+        circle.addListeners()
         circle.enableEdit()
         circle.extensions()
-        circle.addListeners()
+        circle.updateVertexFromDirection();     
+        circle.updateWheelPos();     
+        circle.updateBox(); 
         if (Number(this.$store.state.Editable.index) >= 0 &&
           this.featureLookup[this.$store.state.Editable.index]!==undefined) {
               this.featureLookup[this.$store.state.Editable.index].forEach(element => {

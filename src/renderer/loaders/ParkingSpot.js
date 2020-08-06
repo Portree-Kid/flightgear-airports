@@ -189,11 +189,14 @@ L.ParkingSpot = L.Circle.extend({
                         });
                     }
                     event.target._parkingSpot.select(); 
-                });        
-        
+                });
+                if(this.editor && this.editor.editLayer) {
+                    this.box.addTo(this.editor.editLayer);
+                }
             }
             if(this.box!==undefined) {
                 var latlngs = [leftBack, rightBack, rightMiddle, rightIntermediate, rightFront, leftFront, leftIntermediate, leftMiddle].map(l => this.turfToLatLng(l));
+                console.debug(latlngs);
                 this.box.setLatLngs(latlngs);
             }
         }     
@@ -216,10 +219,10 @@ L.ParkingSpot = L.Circle.extend({
         if(this.direction) {
             this.direction.setStyle(style);  
             this.frontWheel.setStyle(style);
-          }
+        }
         this.updateWheelPos();
         this.updateBox();
-        if(this.box) {
+        if(this.box) {            
             this.box.setStyle(style);
         }
     },    
