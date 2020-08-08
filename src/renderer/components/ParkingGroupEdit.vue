@@ -74,7 +74,7 @@
       <el-col :span="7">
         <span class="label">Heading :</span>
       </el-col>
-      <el-col :span="17">
+      <el-col :span="13">
         <el-input-number
           v-model="avgHeading" @change="headingChange"
           :min="-361"
@@ -83,6 +83,11 @@
           :precision="1"
           :disabled="!editing"
         ></el-input-number>
+      </el-col>
+      <el-col :span="4">
+          <el-button @click="rotate" class="button">
+            <i class="fas fa-ruler-combined"></i>
+          </el-button>
       </el-col>
     </el-row>
     <!--
@@ -136,6 +141,16 @@ const convert = require('geo-coordinates-parser');
     },
 
     methods: {
+      rotate() {
+        this.avgHeading = this.avgHeading + 90;
+        while (this.avgHeading>=360) {
+          this.avgHeading -= 360
+        }
+        while (this.avgHeading<0) {
+          this.avgHeading += 360
+        }
+        this.headingChange(this.avgHeading);
+      },
       show (idx) {
         this.$parent.$parent.$parent.$refs.editLayer.show(idx)
       }, 
