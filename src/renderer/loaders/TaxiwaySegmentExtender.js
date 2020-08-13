@@ -3,6 +3,7 @@ const Vue = require('vue');
 
 var L = require('leaflet');
 const store = require('../store');
+const util = require('util');
 
 exports.extendTaxiSegment = function (taxiwaySegment) {
     taxiwaySegment.__proto__.begin;
@@ -145,7 +146,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
             }
         });
         this.on('editable:vertex:new', event => {
-            console.debug('Vertex Move ' + event)
+            console.debug('editable:vertex:new ' + util.inspect(event));
             // Find nearest node
             let closest = this.editLayer.closestLayerSnap(event.latlng, 5)
             let taxiwaySegment = event.latlng.__vertex.editor.feature;
@@ -188,6 +189,7 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                     taxiwaySegment.end = Number(event.vertex.latlng.glueindex);
                 }
             }
+            //this.splitShape(taxiwaySegment.getLatLngs(), )
         });
         this.on('editable:vertex:deleted', event => {
             console.log('editable:vertex:deleted' + event)

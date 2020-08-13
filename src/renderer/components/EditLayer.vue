@@ -490,7 +490,7 @@ You should have received a copy of the GNU General Public License along with FG 
               }
               else {
                 element.getLatLngs().forEach((e1, index1) => {
-                  console.log(index1 + ' ' + e1);
+                  console.debug('' + index1 + ' ' + e1);
                   if (e1.attributes.index===index) {
                     var splitOffNodes = element.getLatLngs().splice(index1); 
                     element.editor.refresh();
