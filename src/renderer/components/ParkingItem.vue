@@ -30,14 +30,18 @@
         if (this.editLayer === null) {
           this.initLayer()
         }
-        return this.editLayer.show(idx)
+        if (this.editLayer) {
+          return this.editLayer.show(idx)
+        }
       },
       initLayer () {
         var parent = this.$parent
-        while (parent.$refs.editLayer === undefined) {
+        while (parent && !parent.$refs.editLayer) {
           parent = parent.$parent
         }
-        this.editLayer = parent.$refs.editLayer
+        if (parent) {
+          this.editLayer = parent.$refs.editLayer
+        }
       }
     },
     computed: {

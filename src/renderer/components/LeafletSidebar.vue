@@ -40,8 +40,8 @@ You should have received a copy of the GNU General Public License along with FG 
           <ParkingEdit></ParkingEdit>
           <ArcEdit></ArcEdit>
           <NodeEdit></NodeEdit>          
-          <ParkingGroupEdit ref="parkingGroupEdit"  @edit="(msg) => $emit('edit', msg)"></ParkingGroupEdit>
-          <AirportEdit  ref="airportEdit"></AirportEdit>
+          <ParkingGroupEdit ref="parkingGroupEdit"  @editParking="(msg) => $emit('editParking', msg)"></ParkingGroupEdit>
+          <AirportEdit  ref="airportEdit" @edit="$emit('edit', $event)"></AirportEdit>
         </div>
         <!--
         <div class="leaflet-sidebar-pane" id="parking">

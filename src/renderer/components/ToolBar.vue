@@ -42,7 +42,7 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$parent.$parent.$refs.toolLayer.stopDrawing()
         this.$parent.$parent.$refs.toolLayer.drawPolyline()
       },
-      setEdit (edit) {
+      setEditing (edit) {
         this.isEditing = edit;
         if(!this.isEditing) {
           this.$parent.$parent.$refs.toolLayer.stopDrawing()

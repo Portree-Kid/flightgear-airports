@@ -11,14 +11,12 @@ You should have received a copy of the GNU General Public License along with FG 
 -->
 <template>
   <div id="EditBar">
-    <Upload :visible.sync="uploadVisible" ref="upload"></Upload>
     <ZoomButton icon="fas fa-th" v-on:click="zoomin" :show="true" tooltip="Zoomin"></ZoomButton>
     <ZoomButton icon="fas fa-th-large" v-on:click="zoomout" :show="!editing" tooltip="Zoomout"></ZoomButton>
     <!--<ZoomButton icon="far fa-eye-slash" v-on:click="hideAPT" :show='true' tooltip="Hide APT"></ZoomButton>-->
 
-    <EditButton icon="fas fa-upload" v-on:click="upload" :show="!editing" tooltip="Upload"></EditButton>
-    <EditButton icon="fas fa-plane" v-on:click="test" :show="!editing" tooltip="Export"></EditButton>
-    <EditButton icon="fas fa-edit" v-on:click="edit" :show="!editing" tooltip="Edit"></EditButton>
+    <!--<EditButton icon="fas fa-upload" v-on:click="upload" :show="!editing" tooltip="Upload"></EditButton>-->
+    <!--<EditButton icon="fas fa-edit" v-on:click="edit" :show="!editing" tooltip="Edit"></EditButton>-->
     <EditButton
       icon="fas fa-undo"
       v-on:click="centerDialogVisible = true"
@@ -80,24 +78,18 @@ You should have received a copy of the GNU General Public License along with FG 
 
   import EditButton from './EditButton'
   import ZoomButton from './ZoomButton';
-  import Upload from './Upload'
   import Vue from 'vue'
 
   import fileUrl from 'file-url'
 
   export default {
-    components: { EditButton, Upload, ZoomButton },
+    components: { EditButton, ZoomButton },
     data () {
       return {isEditing: false, uploadVisible: false, centerDialogVisible: false, saveDialogVisible: false, checkDialogVisible: false, checking: false, progress: 0, max: 0, pavementLayerVisible: true}
     },
     created () {
     },
     methods: {
-      upload() {
-        this.uploadVisible = true
-        this.$refs.upload.status()
-        this.$refs.upload.check()
-      },
       zoomout() {
         this.$parent.$parent.$refs.editLayer.stopDrawing()
         this.$parent.$parent.zoomUpdated(9)
@@ -112,11 +104,14 @@ You should have received a copy of the GNU General Public License along with FG 
       },
       edit () {
         this.isEditing = true
-        this.$emit('edit')
+        this.$emit('edit', true)
+      },
+      setEditing (editing) {
+        this.isEditing = editing
       },
       undoFirst () {
         this.isEditing = false
-        this.$emit('edit')
+        this.$emit('edit', false)
         this.centerDialogVisible = false
         this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         this.$parent.$parent.$refs.editLayer.disableEdit()
@@ -124,7 +119,7 @@ You should have received a copy of the GNU General Public License along with FG 
       },
       undoLast () {
         this.isEditing = false
-        this.$emit('edit')
+        this.$emit('edit', false)
         this.centerDialogVisible = false
         this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         this.$parent.$parent.$refs.editLayer.disableEdit()
@@ -133,10 +128,10 @@ You should have received a copy of the GNU General Public License along with FG 
       save () {
         this.$parent.$parent.$refs.editLayer.stopDrawing()
         this.isEditing = false
-        this.$emit('edit')
+        this.$emit('edit', false)
         this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         Vue.set(this, 'saveDialogVisible', true)
-        this.$emit('edit')
+        this.$emit('edit', false)
         Vue.nextTick( function () {
             setTimeout( this.saveDefered.bind(this), 100);
           }, this)
@@ -191,9 +186,6 @@ You should have received a copy of the GNU General Public License along with FG 
             workery.view = view
           }
         }, 500)
-      },
-      test() {
-        this.$parent.$parent.$refs.editLayer.test()
       },
       check () {
         try {

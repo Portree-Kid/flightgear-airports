@@ -28,7 +28,7 @@ You should have received a copy of the GNU General Public License along with FG 
     </l-control>
     -->
     <!--<l-marker :lat-lng="marker"></l-marker>-->
-    <LeafletSidebar ref="sidebar" @edit="onEditSidebar"></LeafletSidebar>
+    <LeafletSidebar ref="sidebar" @editParking="onEditSidebar" @edit="onEdit($event)"></LeafletSidebar>
     <AiLayer ref="aiLayer"></AiLayer> 
     <PavementLayer ref="pavementLayer"></PavementLayer>    
     <ThresholdLayer ref="thresholdLayer"></ThresholdLayer>
@@ -45,7 +45,7 @@ You should have received a copy of the GNU General Public License along with FG 
     </l-layer-group>
     <EditLayer ref="editLayer"></EditLayer>
     <ToolLayer ref="toolLayer" @select-poly="onSelectedPolygon"></ToolLayer>
-    <EditBar ref="editBar" @edit="onEdit"></EditBar>
+    <EditBar ref="editBar" @edit="onEdit($event)"></EditBar>
     <ToolBar ref="toolBar"></ToolBar>
   </l-map>
 </template>
@@ -228,14 +228,15 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$refs.sidebar.setData(parkings)
       },
       onEdit (event) {
-        if (this.$refs.editBar.isEditing) {
+        if (event) {
           this.$refs.map.mapObject.options.minZoom = 13
         } else {
           this.$refs.map.mapObject.options.minZoom = 1
         }
         this.$refs.editLayer.enableEdit()
-        this.$refs.toolBar.setEdit(this.$refs.editBar.isEditing)
-        this.$refs.sidebar.setEditing(this.$refs.editBar.isEditing)
+        this.$refs.editBar.setEditing(event)
+        this.$refs.toolBar.setEditing(event)
+        this.$refs.sidebar.setEditing(event)
       },
       onEditSidebar (event) {
         this.$refs.editLayer.onEdit(event)

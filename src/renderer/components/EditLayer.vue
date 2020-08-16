@@ -976,11 +976,18 @@ You should have received a copy of the GNU General Public License along with FG 
         try { fs.mkdirSync(path.join(this.$store.state.Settings.settings.testDirectory, 'Airports', this.icao[0], this.icao[1]), { recursive: true })} catch (err) { }
         try { fs.mkdirSync(path.join(this.$store.state.Settings.settings.testDirectory, 'Airports', this.icao[0], this.icao[1], this.icao[2]), { recursive: true })} catch (err) { }
 
-        fs.copyFileSync(f, fNew)
-        this.$message({
-          type: 'info',
-          message: `Copied to ${fNew}`
-        });
+        try {
+          fs.copyFileSync(f, fNew)
+          this.$message({
+            type: 'info',
+            message: `Copied to ${fNew}`
+          });          
+        } catch (error) {
+          this.$message({
+            type: 'error',
+            message: `Copy error : ${error}`
+          });                    
+        }
       },
       setVisible(visible) {
         if (this.layerGroup) {          

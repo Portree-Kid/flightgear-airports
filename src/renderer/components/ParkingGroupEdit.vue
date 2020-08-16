@@ -173,7 +173,7 @@ const convert = require('geo-coordinates-parser');
       }, 
       wingspanChange( newValue ) {
           if ( newValue ) {
-            this.$emit('edit', {type: 'parking-group-wingspan', wingspan: newValue} )
+            this.$emit('editParking', {type: 'parking-group-wingspan', wingspan: newValue} )
           }
       }, 
       headingChange( newValue ) {

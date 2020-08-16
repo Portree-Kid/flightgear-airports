@@ -253,10 +253,12 @@
         }
       },
       editLayer () {
-        if(this.$parent.$parent.$parent.icao) {
-           return this.$parent.$parent.$parent.$refs.editLayer
-        } else {
-           return this.$parent.$parent.$parent.$parent.$parent.$parent.$refs.editLayer
+        var parent = this.$parent;
+        while (!parent.icao) {
+          parent = this.$parent;
+          if (parent.icao) {
+            return parent.$refs.editLayer;
+          }
         }
       },      
       pavementLayer () {

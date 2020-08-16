@@ -1,5 +1,17 @@
+<!--
+Copyright 2020 Keith Paterson
+
+This file is part of FG Airports.
+
+FG Airports is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+FG Airports is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with FG Airports. If not, see http://www.gnu.org/licenses/.
+-->
 <template>
   <div v-if="airport">
+    <Upload :visible.sync="uploadVisible" ref="upload"></Upload>
     <el-dialog
       title="Add Airline"
       :visible.sync="dialogVisible"
@@ -11,7 +23,6 @@
             v-model="airlineCode"
             maxlength="3"
           ></el-input>
-
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">Cancel</el-button>
         <el-button type="primary" @click="addAirline">Confirm</el-button>
@@ -42,7 +53,42 @@
     <h1 class="leaflet-sidebar-header">{{ icao }} {{ name }}</h1>
     <div width="100%" >
         <el-row>
-            <el-button @click="showImportFile = true" v-if="!editing" ><i class="fas fa-file-import"></i></el-button>
+          <el-popover
+            placement="top-start"
+            title="Description"
+            width="200"
+            trigger="hover"
+            content="Edit"
+          >
+              <el-button @click="edit" v-if="!editing"  slot="reference"><i class="fas fa-edit"></i></el-button>
+          </el-popover>
+          <el-popover
+            placement="top-start"
+            title="Description"
+            width="200"
+            trigger="hover"
+            content="Import groundnet"
+          >
+              <el-button @click="showImportFile = true" v-if="!editing" slot="reference"><i class="fas fa-file-import"></i></el-button>
+          </el-popover>
+          <el-popover
+            placement="top-start"
+            title="Description"
+            width="220"
+            trigger="hover"
+            content="Export groundnet to export directory"
+          >
+              <el-button @click="test" v-if="!editing"  slot="reference"><i class="fas fa-file-export"></i></el-button>
+          </el-popover>
+          <el-popover
+            placement="top-start"
+            title="Description"
+            width="200"
+            trigger="hover"
+            content="Upload Airport"
+          >
+              <el-button @click="upload" v-if="!editing"  slot="reference"><i class="fas fa-upload"></i></el-button>
+          </el-popover>
         </el-row>
         <el-row>
           <el-col :span="7"><span class="label"> Airlines :</span></el-col>
@@ -104,20 +150,33 @@
   import FileSelect from './FileSelect'
   import Frequency from './Frequency'
   import ParkingList from './ParkingList'
+  import Upload from './Upload'
   
   const fs = require('fs')
   const path = require('path')
 
 export default {
     data () {
-      return {showImportFile: false, activeTab: 'first', editing: false, dialogVisible: false, airlineCode: '', fileImport: null}
+      return {showImportFile: false, activeTab: 'first', editing: false, uploadVisible: false, dialogVisible: false, airlineCode: '', fileImport: null}
     },
     components: {
-      EditButton, FileSelect, Frequency, ParkingList
+      EditButton, FileSelect, Frequency, ParkingList, Upload
     },
     methods: {
       fileImportFileName (f) {
         this.fileImport = f
+      },
+      edit () {
+        this.isEditing = true
+        this.$emit('edit', true)
+      },
+      upload () {
+        this.uploadVisible = true
+        this.$refs.upload.status()
+        this.$refs.upload.check()
+      },
+      test () {
+        this.$parent.$parent.$parent.$refs.editLayer.test()
       },
       importFile () {
         this.showImportFile = false
