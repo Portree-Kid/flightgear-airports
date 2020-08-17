@@ -261,7 +261,7 @@ You should have received a copy of the GNU General Public License along with FG 
         });
       },
       removeArc (arc) {        
-        console.log(arc);
+        console.debug('Remove Arc : ' + arc);
         var arcLayer = this.groundnetLayerGroup.getLayer(this.$store.state.Editable.index);
         arcLayer.removeFrom(this.groundnetLayerGroup);        
       },
@@ -443,17 +443,6 @@ You should have received a copy of the GNU General Public License along with FG 
           }    
         });
       },
-      /*
-      getParkings (){
-        var parkings = []
-        this.groundnetLayerGroup.eachLayer(l => {
-          if (l instanceof L.ParkingSpot) {
-            parkings.push(l)
-          }
-        })
-        return parkings
-      },
-      */
       refreshLookup(index) {
         //element.__vertex
           this.featureLookup[index] = this.featureLookup[index].filter(item => { 
@@ -475,9 +464,10 @@ You should have received a copy of the GNU General Public License along with FG 
         try {
           this.featureLookup[index].forEach((element, i) => {
             if (element instanceof L.Polyline) {
-              console.log('Poly : ' + i + ' ' + element.attributes);
+              console.debug('Poly : ' + i + ' ' + element.attributes);
               // Complete poly with be removed
               if ( element._latlngs.length <= 3 ) {
+                console.debug('Remove short ' + element);
                 if(Number(element.begin) !== index) {
                   this.featureLookup[Number(element.begin)] = this.featureLookup[Number(element.begin)].filter(item => item !== element);
                   this.refreshLookup(Number(element.begin))
@@ -486,11 +476,12 @@ You should have received a copy of the GNU General Public License along with FG 
                   this.featureLookup[Number(element.end)] = this.featureLookup[Number(element.end)].filter(item => item !== element);
                   this.refreshLookup(Number(element.end))
                 }
+                element.removeFrom(this.groundnetLayerGroup);        
                 element.removeFrom(this.$parent.mapObject);
               }
               else {
                 element.getLatLngs().forEach((e1, index1) => {
-                  console.debug('' + index1 + ' ' + e1);
+                  console.debug('Remove Long' + index1 + ' ' + e1);
                   if (e1.attributes.index===index) {
                     var splitOffNodes = element.getLatLngs().splice(index1); 
                     element.editor.refresh();
