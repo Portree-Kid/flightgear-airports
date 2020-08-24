@@ -184,7 +184,7 @@ const convert = require('geo-coordinates-parser');
             newValue += 360
           }
           if ( newValue ) {
-            this.$emit('edit', {type: 'parking-group-angle', angle: newValue} )
+            this.$emit('editParking', {type: 'parking-group-angle', angle: newValue} )
           }
       }
     },
