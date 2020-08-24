@@ -56,7 +56,7 @@ You should have received a copy of the GNU General Public License along with FG 
           <el-popover
             placement="top-start"
             title="Description"
-            width="200"
+            width="50"
             trigger="hover"
             content="Edit"
           >

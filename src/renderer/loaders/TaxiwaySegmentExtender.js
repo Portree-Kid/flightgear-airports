@@ -5,7 +5,7 @@ var L = require('leaflet');
 const store = require('../store');
 const util = require('util');
 
-exports.extendTaxiSegment = function (taxiwaySegment) {
+const extendTaxiSegment = function (taxiwaySegment) {
     taxiwaySegment.__proto__.begin;
     taxiwaySegment.__proto__.end;
     taxiwaySegment.__proto__.bidirectional;
@@ -145,8 +145,12 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                 this.follow(dragIndex, event);
             }
         });
+        this.on('editable:middlemarker:mousedown', event => {
+            console.debug('editable:middlemarker:mousedown' + util.inspect(event));
+        } ),
         this.on('editable:vertex:new', event => {
-            console.debug('editable:vertex:new ' + util.inspect(event));
+
+            console.debug('editable:vertex:new ' + event.vertex.getIndex() + '\t' + event.vertex.getLastIndex() + '\t');
             // Find nearest node
             let closest = this.editLayer.closestLayerSnap(event.latlng, 5)
             let taxiwaySegment = event.latlng.__vertex.editor.feature;
@@ -154,39 +158,75 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
                 taxiwaySegment.options.attributes = { direction: 'bi-directional' };
             }
             taxiwaySegment.updateStyle();
-            // Glue to another node
-            if (closest) {
-                event.latlng['glueindex'] = Number(closest.glueindex);
-                event.latlng.__vertex.setLatLng(closest.latlng);
-                event.latlng.attributes = { index: event.latlng.glueindex, isOnRunway: 0 };
-                // Push Vertex to lookup
-                this.editLayer.featureLookup[event.latlng.glueindex].push(event.latlng.__vertex);
-                if (taxiwaySegment.options.attributes.begin === undefined) {
-                    taxiwaySegment.options.attributes.begin = event.latlng['glueindex']
-                } else {
-                    taxiwaySegment.options.attributes.end = event.latlng['glueindex']
-                }
-                if (taxiwaySegment.getLatLngs().length === 1) {
-                    taxiwaySegment.begin = closest.glueindex;
-                }
-                taxiwaySegment.end = closest.glueindex;
-                console.log(`Closest : ${closest}`)
-            } else {
-                event.vertex.latlng['glueindex'] = ++this.editLayer.groundnetLayerGroup.maxId;
-                event.vertex.latlng.attributes = { index: event.vertex.latlng.glueindex, isOnRunway: 0 };
-                this.editLayer.featureLookup[event.vertex.latlng.glueindex] = [];
-                this.editLayer.featureLookup[event.vertex.latlng.glueindex].push(event.vertex);
-                this.editLayer.featureLookup[event.vertex.latlng.glueindex].push(taxiwaySegment);
-                // taxiwaySegment.editor.refresh();
+            if(event.vertex.getIndex() !==  0 && event.vertex.getIndex() !==  event.vertex.getLastIndex()) {
+                var nextIndex = ++taxiwaySegment.editLayer.groundnetLayerGroup.maxId;
+                var splitOffNodes = taxiwaySegment.getLatLngs().splice(-1);
+                var remainingNodes = taxiwaySegment.getLatLngs();
+                splitOffNodes.unshift(L.latLng(remainingNodes[1].lat, remainingNodes[1].lng, remainingNodes[1].alt));
+                remainingNodes[1]['glueindex'] = nextIndex;
+                remainingNodes[1].attributes = { index: nextIndex, isOnRunway: 0 };
+                taxiwaySegment.options.attributes.end = nextIndex;
+                splitOffNodes[0]['glueindex'] = nextIndex;
+                splitOffNodes[0].attributes = { index: nextIndex, isOnRunway: 0 };
+                taxiwaySegment.setLatLngs(remainingNodes); 
+                //taxiwaySegment.editor.refresh();
                 //taxiwaySegment.editor.reset();
-                if (taxiwaySegment.options.attributes.begin === undefined) {
-                    taxiwaySegment.options.attributes.begin = event.vertex.latlng['glueindex']
-                    taxiwaySegment.begin = event.vertex.latlng.glueindex;
-                } else if (taxiwaySegment.options.attributes.end === undefined ||
-                    (taxiwaySegment.getLatLngs()[taxiwaySegment.getLatLngs().length - 1].glueindex &&
-                        Number(taxiwaySegment.getLatLngs()[taxiwaySegment.getLatLngs().length - 1].glueindex) !== taxiwaySegment.options.attributes.end)) {
-                    taxiwaySegment.options.attributes.end = event.vertex.latlng['glueindex']
-                    taxiwaySegment.end = Number(event.vertex.latlng.glueindex);
+                if( splitOffNodes.length>1) {                    
+                    var polyline = new L.Polyline(splitOffNodes, { attributes: {} });
+                    polyline.addTo(taxiwaySegment.editLayer.groundnetLayerGroup);                
+                    extendTaxiSegment(polyline);
+                    polyline.addListeners();    
+                    polyline.setEditlayer(taxiwaySegment.editLayer);
+                    polyline.enableEdit();
+                    //polyline.editor.refresh();
+                    //polyline.editor.reset();
+                    polyline.featureLookup = this.featureLookup;
+                    polyline.options.attributes.name = taxiwaySegment.options.attributes.name;
+                    polyline.options.attributes.direction = taxiwaySegment.options.attributes.direction;
+                    polyline.options.attributes.begin = nextIndex;
+                    polyline.options.attributes.end = taxiwaySegment.end;
+                    polyline.begin = nextIndex;
+                    polyline.end = taxiwaySegment.end;
+                    taxiwaySegment.end = nextIndex;
+                    this.editLayer.featureLookup[nextIndex] = [];
+                    this.featureLookup[nextIndex].push(taxiwaySegment);                                                
+                    this.featureLookup[nextIndex].push(polyline);                                                
+                }
+            } else {
+                // Glue to another node
+                if (closest) {
+                    event.latlng['glueindex'] = Number(closest.glueindex);
+                    event.latlng.__vertex.setLatLng(closest.latlng);
+                    event.latlng.attributes = { index: event.latlng.glueindex, isOnRunway: 0 };
+                    // Push Vertex to lookup
+                    this.editLayer.featureLookup[event.latlng.glueindex].push(event.latlng.__vertex);
+                    if (taxiwaySegment.options.attributes.begin === undefined) {
+                        taxiwaySegment.options.attributes.begin = event.latlng['glueindex']
+                    } else {
+                        taxiwaySegment.options.attributes.end = event.latlng['glueindex']
+                    }
+                    if (taxiwaySegment.getLatLngs().length === 1) {
+                        taxiwaySegment.begin = closest.glueindex;
+                    }
+                    taxiwaySegment.end = closest.glueindex;
+                    console.log(`Closest : ${closest}`)
+                } else {
+                    event.vertex.latlng['glueindex'] = ++this.editLayer.groundnetLayerGroup.maxId;
+                    event.vertex.latlng.attributes = { index: event.vertex.latlng.glueindex, isOnRunway: 0 };
+                    this.editLayer.featureLookup[event.vertex.latlng.glueindex] = [];
+                    this.editLayer.featureLookup[event.vertex.latlng.glueindex].push(event.vertex);
+                    this.editLayer.featureLookup[event.vertex.latlng.glueindex].push(taxiwaySegment);
+                    // taxiwaySegment.editor.refresh();
+                    //taxiwaySegment.editor.reset();
+                    if (taxiwaySegment.options.attributes.begin === undefined) {
+                        taxiwaySegment.options.attributes.begin = event.vertex.latlng['glueindex']
+                        taxiwaySegment.begin = event.vertex.latlng.glueindex;
+                    } else if (taxiwaySegment.options.attributes.end === undefined ||
+                        (taxiwaySegment.getLatLngs()[taxiwaySegment.getLatLngs().length - 1].glueindex &&
+                            Number(taxiwaySegment.getLatLngs()[taxiwaySegment.getLatLngs().length - 1].glueindex) !== taxiwaySegment.options.attributes.end)) {
+                        taxiwaySegment.options.attributes.end = event.vertex.latlng['glueindex']
+                        taxiwaySegment.end = Number(event.vertex.latlng.glueindex);
+                    }
                 }
             }
             //this.splitShape(taxiwaySegment.getLatLngs(), )
@@ -253,38 +293,41 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         });
         this.on('editable:vertex:dragend', function (event) {
             console.log("Dragend : ", event.vertex);
-            if (dragIndex > 0) {
-                event.target.featureLookup[dragIndex].forEach(element => {
-                    if (element instanceof L.ParkingSpot) {
-                        //element.setLatLng(event);
-                        console.log(element);
-                    }
-                });
-            }
-            dragIndex = -1;
-            var parking = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.ParkingSpot);
-            if (parking.length > 0) {
-                parking[0].selectParking();
-            } else {
-                if( Number(event.vertex.latlng.glueindex) !== store.default.state.Editable.index) {
-                    if (Number(store.default.state.Editable.index) >= 0 &&
-                      this.featureLookup[store.default.state.Editable.index] !== undefined) {
-                      this.featureLookup[store.default.state.Editable.index].forEach(element => {
-                            if(element.deselect !== undefined) {
-                                element.deselect();
-                            }
-                        });
-                      }
-                      store.default.dispatch('setNode', event.vertex.latlng)
-                }
-                var lines = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.Polyline);
-                Vue.default.nextTick(function () {
-                    lines.forEach( line => {
-                        line.selectVertex(store.default.state.Editable.index)
+            try {
+                if (dragIndex > 0) {
+                    event.target.featureLookup[dragIndex].forEach(element => {
+                        if (element instanceof L.ParkingSpot) {
+                            //element.setLatLng(event);
+                            console.log(element);
+                        }
                     });
-                })
+                }
+                dragIndex = -1;
+                var parking = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.ParkingSpot);
+                if (parking.length > 0) {
+                    parking[0].selectParking();
+                } else {
+                    if( Number(event.vertex.latlng.glueindex) !== store.default.state.Editable.index) {
+                        if (Number(store.default.state.Editable.index) >= 0 &&
+                          this.featureLookup[store.default.state.Editable.index] !== undefined) {
+                          this.featureLookup[store.default.state.Editable.index].forEach(element => {
+                                if(element.deselect !== undefined) {
+                                    element.deselect();
+                                }
+                            });
+                          }
+                          store.default.dispatch('setNode', event.vertex.latlng)
+                    }
+                    var lines = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.Polyline);
+                    Vue.default.nextTick(function () {
+                        lines.forEach( line => {
+                            line.selectVertex(store.default.state.Editable.index)
+                        });
+                    })
+                }                    
+            } catch (error) {
+                console.error(error);
             }
-
         });
     };
     /**
@@ -365,3 +408,5 @@ exports.extendTaxiSegment = function (taxiwaySegment) {
         }       
     };
 };
+
+exports.extendTaxiSegment = extendTaxiSegment;

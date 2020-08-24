@@ -85,8 +85,12 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         // Loaded segments
         featureList.filter(o => o instanceof L.TaxiwaySegment).filter(n => n).forEach(element => {
             var begin = mapBeginNode(element);
+            if(begin['@index']==="")
+              console.warn("Begin missing");
             nodes[begin['@index']] = begin;
             var end = mapEndNode(element);
+            if(end['@index']==="")
+              console.warn("End missing");
             nodes[end['@index']] = end;
         });
         // New segments 
@@ -117,8 +121,13 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
                             arcList.push(arc);
                             featureLookup[latlng.glueindex][startIndex] = arc;
                         }
+                        if (currentArc.direction === '' || !currentArc.direction) {
+                            console.error( "Arc without direction " + util.inspect(currentArc) );                            
+                        }
                     }
                     startIndex = latlng.glueindex;
+                } else {
+                    console.error( "LatLng without glueindex " + util.inspect(latlng) );
                 }
             });
         });
@@ -241,7 +250,7 @@ var mapVertexNode = function (l) {
 }
 
 var convertLat = function (latlng) {
-    console.debug(latlng.lat);
+    //console.debug(latlng.lat);
     var NS = latlng.lat > 0 ? 'N' : 'S';
     var deg = mathjs.floor(mathjs.abs(latlng.lat));
     var min = (mathjs.abs(latlng.lat) - deg) * 60;
@@ -250,7 +259,7 @@ var convertLat = function (latlng) {
 }
 
 var convertLon = function (latlng) {
-    console.debug(latlng.lng);
+    //console.debug(latlng.lng);
     var NS = latlng.lng > 0 ? 'E' : 'W';
     var deg = mathjs.floor(mathjs.abs(latlng.lng));
     var min = (mathjs.abs(latlng.lng) - deg) * 60;
@@ -259,7 +268,7 @@ var convertLon = function (latlng) {
 }
 
 var styleArc = function (attributes, arc) {
-    console.debug(attributes);
+    //console.debug(attributes);
     if(attributes !== undefined){
         if (attributes.isPushBackRoute !== undefined && Number(attributes.isPushBackRoute) === 1 ) {
             arc['@isPushBackRoute'] = "1";
