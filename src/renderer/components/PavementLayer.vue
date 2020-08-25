@@ -31,12 +31,19 @@
         // Callback for add
         readPavement(this.$store.state.Settings.settings.flightgearDirectory_apt, icao, this.read)
       },
+      // Callback called when pavement read
       read (layer) {
         this.pavement = layer
         if (this.pavement) {
           this.pavement.on('add', this.onAdd)
           this.pavement.addTo(this.$parent.mapObject)
           this.visible = true
+        } else {
+          this.$message({
+            type: 'Error',
+            showClose: true,
+            message: `Couldn't load pavement from ${this.$store.state.Settings.settings.flightgearDirectory_apt}`
+          })
         }
       },
       onAdd () {

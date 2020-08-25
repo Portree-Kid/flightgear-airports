@@ -17,23 +17,31 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="22" class="label">Flightgear Directory</el-col>
+        <el-col :span="22" class="label">Flightgear Data Directory</el-col>
       </el-row>
       <el-row>
         <el-col :span="20" class="file-label">{{ flightgear_directory }}</el-col>
         <el-col :span="4">
-          <directory-select @input="flightgearDirectorySelect"></directory-select>
+        <el-popover
+          placement="top-start"
+          title="E-Mail"
+          width="200"
+          trigger="hover"
+          content="The FGDATA directory."
+        >
+          <directory-select @input="flightgearDirectorySelect" slot="reference"></directory-select>
+        </el-popover>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="7" class="label">Traffic Directory</el-col>
-        <el-col :span="15" class="file-label">{{ Traffic_directory }}</el-col>
+        <el-col :span="15" v-bind:class="{ invalid: !Traffic_directory_ok}">{{ Traffic_directory }}</el-col>
         <el-col :span="2">
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="7" class="label">APT File</el-col>
-        <el-col :span="15" class="file-label">{{ apt_file }}</el-col>
+        <el-col :span="15" v-bind:class="{invalid: !apt_file_ok}" >{{ apt_file }}</el-col>
         <el-col :span="2">
         </el-col>
       </el-row>
@@ -123,7 +131,7 @@
   import DirectorySelect from './DirectorySelect'
 
   const { ipcRenderer } = require('electron')
-
+  const fs = require('fs')
   export default {
     name: 'settings-panel',
     components: { DirectorySelect, FileSelect },
@@ -132,7 +140,7 @@
     },
 
     data () {
-      return {
+      return { ok: true
       }
     },
     methods: {
@@ -192,8 +200,24 @@
       Traffic_directory: function () {
         return this.$store.state.Settings.settings.flightgearDirectory_traffic
       },
+      Traffic_directory_ok: function () {
+        try {
+          fs.accessSync(this.$store.state.Settings.settings.flightgearDirectory_traffic)
+          return true
+        } catch (error) {
+          return false
+        }
+      },
       apt_file: function () {
         return this.$store.state.Settings.settings.flightgearDirectory_apt
+      },
+      apt_file_ok: function () {
+        try {
+          fs.accessSync(this.$store.state.Settings.settings.flightgearDirectory_apt)
+          return true
+        } catch (error) {
+          return false
+        }
       },
       airports_directory: function () {
         return this.$store.state.Settings.settings.airportsDirectory
@@ -229,4 +253,9 @@
 .file-label {
   padding: 10px;
 }
+.invalid {
+  padding: 10px;
+  background-color: red;
+}
+
 </style>

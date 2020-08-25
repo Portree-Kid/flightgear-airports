@@ -10,7 +10,9 @@
     props: [],
     mounted () {
       this.aiLayer = aiLayer({url: this.$store.state.Settings.settings.phi_url})
-      this.aiLayer.addTo(this.$parent.mapObject)
+      if(this.aiLayer) {
+        this.aiLayer.addTo(this.$parent.mapObject)
+      }
     },
     data () {
       return {

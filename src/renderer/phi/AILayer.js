@@ -264,5 +264,5 @@ function mapSGPropertyNode(node) {
 }));
 
 export function aiLayer(options) {
-    return new L.AILayer(null, options);
+    return undefined //new L.AILayer(null, options);
 }

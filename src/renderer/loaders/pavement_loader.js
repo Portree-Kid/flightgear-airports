@@ -12,7 +12,6 @@ You should have received a copy of the GNU General Public License along with FG 
 /* eslint-disable */
 const lineReader = require('readline');
 const zlib = require('zlib');
-// const geodesy = require('geodesy');
 const LatLonEllipsoidal = require('geodesy/latlon-ellipsoidal-vincenty.js').default;
 const fs = require('fs');
 
@@ -269,7 +268,7 @@ function createLineString(currentFeature, layerGroup) {
     }
 }
 
-module.exports.readPavement = function (f, icao, cb) {
+module.exports.readPavement = function (f, icao, callback) {
     console.log(f);
     var pavementLayerGroup = L.layerGroup();
     var currentFeature;
@@ -278,6 +277,7 @@ module.exports.readPavement = function (f, icao, cb) {
 
     if (!fs.existsSync(f)) {
         store.default.dispatch('setPavementLoaded', true);
+        callback();
         return;
     }
     try {
@@ -307,14 +307,16 @@ module.exports.readPavement = function (f, icao, cb) {
             store.default.dispatch('setPavementLoaded', true);
             console.error(err);
             lr.close();
+            callback();
         }).on('close', function () {
             store.default.dispatch('setPavementLoaded', true);
             console.log("End");
-            cb(pavementLayerGroup);
+            callback(pavementLayerGroup);
         });
     } catch (err) {
         console.error('no access!');
         store.default.dispatch('setPavementLoaded', true);
+        callback();
         return;
     }
 }
