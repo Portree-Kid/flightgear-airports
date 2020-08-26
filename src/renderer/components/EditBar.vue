@@ -194,6 +194,16 @@ You should have received a copy of the GNU General Public License along with FG 
             ? `http://localhost:9080/src/renderer/utils/check.js`
             : `file://${process.resourcesPath}/workers/check.js`
           console.log('make a check worker: ', path.resolve(__dirname, 'check.js'))
+          if(!this.$parent.$parent.$refs.pavementLayer.pavement) {
+            this.max = 0
+            this.checkDialogVisible = false
+            this.$message({
+              type: 'Error',
+              showClose: true,
+              message: `Check can't run without pavementlayer since runways aren't known. Is the APT file set correctly?`
+            })
+            return
+          }
 
           const worker = new Worker(winURL)
           worker.onerror = function(e) {
