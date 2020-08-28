@@ -146,10 +146,9 @@ const extendTaxiSegment = function (taxiwaySegment) {
             }
         });
         this.on('editable:middlemarker:mousedown', event => {
-            console.debug('editable:middlemarker:mousedown' + util.inspect(event));
+            console.debug('editable:middlemarker:mousedown');
         } ),
         this.on('editable:vertex:new', event => {
-
             console.debug('editable:vertex:new ' + event.vertex.getIndex() + '\t' + event.vertex.getLastIndex() + '\t');
             // Find nearest node
             let closest = this.editLayer.closestLayerSnap(event.latlng, 5)
@@ -173,18 +172,21 @@ const extendTaxiSegment = function (taxiwaySegment) {
                 //taxiwaySegment.editor.reset();
                 if( splitOffNodes.length>1) {                    
                     var polyline = new L.Polyline(splitOffNodes, { attributes: {} });
-                    polyline.addTo(taxiwaySegment.editLayer.groundnetLayerGroup);                
+                    polyline.addTo(taxiwaySegment.editLayer.$parent.$parent.$refs.map.mapObject);         
+                    polyline.addTo(taxiwaySegment.editLayer.groundnetLayerGroup);         
                     extendTaxiSegment(polyline);
                     polyline.addListeners();    
                     polyline.setEditlayer(taxiwaySegment.editLayer);
-                    polyline.enableEdit();
-                    //polyline.editor.refresh();
+                    polyline.enableEdit(taxiwaySegment.editLayer.$parent.$parent.$refs.map.mapObject);
+                    polyline.editor.refresh();
                     //polyline.editor.reset();
                     polyline.featureLookup = this.featureLookup;
                     polyline.options.attributes.name = taxiwaySegment.options.attributes.name;
                     polyline.options.attributes.direction = taxiwaySegment.options.attributes.direction;
+                    polyline.options.attributes.isPushBackRoute = taxiwaySegment.options.attributes.isPushBackRoute;
                     polyline.options.attributes.begin = nextIndex;
                     polyline.options.attributes.end = taxiwaySegment.end;
+                    polyline.updateStyle();
                     polyline.begin = nextIndex;
                     polyline.end = taxiwaySegment.end;
                     taxiwaySegment.end = nextIndex;
@@ -232,11 +234,18 @@ const extendTaxiSegment = function (taxiwaySegment) {
             //this.splitShape(taxiwaySegment.getLatLngs(), )
         });
         this.on('editable:vertex:deleted', event => {
-            console.log('editable:vertex:deleted' + event)
+            console.debug('editable:vertex:deleted')
+        });
+        this.on('editable:vertex:mousedown', event => {
+            console.debug('editable:vertex:mousedown')
+            event.layer.editor.map.fire('mousedown', event);
+        });
+        this.on('editable:vertex:click', event => {
+            console.debug('editable:vertex:click')
         });
         this.on('editable:vertex:rawclick', event => {
             event.cancel()
-            console.log(event)
+            console.debug('editable:vertex:rawclick')
         });
         this.on('editable:vertex:clicked', function (event) {
             if (Number(store.default.state.Editable.index) >= 0 &&
