@@ -788,7 +788,7 @@ You should have received a copy of the GNU General Public License along with FG 
                   console.warn('No glueindex : ' + latlng.__vertex);
                 }
                 let distance = latlng.distanceTo(eventLatlng)
-                if (distance > 0 && distance < snap) {
+                if (distance >= 0 && distance < snap && latlng.glueindex >=0) {
                   layers.push({d: distance, l: layer, latlng: latlng.__vertex.latlng, glueindex: latlng.glueindex})
                 }
               } else {
