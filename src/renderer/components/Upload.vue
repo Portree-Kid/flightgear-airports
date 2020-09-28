@@ -1,5 +1,5 @@
 <template>
-    <el-dialog :title="title" :visible.sync="visible" width="30%" center>
+    <el-dialog :title.sync="title" :visible.sync="visible" width="30%" center>
       <span v-if="max>0">
         <el-progress :percentage="Number(((progress / max)*100).toPrecision(3))" v-if="max>0"></el-progress>
       </span>
@@ -232,7 +232,6 @@
               this.max = 4
             } else if (e.data[0] === 'DONE') {
               console.log('DONE')
-              store.dispatch('setResults', e.data[1])
               worker.terminate()
               worker.view.max = 0
               worker.view.checkDialogVisible = false
@@ -254,18 +253,20 @@
       },
       editLayer () {
         var parent = this.$parent;
-        while (!parent.icao) {
-          parent = this.$parent;
-          if (parent.icao) {
+        while (!parent.icao||parent.$refs.editLayer==undefined) {
+          parent = parent.$parent;
+          if (parent.icao&&parent.$refs.editLayer!==undefined) {
             return parent.$refs.editLayer;
           }
         }
       },      
       pavementLayer () {
-        if(this.$parent.$parent.$parent.icao) {
-           return this.$parent.$parent.$parent.$refs.pavementLayer
-        } else {
-           return this.$parent.$parent.$parent.$parent.$parent.$parent.$refs.pavementLayer
+        var parent = this.$parent;
+        while (!parent.icao||parent.$refs.pavementLayer==undefined) {
+          parent = parent.$parent;
+          if (parent.icao&&parent.$refs.pavementLayer!==undefined) {
+            return parent.$refs.pavementLayer;
+          }
         }
       }      
     },
@@ -283,18 +284,22 @@
       textClass: function () {
         return !this.error?'center':'error'
       },
-      title: function () {
-        if(this.$parent.$parent.$parent.icao !== undefined) {
-           return `Upload ${this.$parent.$parent.$parent.icao} to groundweb.`
-        } else if (this.$parent.$parent.$parent.$refs.editLayer !== undefined) {
-           return `Upload ${this.$parent.$parent.$parent.$refs.editLayer.icao} to groundweb.`
-        }
+      title: function () {        
+        return `Upload ${this.icao} to groundweb.`
       },
       icao: {
         get: function () {
-          return this.$parent.$parent.$parent.icao
+          var parent = this.$parent;
+          while (!parent.icao) {
+            parent = parent.$parent;
+            if (parent.icao) {
+              return parent.icao;
+            }
+          }
+          return this.$store.state.Airports.currentAirport.icao
         },
         set: function (newValue) {
+          console.error('ICAO being set ' + newValue);
         }
       },
       comittable: function () {
