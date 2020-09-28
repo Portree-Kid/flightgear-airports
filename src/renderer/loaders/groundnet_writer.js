@@ -18,6 +18,11 @@ var featureLookup = [];
 var parkings = [];
 var pushBackNodeLookup = [];
 
+/**
+ * Walk nodes until the pushback node is found. 
+ * @param {*} index 
+ */
+
 function findRouteToPushback (index) {
     if (featureLookup===undefined) {
       return
@@ -25,6 +30,7 @@ function findRouteToPushback (index) {
     var walkedNodes = [index]
     var pushBackNodes = []
     walkPushbackRoute(index, walkedNodes, pushBackNodes)
+
     return pushBackNodes
   }
 
@@ -62,6 +68,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         }
         if (f == null)
             return;
+        pushBackNodeLookup = []; 
 
         console.debug(featureList);
 
@@ -78,8 +85,6 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
 
         var version = new Date().toUTCString() + ' by FlightgearAirports';
         var name = store.default.state.Settings.settings.name;        
-
-
 
         featureLookup = [];        
         // Loaded segments
@@ -138,7 +143,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         });
 
 
-        // delete the parkings 
+        // Find the index of the pushback node 
         parkings.forEach(n => {
             nodes[n['@index']] = null;
             var pushBackNode = findRouteToPushback(Number(n['@index']))[0];
@@ -151,6 +156,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         arcList = arcList.filter(a => a['@begin'] !== a['@end']);
 
         nodes.sort((p, p2) => { return p['@index'] - p2['@index'] });
+        //console.debug(util.inspect(nodes));
         var uniqueNodes = nodes.filter((v, i, a) => a.indexOf(v) === i);
 
         var approachList = store.default.state.Frequencies.items.filter(f => f.type === 'APPROACH').map(mapFrequency);
@@ -221,6 +227,10 @@ var mapRunwayNodes = function (o) {
 
 var mapHoldPoint = function (o) {
     if (o instanceof L.HoldNode) {
+        if( o['holdPointType'] === undefined )
+        {
+            console.error('Oh dear ' + o);
+        }
         return { '@index': String(o['glueindex']), '@holdPointType': o['holdPointType'] };
     }
 }

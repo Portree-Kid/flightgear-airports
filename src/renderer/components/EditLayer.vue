@@ -576,8 +576,8 @@ You should have received a copy of the GNU General Public License along with FG 
           console.log(event)
           event.target.addTo(this.groundnetLayerGroup)
           var pt = event.sourceTarget._latlngs[event.sourceTarget._latlngs.length-1];          
-          pt.attributes.holdPointType = 'PushBack'
-          var nIndex = pt.attributes.index
+          pt.options.attributes['holdPointType'] = 'PushBack'
+          var nIndex = pt.options.attributes.index
           var fa_icon = "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-arrows-alt-h'></i>";
           const icon = new L.DivIcon({
               className: 'custom-div-icon',
@@ -589,6 +589,7 @@ You should have received a copy of the GNU General Public License along with FG 
           node.glueindex = nIndex;
           node.addTo(this.groundnetLayerGroup);
           node.featureLookup = this.featureLookup;
+          node['holdPointType'] = 'PushBack'
           this.featureLookup[nIndex].push(node);
           node.addListeners();
           node.extensions();
@@ -952,7 +953,7 @@ You should have received a copy of the GNU General Public License along with FG 
       save () {
         var xml = []
         this.groundnetLayerGroup.eachLayer(l => {
-          console.log(l)
+          //console.debug(l)
           xml.push(l)
         })
         writeGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, this.icao, xml)
