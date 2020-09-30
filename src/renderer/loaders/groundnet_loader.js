@@ -106,7 +106,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                 p => ({index: Number(p.attrs.index), name: String(p.attrs.name), number: String(p.attrs.number), type: String(p.attrs.type)}
             )).sort((p1, p2) => {
                 if (p1.name === p2.name) {
-                    return p1.number - p2.number
+                    return p1.number?p1.number.localeCompare(p2.number):-1;
                 } else {
                   return p1.name.localeCompare(p2.name)
                 }}));
