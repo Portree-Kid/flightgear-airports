@@ -242,7 +242,7 @@
           var codes = this.$store.state.Editable.data.parking.airlineCodes
           if (Array.isArray(codes)) {
             return codes
-          } else if (codes !== undefined) {
+          } else if (codes !== undefined && typeof codes === 'string') {
             return codes.split(',')            
           } else {
             return []
