@@ -110,7 +110,7 @@ You should have received a copy of the GNU General Public License along with FG 
     methods: {
       doCommand (e) {
         let cmd = String.fromCharCode(e.keyCode).toLowerCase()
-        if (e.keyCode === 46 /** DEL */) {
+        if (e.keyCode === 46 /** DEL */ && e.target.type !== 'text') {
           this.$parent.$parent.$refs.editLayer.deleteFeature()
         }
         console.log(cmd)
