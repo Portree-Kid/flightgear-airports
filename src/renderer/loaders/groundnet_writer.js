@@ -83,7 +83,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         var arcList = [];
         var frequencies = [];
 
-        var version = new Date().toUTCString() + ' by FlightgearAirports';
+        var version = new Date().toUTCString() + ' by FlightgearAirports ' + require('electron').remote.app.getVersion();
         var name = store.default.state.Settings.settings.name;        
 
         featureLookup = [];        
@@ -173,7 +173,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
 
         var unicomList = store.default.state.Frequencies.items.filter(f => f.type === 'UNICOM').map(mapFrequency);
 
-        var xmlObj = { groundnet: { version: version, name: name, 
+        var xmlObj = { groundnet: { version: 1, fgaversion: version, name: name, 
             'frequencies': { APPROACH: approachList, DEPARTURE: departureList, AWOS: awosList, CLEARANCE: clearanceList, GROUND: groundList, TOWER: towerList, UNICOM: unicomList },
             parkingList: { Parking: parkings }, TaxiNodes: { node: uniqueNodes }, TaxiWaySegments: { arc: arcList } } };
 
