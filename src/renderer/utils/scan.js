@@ -186,6 +186,9 @@ function scanTrafficIntoDB(p, features) {
 
 function traverseDir(dir) {
   var result = [];
+  if(!fs.existsSync(dir)) {
+    return result;
+  }
   fs.readdirSync(dir).forEach(file => {
     let fullPath = path.join(dir, file);
     if (fs.lstatSync(fullPath).isDirectory()) {

@@ -41,11 +41,7 @@ You should have received a copy of the GNU General Public License along with FG 
     props: [],
     created () {
 
-      console.log(LMap)
-      console.log(LMarker)
-      console.log(L)
-      console.log(LEdit)
-      console.log(L2)
+      [LMap, LMarker, L, LEdit, L2]
       console.log('Created Editlayer')
       // console.log(LSymbol)
     },
@@ -125,8 +121,11 @@ You should have received a copy of the GNU General Public License along with FG 
         this.icao = icao
         this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao, force)
         if (this.groundnetLayerGroup === undefined) {
-          console.error('ICAO not loaded ' + icao)
+          console.warn('Groundnet for ICAO not loaded ' + icao)
           return
+        }
+        if (this.groundnetLayerGroup.getLayers().length === 0) {
+          console.warn('Groundnet for ICAO not loaded ' + icao)
         }
         this.groundnetLayerGroup.eachLayer(l => {
           if (l instanceof L.TaxiwaySegment) {

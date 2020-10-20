@@ -60,6 +60,11 @@ function walkPushbackRoute (index, walkedNodes, pushBackNodes) {
 
 exports.writeGroundnetXML = function (fDir, icao, featureList) {
     try {
+        try { fs.mkdirSync(path.join(fDir), { recursive: true })} catch (err) { }
+        try { fs.mkdirSync(path.join(fDir, icao[0]),{ recursive: true })} catch (err) { }
+        try { fs.mkdirSync(path.join(fDir, icao[0], icao[1]), { recursive: true })} catch (err) { }
+        try { fs.mkdirSync(path.join(fDir, icao[0], icao[1], icao[2]), { recursive: true })} catch (err) { }
+
         var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');
         var fBak = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.bak.xml');
 

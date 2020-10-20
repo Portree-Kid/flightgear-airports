@@ -31,6 +31,10 @@
       load (icao) {
         // Callback for add
         this.layerGroup = readThresholdXML(this.$store.state.Settings.settings.airportsDirectory, icao, this.read)
+        if (!this.layerGroup) {
+          console.warn('Threshold for ICAO not loaded ' + icao)
+          return
+        }
         this.layerGroup.addTo(this.$parent.mapObject)
         this.visible = true
         this.icao = icao
