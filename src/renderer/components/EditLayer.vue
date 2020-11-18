@@ -70,6 +70,16 @@ You should have received a copy of the GNU General Public License along with FG 
         );
       this.$store.watch(
         function (state) {
+              return state.Editable.data.multiarc;
+          },
+          () => { this.editedMultiArc() }
+          ,
+          {
+            deep: true //add this if u need to watch object properties change etc.
+          }
+        );
+      this.$store.watch(
+        function (state) {
               return state.Editable.data.parking;
           },
           () => { this.editedParking() }
@@ -658,12 +668,34 @@ You should have received a copy of the GNU General Public License along with FG 
             !this.editing) {
           return;
         }
+        console.debug("Edit Type : " + this.$store.state.type);
         var arc = this.groundnetLayerGroup.getLayer(this.$store.state.Editable.index);
         if (arc && arc instanceof L.Polyline) {
           console.log('Edited Arc : ' + this.$store.state.Editable.index);
           arc.options.attributes = Object.assign({}, this.$store.state.Editable.data.arc)
           arc.updateStyle();
         }        
+      },
+      editedMultiArc() {
+        if (!this.groundnetLayerGroup ||
+            this.$store.state.Editable.data.multiarc === undefined ||
+            this.$store.state.Editable.data.multiarc.ids === undefined ||
+            this.featureLookup===undefined ||
+            !this.editing) {
+          return;
+        }
+        console.debug("Edit Type : " + this.$store.state.Editable.data.multiarc.ids);
+        this.$store.state.Editable.data.multiarc.ids.forEach(id => {
+          console.debug(id);
+          var arc = this.groundnetLayerGroup.getLayer(id);
+          if (arc && arc instanceof L.Polyline) {
+            console.log('Edited Arc : ' + this.$store.state.Editable.index);
+            arc.options.attributes.direction = this.$store.state.Editable.data.multiarc.direction
+            arc.options.attributes.name = this.$store.state.Editable.data.multiarc.name
+            arc.options.attributes.isPushBackRoute = this.$store.state.Editable.data.multiarc.isPushBackRoute
+            arc.updateStyle();
+          }        
+        });
       },
       //Update Node
       editedNode() {
@@ -824,11 +856,11 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$parent.mapObject.on('click', this.addParking)
       },
       removeLayerClick (event) {
-        console.log(event)
+        console.debug(event)
         this.groundnetLayerGroup.removeLayer(event.target)
       },
       addParking (event) {
-        console.log(event.latlng)
+        console.debug(event.latlng)
         if (event.latlng === undefined) {
           return
         }

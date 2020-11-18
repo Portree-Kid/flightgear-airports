@@ -85,7 +85,7 @@ You should have received a copy of the GNU General Public License along with FG 
         },
         (newValue, oldValue) => {
           // debugger
-          console.log('setIcaoLoading ' + oldValue + ' => ' + newValue + ' ' + this.groundnetLoaded + ' ' + this.pavementLoaded + ' ' + this.loadingInstance)
+          console.log('setIcaoLoading ' + oldValue + ' => ' + newValue + ' groundnetLoaded ' + this.groundnetLoaded + ' pavementLoaded ' + this.pavementLoaded + ' ' + this.loadingInstance)
           if (newValue !== oldValue && newValue !== '') {
             this.groundnetLoaded = newValue
             if ((this.loadingInstance === null || this.loadingInstance === undefined)) {
@@ -105,7 +105,7 @@ You should have received a copy of the GNU General Public License along with FG 
         },
         (newValue, oldValue) => {
           // debugger
-          console.log('groundnetLoaded ' + oldValue + ' => ' + newValue + ' ' + this.groundnetLoaded + ' ' + this.pavementLoaded + ' ' + this.loadingInstance)
+          console.log('groundnetLoaded ' + oldValue + ' => ' + newValue + ' groundnetLoaded ' + this.groundnetLoaded + ' pavementLoaded ' + this.pavementLoaded + ' ' + this.loadingInstance)
           if (newValue !== oldValue) {
             this.groundnetLoaded = newValue
             if (this.groundnetLoaded &&
