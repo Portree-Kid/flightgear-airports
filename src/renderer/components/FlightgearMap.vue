@@ -208,12 +208,20 @@ You should have received a copy of the GNU General Public License along with FG 
         if (this.$refs.pavementLayer.getLayer() === e.layer) {
           // debugger
           var l = this.layersControl._layers.filter(l => l.name === 'APT Layer')
+          if (l.length > 0 && l[0].layer !== this.$refs.pavementLayer.getLayer()) {
+            this.layersControl.removeLayer(l[0].layer)
+            this.layersControl.addOverlay(this.$refs.pavementLayer.getLayer(), 'APT Layer')
+          }
           if (l.length === 0) {
             this.layersControl.addOverlay(this.$refs.pavementLayer.getLayer(), 'APT Layer')
           }
         }
         if (this.$refs.thresholdLayer.getLayer() === e.layer) {
           l = this.layersControl._layers.filter(l => l.name === 'Threshold Layer')
+          if (l.length > 0 && l[0].layer !== this.$refs.thresholdLayer.getLayer()) {
+            this.layersControl.removeLayer(l[0].layer)
+            this.layersControl.addOverlay(this.$refs.thresholdLayer.getLayer(), 'Threshold Layer')
+          }
           if (l.length === 0) {
             this.layersControl.addOverlay(this.$refs.thresholdLayer.getLayer(), 'Threshold Layer')
           }
