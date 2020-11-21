@@ -206,7 +206,12 @@ var mapParkings = function (o) {
             console.debug(o.options.attributes.airlineCodes);
             parking['@airlineCodes'] = o.options.attributes.airlineCodes;
         }
-        if(o.options.attributes.number !== undefined && o.options.attributes.number.trim() !== '') {
+        if(o.options.attributes.number !== undefined && 
+            typeof o.options.attributes.number === 'number' || (
+                typeof o.options.attributes.number === 'string' &&
+                o.options.attributes.number.trim() !== ''
+            )
+            ) {
             console.debug(o.options.attributes.number);
             parking['@number'] = o.options.attributes.number;
         }
