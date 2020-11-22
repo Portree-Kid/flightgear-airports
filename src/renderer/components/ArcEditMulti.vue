@@ -84,7 +84,7 @@ You should have received a copy of the GNU General Public License along with FG 
       // getter
         get: function () {
           return this.$store.state.Editable.data.multiarc.isPushBackRoute === '1' ||
-          this.$store.state.Editable.data.multiarc.isPushBackRoute === 1
+          Number(this.$store.state.Editable.data.multiarc.isPushBackRoute) === Number(1)
         },
         // setter
         set: function (newValue) {

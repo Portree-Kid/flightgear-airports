@@ -1,3 +1,15 @@
+/**
+Copyright 2020 Keith Paterson
+
+This file is part of FG Airports.
+
+FG Airports is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+FG Airports is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with FG Airports. If not, see http://www.gnu.org/licenses/.
+*/
+
 import Vue from 'vue'
 
 const state = {
@@ -68,13 +80,15 @@ const mutations = {
       return
     }
     if (!state.data || state.type !== 'multiarc') {
-      Vue.set(state, 'data', {})
+      Vue.set(state, 'data', {multiarc: {}})
     }
-    Vue.set(state.data, 'multiarc', arc)
+    Vue.set(state.data.multiarc, 'isPushBackRoute', arc.isPushBackRoute)
+    Vue.set(state.data.multiarc, 'direction', arc.direction)
     if (state.data.multiarc.name === undefined) {
       Vue.set(state.data.multiarc, 'name', '')
     }
     Vue.set(state, 'index', arc.index)
+
     Vue.set(state, 'type', 'multiarc')
   },
   'SET_EDIT_MULTI_ARC_IDS' (state, arcs) {
@@ -83,6 +97,9 @@ const mutations = {
     }
     if (!state.data || state.type !== 'multiarc') {
       return
+    }
+    if (state.data.multiarc.ids === undefined) {
+      state.data.multiarc.ids = []
     }
     state.data.multiarc.ids = state.data.multiarc.ids.concat(arcs.filter(n => n).filter((v, i, a) => a.indexOf(v) === i))
   },
