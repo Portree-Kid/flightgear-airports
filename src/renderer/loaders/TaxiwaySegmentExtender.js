@@ -485,8 +485,35 @@ const extendTaxiSegment = function (taxiwaySegment) {
         })
     };
 
+    taxiwaySegment.__proto__.updateArrows = function (zoom) {
+        if (this.options.attributes.direction === 'forward') {
+            this.setText(null);
+            if (zoom <= 16) {
+                this.setText(' >', { repeat: true, offset: 6, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 15px serif;' } })                                    
+            } else if (zoom <= 19 ) {
+                this.setText(' > ', { repeat: true, offset: 7, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 20px serif;' } })                    
+            } else {
+                this.setText('  >  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })                    
+            }
+        } else if (this.options.attributes.direction === 'backward') {
+            this.setText(null);
+            if (zoom <= 16) {
+                this.setText(' <', { repeat: true, offset: 6, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 15px serif;' } })                                    
+            } else if (zoom <= 19 ) {
+                this.setText(' < ', { repeat: true, offset: 7, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 20px serif;' } })                    
+            } else {
+                this.setText('  <  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })                    
+            }
+        } else {
+            this.setText(null);
+        }    
+    }
+
     taxiwaySegment.__proto__.updateStyle = function () {
         var style = {};
+        if(!this.options.attributes) {
+            return;
+        }
         if (this.options.attributes.selected) {
             style.color = 'red';
         } else if (this.options.attributes.isPushBackRoute) {
@@ -499,10 +526,10 @@ const extendTaxiSegment = function (taxiwaySegment) {
         if (this._map !== null) {
             if (this.options.attributes.direction === 'forward') {
                 this.setText(null);
-                this.setText('  >  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })
+                this.setText('  >  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })                    
             } else if (this.options.attributes.direction === 'backward') {
                 this.setText(null);
-                this.setText('  <  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })
+                this.setText('  <  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })                    
             } else {
                 this.setText(null);
             }

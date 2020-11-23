@@ -327,6 +327,11 @@ You should have received a copy of the GNU General Public License along with FG 
           this.$refs.airportLayer.setVisible(zoom < 12)
           this.$refs.pavementLayer.setVisible(zoom >= 12)
         }
+        this.$refs.editLayer.groundnetLayerGroup.eachLayer(function (layer) {
+          if (layer.updateArrows !== undefined) {
+            layer.updateArrows(zoom)
+          }
+        })
       },
       async centerUpdated (center) {
         if (center !== this.$store.state.Settings.center) {

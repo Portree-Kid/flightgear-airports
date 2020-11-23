@@ -139,7 +139,10 @@ You should have received a copy of the GNU General Public License along with FG 
         }
         this.groundnetLayerGroup.eachLayer(l => {
           if (l instanceof L.TaxiwaySegment) {
-            l.addListeners()
+            l.addListeners()                        
+          }
+          if (l.updateArrows !== undefined) {
+            l.updateArrows(this.$store.state.Settings.zoom)
           }
         })
         console.log(this.groundnetLayerGroup.maxId)
