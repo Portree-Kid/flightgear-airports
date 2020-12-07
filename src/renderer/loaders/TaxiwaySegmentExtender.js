@@ -486,6 +486,9 @@ const extendTaxiSegment = function (taxiwaySegment) {
     };
 
     taxiwaySegment.__proto__.updateArrows = function (zoom) {
+        if( this._map === null) {
+            return;
+        }
         if (this.options.attributes.direction === 'forward') {
             this.setText(null);
             if (zoom <= 16) {
