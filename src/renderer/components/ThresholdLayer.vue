@@ -62,7 +62,15 @@
             this.visible = visible
           }
         }
+      },
+      zoomUpdated () {
+        this.layerGroup.eachLayer(l => {
+          if (l instanceof L.Threshold) {
+            l.updateIcon(this.$parent.mapObject)
+          }
+        })
       }
+
     },
     computed: {
       edit: function () {

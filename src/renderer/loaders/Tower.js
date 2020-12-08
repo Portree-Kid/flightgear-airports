@@ -49,8 +49,8 @@ L.TowerMarker = L.Marker.extend({
                 var scale = pixelSize/64;
                 var offset = -(64/2);
                 this.setIcon(L.divIcon({
-                    iconSize: null,
-                    className: 'aircraft-marker-icon',
+                    iconSize: 64,
+                    className: 'tower-marker-icon',
                     html: `<div style=\'transform: translateX(${offset}px) translateY(${offset}px) scale(${scale}); border: 1px red\'>${this.svg}</div>`,
                 }));    
                 this._metersPP = metersPP;

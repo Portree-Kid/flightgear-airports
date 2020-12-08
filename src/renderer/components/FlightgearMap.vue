@@ -162,7 +162,9 @@ You should have received a copy of the GNU General Public License along with FG 
               this.$refs.pavementLayer.load(airportsToLoad[0])
               this.$refs.editLayer.load(airportsToLoad[0])
               this.$refs.thresholdLayer.load(airportsToLoad[0])
-              this.$refs.towerLayer.load(airportsToLoad[0])
+              if (this.$refs.towerLayer) {
+                this.$refs.towerLayer.load(airportsToLoad[0])
+              }
               this.editingAirport = airportsToLoad[0]
             })
           }
@@ -228,7 +230,7 @@ You should have received a copy of the GNU General Public License along with FG 
             this.layersControl.addOverlay(this.$refs.thresholdLayer.getLayer(), 'Threshold Layer')
           }
         }
-        if (this.$refs.towerLayer.getLayer() === e.layer) {
+        if (this.$refs.towerLayer !== undefined && this.$refs.towerLayer.getLayer() === e.layer) {
           l = this.layersControl._layers.filter(l => l.name === 'Tower Layer')
           if (l.length > 0 && l[0].layer !== this.$refs.towerLayer.getLayer()) {
             this.layersControl.removeLayer(l[0].layer)
@@ -338,7 +340,12 @@ You should have received a copy of the GNU General Public License along with FG 
         if (zoom !== this.$store.state.Settings.zoom) {
           this.$store.dispatch('setZoom', zoom)
           this.$refs.airportLayer.setVisible(zoom < 12)
-          this.$refs.towerLayer.setVisible(this.zoom >= 12)
+          if (this.$refs.towerLayer) {
+            this.$refs.towerLayer.setVisible(this.zoom >= 12)
+          }
+          if (this.$refs.thresholdLayer) {
+            this.$refs.thresholdLayer.setVisible(this.zoom >= 12)
+          }
           this.$refs.pavementLayer.setVisible(zoom >= 12)
         }
         this.$refs.editLayer.groundnetLayerGroup.eachLayer(function (layer) {
@@ -346,6 +353,9 @@ You should have received a copy of the GNU General Public License along with FG 
             layer.updateArrows(zoom)
           }
         })
+        if (this.$refs.thresholdLayer) {
+          this.$refs.thresholdLayer.zoomUpdated()
+        }
         if (this.$refs.towerLayer) {
           this.$refs.towerLayer.zoomUpdated()
         }
@@ -354,7 +364,12 @@ You should have received a copy of the GNU General Public License along with FG 
         if (center !== this.$store.state.Settings.center) {
           this.$store.dispatch('setCenter', center)
           this.$refs.airportLayer.setVisible(this.zoom < 12)
-          this.$refs.towerLayer.setVisible(this.zoom >= 12)
+          if (this.$refs.thresholdLayer) {
+            this.$refs.thresholdLayer.setVisible(this.zoom >= 12)
+          }
+          if (this.$refs.towerLayer) {
+            this.$refs.towerLayer.setVisible(this.zoom >= 12)
+          }
           this.$refs.pavementLayer.setVisible(this.zoom >= 12)
         }
       },

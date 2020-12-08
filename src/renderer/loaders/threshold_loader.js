@@ -50,8 +50,16 @@ exports.readThresholdXML = function (fDir, icao, force) {
 
 
             thresholdNodes.map(n => {
-                var circle = threshold(n, layerGroup);
-                features.push(circle);
+               var icon = threshold(n);
+               icon.addTo(layerGroup);
+
+                var latlon = convert(n.find('lat/text()').text() + " " + n.find('lon/text()').text());
+                /*
+                var marker = new L.Circle([latlon.decimalLatitude, latlon.decimalLongitude], 5);
+                marker.addTo(layerGroup);
+                */
+
+//                features.push(circle);
             }).sort();
 
             return layerGroup;

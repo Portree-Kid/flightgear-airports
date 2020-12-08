@@ -10,143 +10,76 @@ FG Airports is distributed in the hope that it will be useful, but WITHOUT ANY W
 You should have received a copy of the GNU General Public License along with FG Airports. If not, see http://www.gnu.org/licenses/.
 */
 /* eslint-disable */
+
 const convert = require('geo-coordinates-parser');
-const leaflet = require('leaflet');
-const turf = require('@turf/turf');
-const util = require('util');
-const store = require('../store');
+const fs = require('fs');
+const path = require('path');
 
-var $ = require('jquery');
-L.Threshold = L.Circle.extend({
-    select() {
-        var style = {};
-        style['color'] = 'red';
-        this.setStyle(style);
-    },    
-    addListeners: function () {
-        this.on('editable:drawing:move', function (event) {
-            console.log("Move : ", event);
-            console.log("Move : ", event.latlng);
-            // Is it the edit vertex (Middle) moving?
-            if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){
-                event.target.setLatLng(event.latlng);
-                event.target.updateVertexFromDirection();
-                this.follow(event.target.id, event);                        
+/**http://wiki.openstreetmap.org/wiki/Zoom_levels*/
+
+
+L.Threshold = L.Marker.extend({
+    options: {
+        zIndexOffset: 20000, 
+    },
+    stripSVG: function(fName) {
+        var rx = /<\s*svg[^>]*>([\s\S]*)<\s*\/svg[^>]*>/gm;
+        var svg = fs.readFileSync(path.join(__static, '/', fName), 'utf8');
+        var svg2 = rx.exec(svg);
+        return svg2[0];
+    },
+    updateIcon : function(map) {
+        console.debug(`Lat Lng Threshold ${this.getLatLng()}`);
+        if(map !== null) {
+            var metersPP = this.metersPerPixel(map.getCenter().lat, map.getZoom());
+            console.debug('Old Meters per pixel ' + this.metersPP);
+            console.debug('New Meters per pixel ' + metersPP);
+            if(this._metersPP != metersPP) {                
+                var pixelSize = (this.iconSize/2) / metersPP;
+                var scale = pixelSize/this.iconSize;
+                var offset = 0;//-(this.iconSize/2);                
+                this.setIcon(L.divIcon({
+                    iconSize: 64,
+                    className: 'threshold-marker-icon',
+                    html: `<div style=\'transform: translateX(${offset}px) translateY(${offset}px) scale(${scale}) rotate(${this.options.heading}deg); border: 1px red\'>${this.svg}</div>`,
+                }));    
+
+                this.update(this.getLatLng());
+                console.debug();
+                this.setLatLng(this.getLatLng());
+                this._metersPP = metersPP;
             }
-            else if(event.target.editor._resizeLatLng.__vertex._icon === event.sourceTarget._element) {
-                event.target.updateDirectionFromVertex();     
-                event.target.updateVertexFromDirection();     
-            }
-        });
-        /*        
-        this.on('editable:vertex:drag', function (event) {
-            console.log("Drag : ", event);
-        });
-        */
-        this.on('click', function (event) {
-            console.log("Click : " + event.target);
-            store.default.dispatch('setParking', event.target.options.attributes);
-            this.select(); 
-            this.unwatch = store.default.watch(
-                function (state) {
-                        return state.Editable.data.parking;
-                },
-                    () => { 
-                        if (event.target instanceof L.Threshold) {
-                            event.target.setStyle({color : '#3388ff'}); 
-                            this.unwatch();    
-                        }
-                    }                    
-                ,
-                {
-                    deep: true //add this if u need to watch object properties change etc.
-                }
-            );
-        });        
-        this.on('editable:vertex:clicked', function (event) {
-            console.log(this.featureLookup[event.vertex.glueindex]);
-            if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){
-                event.vertex._icon.style['background-color'] = 'red';
-                store.default.dispatch('setParking', event.target.options.attributes);
-                this.unwatch = store.default.watch(
-                    function (state) {
-                            return state.Editable.data.parking;
-                    },
-                        () => { 
-                            event.target.setStyle({color : '#3388ff'}); 
-                            this.unwatch();
-                        }                    
-                    ,
-                    {
-                        deep: true //add this if u need to watch object properties change etc.
-                    }
-                );
+        }
+    },
+    onAdd : function(map) {
+        var metersPP = this.metersPerPixel(map.getCenter().lat, map.getZoom());
+        this.updateIcon(map);
+    },
+    metersPerPixel: function (latitude, zoomLevel) {
+        var earthCircumference = 40075017;
+        var latitudeRadians = latitude * (Math.PI / 180);
+        return earthCircumference * Math.cos(latitudeRadians) / Math.pow(2, zoomLevel + 8);
+    },
     
-            }
-
-        });
-
-        this.on('editable:disable', function (event) {
-            event.target.removeDirection();
-        });    
+    pixelValue: function (latitude, meters, zoomLevel) {
+        return meters / metersPerPixel(latitude, zoomLevel);
     },
-    updateStyle: function () {
-
-    },
-    turfToLatLng: function (turfPoint) {
-        return {lat: turfPoint.geometry.coordinates[1], lng: turfPoint.geometry.coordinates[0]};
-    },
-    extensions: function (editLayer) {
-       this.createDirection(); 
-       if (typeof this.featureLookup[this.id] === 'undefined') {
-        this.featureLookup[this.id] = [];
-       }
-       this.featureLookup[this.id].push(this);
-    },
-
-    _getLatRadius: function () {
-        return this._mRadius;
-    },
-
-    _getLngRadius: function () {
-        return this._mRadius;
-    },
+        
 
 });
 
-var threshold = function (n, layerGroup) {
-    //console.log(n.attr('lat') + " " + n.attr('lon'));
-    var latlon = convert(n.find('lat/text()').text() + " " + n.find('lon/text()').text());
-    //console.log(latlon.decimalLatitude);
-    //console.log(convert(n.attr('lat') + " " + n.attr('lon')).decimalLongitude);
-    const circle = new L.Threshold([latlon.decimalLatitude, latlon.decimalLongitude], { radius: 10, attributes: {}  });
-    circle.on('editable:enable', function (event) {
-      // event.target.createDirection();
-    });
-    /*
-<Parking index="2"
-type="gate"
-name="A6"
-number=""
-lat="N44 52.799"
-lon="W93 11.947"
-heading="-147.51"
-radius="18"
-pushBackRoute="541" 
-airlineCodes="VIR,KAL,DAL,KLM" />
-*/
-    //circle.attributes = { type: n.attr('type'), name: n.attr('name'), radius: Number(n.attr('radius')), airlineCodes: n.attr('airlineCodes'), heading: Number(n.attr('heading')) };
+L.Threshold.addInitHook(function(){
+    this.svg = this.stripSVG('FGA_THR.svg');
+    this.iconSize = 500;
+});
 
-    $.each( n.attrs, function( key, value ) {
-        console.log( '$', circle.id, key , value);
-        
-        if(isNaN(value))
-          circle.options.attributes[ key ] = value;
-        else
-          circle.options.attributes[ key ] = Number( value);
-    });
-    circle.addTo(layerGroup);
-    return circle;
+//Builds a marker for a ai or multiplayer aircraft
+var threshold = function (n, options) {
+    var latlon = convert(n.find('lat/text()').text() + " " + n.find('lon/text()').text());
+    var heading = n.find('hdg-deg/text()').text();
+
+    var marker = new L.Threshold([latlon.decimalLatitude, latlon.decimalLongitude], {heading: heading});
+    return marker;
 }
 
 module.exports = threshold;
