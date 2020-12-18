@@ -31,9 +31,15 @@ const actions = {
     context.commit('SET_ICAO_LOADING', p)
   },
   async setGroundnetLoaded (context, p) {
+    if (typeof p !== 'boolean') {
+      console.error('Not Boolean')
+    }
     context.commit('SET_GROUNDNET_LOADED', p)
   },
   async setPavementLoaded (context, p) {
+    if (typeof p !== 'boolean') {
+      console.error('Not Boolean')
+    }
     context.commit('SET_PAVEMENT_LOADED', p)
   }
 }

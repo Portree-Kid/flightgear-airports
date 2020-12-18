@@ -3,7 +3,7 @@
     <div class="select-button">
       ...
     </div>
-    <input type="file" @change="handleFileChange" webkitdirectory directory/>
+    <input name="hiddenDir" type="file" v-on:change="handleFileChange($event)" webkitdirectory directory tabindex="-1"/>
   </label>
 </template>
 
@@ -20,9 +20,15 @@
 
   methods: {
     handleFileChange (e) {
-      var first = e.target.files[0].webkitRelativePath.split("/")[0];
-      var webkitdirectoryPath = e.target.files[0].path.split(first)[0] + first;
-      this.$emit('input', webkitdirectoryPath)
+      try {
+        if (e.target.files && e.target.files.length>0) {
+          var first = e.target.files[0].webkitRelativePath.split("/")[0];
+          var webkitdirectoryPath = e.target.files[0].path.split(first)[0] + first;
+          this.$emit('input', webkitdirectoryPath)          
+        }
+      } catch (error) {
+        console.error(error)
+      }
     }
   }
 }
@@ -39,6 +45,8 @@
 
   text-align: center;
   font-weight: bold;
+  width: 28px;
+  height: 28px;
 }
 
 .directory-select > input[type="file"] {

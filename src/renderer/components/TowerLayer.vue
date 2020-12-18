@@ -1,21 +1,29 @@
+<!--
+Copyright 2020 Keith Paterson
+
+This file is part of FG Airports.
+
+FG Airports is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+FG Airports is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with FG Airports. If not, see http://www.gnu.org/licenses/.
+-->
 <template></template>
 
 <script lang="js">
   import { LMap, LMarker } from 'vue2-leaflet'
   import L from 'leaflet'
   import LEdit from 'leaflet-editable/src/Leaflet.Editable.js'
-  import {readThresholdXML} from '../loaders/threshold_loader'
+  import {readTowerXML} from '../loaders/tower_loader'
 
   export default {
-    name: 'edit-layer',
+    name: 'tower-layer',
     props: [],
     created () {
+      console.debug([LMap, LMarker, L, LEdit])
     },
     mounted () {
-      console.log(LMap)
-      console.log(LMarker)
-      console.log(L)
-      console.log(LEdit)
     },
     beforeDestroy () {
       this.remove()
@@ -30,9 +38,9 @@
       },
       load (icao) {
         // Callback for add
-        this.layerGroup = readThresholdXML(this.$store.state.Settings.settings.airportsDirectory, icao, this.read)
+        this.layerGroup = readTowerXML(this.$store.state.Settings.settings.airportsDirectory, icao, this.read)
         if (!this.layerGroup) {
-          console.warn('Threshold for ICAO not loaded ' + icao)
+          console.warn('Tower for ICAO not loaded ' + icao)
           return
         }
         this.layerGroup.addTo(this.$parent.mapObject)
@@ -51,6 +59,16 @@
           this.deferredMountedTo(this.$parent.mapObject)
         }
       },
+      enableEdit () {
+        this.layerGroup.eachLayer(l => {
+          if (l instanceof L.TowerMarker) {
+            l.enableEdit(this.$parent.mapObject)
+          }
+        })
+      },
+      save () {
+      },
+
       setVisible (visible) {
         if (this.layerGroup !== undefined) {
           if (visible !== this.visible) {
@@ -65,18 +83,17 @@
       },
       zoomUpdated () {
         this.layerGroup.eachLayer(l => {
-          if (l instanceof L.Threshold) {
+          if (l instanceof L.TowerMarker) {
             l.updateIcon(this.$parent.mapObject)
           }
         })
       }
-
     },
     computed: {
       edit: function () {
         console.log('Zoom : ' + this.$store.state.Settings.zoom)
         if (this.$store.state.Settings.zoom > 12) {
-          console.log('Zoom above 12')
+          console.log()
         }
       }
     }

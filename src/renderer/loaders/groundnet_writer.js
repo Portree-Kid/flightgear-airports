@@ -60,6 +60,11 @@ function walkPushbackRoute (index, walkedNodes, pushBackNodes) {
 
 exports.writeGroundnetXML = function (fDir, icao, featureList) {
     try {
+        try { fs.mkdirSync(path.join(fDir), { recursive: true })} catch (err) { }
+        try { fs.mkdirSync(path.join(fDir, icao[0]),{ recursive: true })} catch (err) { }
+        try { fs.mkdirSync(path.join(fDir, icao[0], icao[1]), { recursive: true })} catch (err) { }
+        try { fs.mkdirSync(path.join(fDir, icao[0], icao[1], icao[2]), { recursive: true })} catch (err) { }
+
         var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');
         var fBak = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.bak.xml');
 
@@ -201,7 +206,12 @@ var mapParkings = function (o) {
             console.debug(o.options.attributes.airlineCodes);
             parking['@airlineCodes'] = o.options.attributes.airlineCodes;
         }
-        if(o.options.attributes.number) {
+        if(o.options.attributes.number !== undefined && 
+            typeof o.options.attributes.number === 'number' || (
+                typeof o.options.attributes.number === 'string' &&
+                o.options.attributes.number.trim() !== ''
+            )
+            ) {
             console.debug(o.options.attributes.number);
             parking['@number'] = o.options.attributes.number;
         }

@@ -30,8 +30,6 @@ You should have received a copy of the GNU General Public License along with FG 
     <!--<l-marker :lat-lng="marker"></l-marker>-->
     <LeafletSidebar ref="sidebar" @editParking="onEditSidebar" @edit="onEdit($event)"></LeafletSidebar>
     <AiLayer ref="aiLayer"></AiLayer> 
-    <PavementLayer ref="pavementLayer"></PavementLayer>    
-    <ThresholdLayer ref="thresholdLayer"></ThresholdLayer>
     <l-layer-group layerType="overlay" name="airports" ref="airportLayer">
       <l-circle
         v-for="(item, index) in this.$store.state.Airports.airports"
@@ -44,6 +42,9 @@ You should have received a copy of the GNU General Public License along with FG 
       ></l-circle>
     </l-layer-group>
     <EditLayer ref="editLayer"></EditLayer>
+    <PavementLayer ref="pavementLayer"></PavementLayer>    
+    <ThresholdLayer ref="thresholdLayer"></ThresholdLayer>
+    <TowerLayer ref="towerLayer"></TowerLayer>
     <ToolLayer ref="toolLayer" @select-poly="onSelectedPolygon"></ToolLayer>
     <EditBar ref="editBar" @edit="onEdit($event)"></EditBar>
     <ToolBar ref="toolBar"></ToolBar>
@@ -60,6 +61,7 @@ You should have received a copy of the GNU General Public License along with FG 
   import ToolBar from './ToolBar'
   import EditLayer from './EditLayer'
   import ToolLayer from './ToolLayer'
+  import TowerLayer from './TowerLayer'
   import PavementLayer from './PavementLayer'
   import ThresholdLayer from './ThresholdLayer'
 
@@ -75,7 +77,7 @@ You should have received a copy of the GNU General Public License along with FG 
   })
   export default {
     name: 'flightgear-map',
-    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, AiLayer, EditBar, ToolBar, EditLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer, ToolLayer },
+    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, AiLayer, EditBar, ToolBar, EditLayer, TowerLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer, ToolLayer },
     props: [],
     created () {
       this.loadingInstance = null
@@ -85,7 +87,7 @@ You should have received a copy of the GNU General Public License along with FG 
         },
         (newValue, oldValue) => {
           // debugger
-          console.log('setIcaoLoading ' + oldValue + ' => ' + newValue + ' ' + this.groundnetLoaded + ' ' + this.pavementLoaded + ' ' + this.loadingInstance)
+          console.log('setIcaoLoading ' + oldValue + ' => ' + newValue + ' groundnetLoaded ' + this.groundnetLoaded + ' pavementLoaded ' + this.pavementLoaded + ' ' + this.loadingInstance)
           if (newValue !== oldValue && newValue !== '') {
             this.groundnetLoaded = newValue
             if ((this.loadingInstance === null || this.loadingInstance === undefined)) {
@@ -105,7 +107,7 @@ You should have received a copy of the GNU General Public License along with FG 
         },
         (newValue, oldValue) => {
           // debugger
-          console.log('groundnetLoaded ' + oldValue + ' => ' + newValue + ' ' + this.groundnetLoaded + ' ' + this.pavementLoaded + ' ' + this.loadingInstance)
+          console.log('groundnetLoaded ' + oldValue + ' => ' + newValue + ' groundnetLoaded ' + this.groundnetLoaded + ' pavementLoaded ' + this.pavementLoaded + ' ' + this.loadingInstance)
           if (newValue !== oldValue) {
             this.groundnetLoaded = newValue
             if (this.groundnetLoaded &&
@@ -160,6 +162,9 @@ You should have received a copy of the GNU General Public License along with FG 
               this.$refs.pavementLayer.load(airportsToLoad[0])
               this.$refs.editLayer.load(airportsToLoad[0])
               this.$refs.thresholdLayer.load(airportsToLoad[0])
+              if (this.$refs.towerLayer) {
+                this.$refs.towerLayer.load(airportsToLoad[0])
+              }
               this.editingAirport = airportsToLoad[0]
             })
           }
@@ -169,7 +174,6 @@ You should have received a copy of the GNU General Public License along with FG 
           if (this.$refs.airportLayer) {
             this.$refs.airportLayer.setVisible(this.zoom < 12)
           }
-
           // console.log(this.groundnet)
         }
       })
@@ -208,14 +212,32 @@ You should have received a copy of the GNU General Public License along with FG 
         if (this.$refs.pavementLayer.getLayer() === e.layer) {
           // debugger
           var l = this.layersControl._layers.filter(l => l.name === 'APT Layer')
+          if (l.length > 0 && l[0].layer !== this.$refs.pavementLayer.getLayer()) {
+            this.layersControl.removeLayer(l[0].layer)
+            this.layersControl.addOverlay(this.$refs.pavementLayer.getLayer(), 'APT Layer')
+          }
           if (l.length === 0) {
             this.layersControl.addOverlay(this.$refs.pavementLayer.getLayer(), 'APT Layer')
           }
         }
         if (this.$refs.thresholdLayer.getLayer() === e.layer) {
           l = this.layersControl._layers.filter(l => l.name === 'Threshold Layer')
+          if (l.length > 0 && l[0].layer !== this.$refs.thresholdLayer.getLayer()) {
+            this.layersControl.removeLayer(l[0].layer)
+            this.layersControl.addOverlay(this.$refs.thresholdLayer.getLayer(), 'Threshold Layer')
+          }
           if (l.length === 0) {
             this.layersControl.addOverlay(this.$refs.thresholdLayer.getLayer(), 'Threshold Layer')
+          }
+        }
+        if (this.$refs.towerLayer !== undefined && this.$refs.towerLayer.getLayer() === e.layer) {
+          l = this.layersControl._layers.filter(l => l.name === 'Tower Layer')
+          if (l.length > 0 && l[0].layer !== this.$refs.towerLayer.getLayer()) {
+            this.layersControl.removeLayer(l[0].layer)
+            this.layersControl.addOverlay(this.$refs.towerLayer.getLayer(), 'Tower Layer')
+          }
+          if (l.length === 0) {
+            this.layersControl.addOverlay(this.$refs.towerLayer.getLayer(), 'Tower Layer')
           }
         }
       },
@@ -234,6 +256,7 @@ You should have received a copy of the GNU General Public License along with FG 
           this.$refs.map.mapObject.options.minZoom = 1
         }
         this.$refs.editLayer.enableEdit()
+        this.$refs.towerLayer.enableEdit()
         this.$refs.editBar.setEditing(event)
         this.$refs.toolBar.setEditing(event)
         this.$refs.sidebar.setEditing(event)
@@ -317,13 +340,36 @@ You should have received a copy of the GNU General Public License along with FG 
         if (zoom !== this.$store.state.Settings.zoom) {
           this.$store.dispatch('setZoom', zoom)
           this.$refs.airportLayer.setVisible(zoom < 12)
+          if (this.$refs.towerLayer) {
+            this.$refs.towerLayer.setVisible(this.zoom >= 12)
+          }
+          if (this.$refs.thresholdLayer) {
+            this.$refs.thresholdLayer.setVisible(this.zoom >= 12)
+          }
           this.$refs.pavementLayer.setVisible(zoom >= 12)
+        }
+        this.$refs.editLayer.groundnetLayerGroup.eachLayer(function (layer) {
+          if (layer.updateArrows !== undefined) {
+            layer.updateArrows(zoom)
+          }
+        })
+        if (this.$refs.thresholdLayer) {
+          this.$refs.thresholdLayer.zoomUpdated()
+        }
+        if (this.$refs.towerLayer) {
+          this.$refs.towerLayer.zoomUpdated()
         }
       },
       async centerUpdated (center) {
         if (center !== this.$store.state.Settings.center) {
           this.$store.dispatch('setCenter', center)
           this.$refs.airportLayer.setVisible(this.zoom < 12)
+          if (this.$refs.thresholdLayer) {
+            this.$refs.thresholdLayer.setVisible(this.zoom >= 12)
+          }
+          if (this.$refs.towerLayer) {
+            this.$refs.towerLayer.setVisible(this.zoom >= 12)
+          }
           this.$refs.pavementLayer.setVisible(this.zoom >= 12)
         }
       },
