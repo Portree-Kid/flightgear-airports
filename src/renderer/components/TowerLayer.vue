@@ -60,11 +60,13 @@ You should have received a copy of the GNU General Public License along with FG 
         }
       },
       enableEdit () {
-        this.layerGroup.eachLayer(l => {
-          if (l instanceof L.TowerMarker) {
-            l.enableEdit(this.$parent.mapObject)
-          }
-        })
+        if (this.layerGroup) {
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.TowerMarker) {
+              l.enableEdit(this.$parent.mapObject)
+            }
+          })
+        }
       },
       save () {
       },
@@ -82,11 +84,13 @@ You should have received a copy of the GNU General Public License along with FG 
         }
       },
       zoomUpdated () {
-        this.layerGroup.eachLayer(l => {
-          if (l instanceof L.TowerMarker) {
-            l.updateIcon(this.$parent.mapObject)
-          }
-        })
+        if (this.layerGroup) {
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.TowerMarker) {
+              l.updateIcon(this.$parent.mapObject)
+            }
+          })
+        }
       }
     },
     computed: {

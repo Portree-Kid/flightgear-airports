@@ -196,7 +196,6 @@ You should have received a copy of the GNU General Public License along with FG 
     },
     methods: {
       ready (e) {
-        console.log(e)
         e.on('layeradd', this.onLayerAdd)
       },
       onLayerAdd (e) {
@@ -220,7 +219,7 @@ You should have received a copy of the GNU General Public License along with FG 
             this.layersControl.addOverlay(this.$refs.pavementLayer.getLayer(), 'APT Layer')
           }
         }
-        if (this.$refs.thresholdLayer.getLayer() === e.layer) {
+        if (this.$refs.thresholdLayer !== undefined && this.$refs.thresholdLayer.getLayer() === e.layer) {
           l = this.layersControl._layers.filter(l => l.name === 'Threshold Layer')
           if (l.length > 0 && l[0].layer !== this.$refs.thresholdLayer.getLayer()) {
             this.layersControl.removeLayer(l[0].layer)
@@ -229,6 +228,7 @@ You should have received a copy of the GNU General Public License along with FG 
           if (l.length === 0) {
             this.layersControl.addOverlay(this.$refs.thresholdLayer.getLayer(), 'Threshold Layer')
           }
+          this.$refs.thresholdLayer.zoomUpdated()
         }
         if (this.$refs.towerLayer !== undefined && this.$refs.towerLayer.getLayer() === e.layer) {
           l = this.layersControl._layers.filter(l => l.name === 'Tower Layer')
@@ -239,6 +239,7 @@ You should have received a copy of the GNU General Public License along with FG 
           if (l.length === 0) {
             this.layersControl.addOverlay(this.$refs.towerLayer.getLayer(), 'Tower Layer')
           }
+          this.$refs.towerLayer.zoomUpdated()
         }
       },
       onSelectedPolygon (ring) {
@@ -348,11 +349,13 @@ You should have received a copy of the GNU General Public License along with FG 
           }
           this.$refs.pavementLayer.setVisible(zoom >= 12)
         }
-        this.$refs.editLayer.groundnetLayerGroup.eachLayer(function (layer) {
-          if (layer.updateArrows !== undefined) {
-            layer.updateArrows(zoom)
-          }
-        })
+        if (this.$refs.editLayer.groundnetLayerGroup) {
+          this.$refs.editLayer.groundnetLayerGroup.eachLayer(function (layer) {
+            if (layer.updateArrows !== undefined) {
+              layer.updateArrows(zoom)
+            }
+          })
+        }
         if (this.$refs.thresholdLayer) {
           this.$refs.thresholdLayer.zoomUpdated()
         }

@@ -64,11 +64,13 @@
         }
       },
       zoomUpdated () {
-        this.layerGroup.eachLayer(l => {
-          if (l instanceof L.Threshold) {
-            l.updateIcon(this.$parent.mapObject)
-          }
-        })
+        if (this.layerGroup) {
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.Threshold) {
+              l.updateIcon(this.$parent.mapObject)
+            }
+          })
+        }
       }
 
     },
