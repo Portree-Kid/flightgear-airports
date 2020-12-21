@@ -63,12 +63,12 @@ exports.readTowerXML = function (fDir, icao, force) {
             towerNodes.map(n => {
                 var towerIcon = tower(n, layerGroup);
                 towerIcon.addTo(layerGroup);
-                var latlon = convert(n.find('lat/text()').text() + " " + n.find('lon/text()').text());
                 /*
+                //DEBUG Code 
+                var latlon = convert(n.find('lat/text()').text() + " " + n.find('lon/text()').text());
                 var marker = new L.Circle([latlon.decimalLatitude, latlon.decimalLongitude], 5);
                 marker.addTo(layerGroup);
                 */
-
                 features.push(towerIcon);
             }).sort();
 

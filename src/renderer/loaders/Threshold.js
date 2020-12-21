@@ -51,10 +51,6 @@ L.Threshold = L.Marker.extend({
             }
         }
     },
-    onAdd : function(map) {
-        var metersPP = this.metersPerPixel(map.getCenter().lat, map.getZoom());
-        this.updateIcon(map);
-    },
     metersPerPixel: function (latitude, zoomLevel) {
         var earthCircumference = 40075017;
         var latitudeRadians = latitude * (Math.PI / 180);

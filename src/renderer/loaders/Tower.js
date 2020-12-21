@@ -22,18 +22,6 @@ L.TowerMarker = L.Marker.extend({
     options: {
         zIndexOffset: 10000,
     },
-
-    initialize: function (latlng, options) {
-        L.Marker.prototype.initialize(latlng, options);
-        L.Util.setOptions(this, options);
-        this.svg = this.stripSVG('tower.svg');
-
-        this.isDragging = false;        
-    },
-    updateProperties: function(properties) {
-        this.heading = properties.heading;
-        this.updateIcon();
-    },
     stripSVG: function(fName) {
         var rx = /<\s*svg[^>]*>([\s\S]*)<\s*\/svg[^>]*>/gm;
         var svg = fs.readFileSync(path.join(__static, '/', fName), 'utf8');
@@ -41,27 +29,28 @@ L.TowerMarker = L.Marker.extend({
         return svg2[0];
     },
     updateIcon : function(map) {
+        console.debug(`Lat Lng Threshold ${this.getLatLng()}`);
         if(map !== null) {
             var metersPP = this.metersPerPixel(map.getCenter().lat, map.getZoom());
-            if(this._metersPP != metersPP) {
-                console.debug('Meters per pixel ' + metersPP);
-                var pixelSize = 32 / metersPP;
-                var scale = pixelSize/64;
-                var offset = -(64/2);
+            console.debug('Old Meters per pixel ' + this.metersPP);
+            console.debug('New Meters per pixel ' + metersPP);
+            if(this._metersPP != metersPP) {                
+                var pixelSize = (this.iconSize/2) / metersPP;
+                var scale = pixelSize/this.iconSize;
+                var offset = 0;//-(this.iconSize/2);                
                 this.setIcon(L.divIcon({
                     iconSize: 64,
-                    className: 'tower-marker-icon',
-                    html: `<div style=\'transform: translateX(${offset}px) translateY(${offset}px) scale(${scale}); border: 1px red\'>${this.svg}</div>`,
+                    className: 'threshold-marker-icon',
+                    html: `<div style=\'transform: translateX(${offset}px) translateY(${offset}px) scale(${scale}) rotate(${this.options.heading}deg); border: 1px red\'>${this.svg}</div>`,
                 }));    
+
+                this.update(this.getLatLng());
+                console.debug();
+                this.setLatLng(this.getLatLng());
                 this._metersPP = metersPP;
             }
         }
-    },
-    onAdd : function(map) {
-        var metersPP = this.metersPerPixel(map.getCenter().lat, map.getZoom());
-        console.debug('Meters per pixel ' + metersPP);
-        this.updateIcon(map);
-    },
+    },    
     metersPerPixel: function (latitude, zoomLevel) {
         var earthCircumference = 40075017;
         var latitudeRadians = latitude * (Math.PI / 180);
@@ -75,10 +64,15 @@ L.TowerMarker = L.Marker.extend({
 
 });
 
+L.TowerMarker.addInitHook(function(){
+    this.svg = this.stripSVG('tower.svg');
+    this.iconSize = 64;
+});
+
 //Builds a marker for a ai or multiplayer aircraft
 var tower = function (n, options) {
     var latlon = convert(n.find('lat/text()').text() + " " + n.find('lon/text()').text());
-    return new L.TowerMarker([latlon.decimalLatitude, latlon.decimalLongitude], options);
+    return new L.TowerMarker([latlon.decimalLatitude, latlon.decimalLongitude], {heading: 0});
 }
 
 module.exports = tower;
