@@ -24,6 +24,7 @@ You should have received a copy of the GNU General Public License along with FG 
       console.debug([LMap, LMarker, L, LEdit])
     },
     mounted () {
+
     },
     beforeDestroy () {
       this.remove()
@@ -37,6 +38,8 @@ You should have received a copy of the GNU General Public License along with FG 
         return this.layerGroup
       },
       load (icao) {
+        this.$parent.mapObject.createPane('tower-pane')
+        this.$parent.mapObject.getPane('tower-pane').style.zIndex = 550
         // Callback for add
         this.layerGroup = readTowerXML(this.$store.state.Settings.settings.airportsDirectory, icao, this.read)
         if (!this.layerGroup) {

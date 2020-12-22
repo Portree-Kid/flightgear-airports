@@ -70,9 +70,9 @@ L.TowerMarker.addInitHook(function(){
 });
 
 //Builds a marker for a ai or multiplayer aircraft
-var tower = function (n, options) {
+var tower = function (n, options) {    
     var latlon = convert(n.find('lat/text()').text() + " " + n.find('lon/text()').text());
-    return new L.TowerMarker([latlon.decimalLatitude, latlon.decimalLongitude], {heading: 0});
+    return new L.TowerMarker([latlon.decimalLatitude, latlon.decimalLongitude], {heading: 0, pane: 'tower-pane'});
 }
 
 module.exports = tower;

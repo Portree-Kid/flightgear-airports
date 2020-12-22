@@ -29,6 +29,8 @@
         return this.layerGroup
       },
       load (icao) {
+        this.$parent.mapObject.createPane('threshold-pane')
+        this.$parent.mapObject.getPane('threshold-pane').style.zIndex = 550
         // Callback for add
         this.layerGroup = readThresholdXML(this.$store.state.Settings.settings.airportsDirectory, icao, this.read)
         if (!this.layerGroup) {

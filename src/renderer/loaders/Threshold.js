@@ -74,7 +74,7 @@ var threshold = function (n, options) {
     var latlon = convert(n.find('lat/text()').text() + " " + n.find('lon/text()').text());
     var heading = n.find('hdg-deg/text()').text();
 
-    var marker = new L.Threshold([latlon.decimalLatitude, latlon.decimalLongitude], {heading: heading});
+    var marker = new L.Threshold([latlon.decimalLatitude, latlon.decimalLongitude], {heading: heading, pane: 'threshold-pane'});
     return marker;
 }
 
