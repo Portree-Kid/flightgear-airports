@@ -567,7 +567,7 @@ You should have received a copy of the GNU General Public License along with FG 
         polyLine.addListeners()
 
         polyLine.on('editable:drawing:end', event => {
-          console.log(event)
+          console.debug(event)
           event.target.addTo(this.groundnetLayerGroup)
         })
       },      
@@ -585,11 +585,11 @@ You should have received a copy of the GNU General Public License along with FG 
         polyLine.addListeners()
 
         polyLine.on('editable:drawing:end', event => {
-          console.log(event)
+          console.debug(event)
           event.target.addTo(this.groundnetLayerGroup)
           var pt = event.sourceTarget._latlngs[event.sourceTarget._latlngs.length-1];          
-          pt.options.attributes['holdPointType'] = 'PushBack'
-          var nIndex = pt.options.attributes.index
+          pt.attributes['holdPointType'] = 'PushBack'
+          var nIndex = pt.attributes.index
           var fa_icon = "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-arrows-alt-h'></i>";
           const icon = new L.DivIcon({
               className: 'custom-div-icon',
