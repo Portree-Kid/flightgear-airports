@@ -4,14 +4,14 @@ dist: xenial
 language: node_js
 workspaces:
   use:
-    - binaries
+  - binaries
 cache:
   directories:
   - node_modules
   - "$HOME/.electron"
-  - "$HOME/.cache" 
-addons: 
-before_install: 
+  - "$HOME/.cache"
+addons:
+before_install:
 install:
 - source ~/.bashrc
 - npm install -g xvfb-maybe
@@ -20,67 +20,65 @@ node_js:
 - 10.15.3
 jobs:
   include:
+    matrix:
     - stage: Build binaries
       os: windows
       script:
-        - npm run build
-        - mkdir windows-binaries
-        - mv -v build/flightgear-airports* windows-binaries/
-        - ls -l windows-binaries
+      - npm run build
+      - mkdir windows-binaries
+      - mv -v build/flightgear-airports* windows-binaries/
+      - ls -l windows-binaries
       workspaces:
         create:
           name: windows-binaries
           paths: windows-binaries
     - os: linux
       script:
-        - npm run build
-        - mkdir linux-binaries
-        - mv -v build/flightgear-airports* linux-binaries/
-        - ls -l linux-binaries
+      - npm run build
+      - mkdir linux-binaries
+      - mv -v build/flightgear-airports* linux-binaries/
+      - ls -l linux-binaries
       workspaces:
         create:
           name: linux-binaries
           paths: linux-binaries
     - os: osx
       script:
-        - npm run build
-        - mkdir osx-binaries
-        - mv -v build/flightgear-airports* osx-binaries/
-        - ls -l osx-binaries
+      - npm run build
+      - mkdir osx-binaries
+      - mv -v build/flightgear-airports* osx-binaries/
+      - ls -l osx-binaries
       workspaces:
         create:
           name: osx-binaries
           paths: osx-binaries
     - stage: Deploy
       install:
-        - pwd 
-        - tar -xzf ${CASHER_DIR}/osx-binaries-fetch.tgz
-        - find -name flightgear-airports*
-#        - find -name windows-binaries
-#        - find -name osx-binaries
-#        - find -name linux-binaries
-#        - ls -l | grep "^d"
-#        - ls -l "C:"
-        - cp ./Users/travis/build/Portree-Kid/flightgear-airports/osx-binaries/*.dmg build/
-        - cp ./C:/Users/travis/build/Portree-Kid/flightgear-airports/windows-binaries/*.exe build/
-        - cp ./linux-binaries/*.AppImage build/
-        - ls -l "build/"
+      - pwd
+      - tar -xzf ${CASHER_DIR}/osx-binaries-fetch.tgz
+      - find -name flightgear-airports*
+      - cp ./Users/travis/build/Portree-Kid/flightgear-airports/osx-binaries/*.dmg
+        build/
+      - cp ./C:/Users/travis/build/Portree-Kid/flightgear-airports/windows-binaries/*.exe
+        build/
+      - cp ./linux-binaries/*.AppImage build/
+      - ls -l "build/"
       script: skip
       workspaces:
         use:
-          - windows-binaries
-          - linux-binaries
-          - osx-binaries
+        - windows-binaries
+        - linux-binaries
+        - osx-binaries
       deploy:
         skip_cleanup: true
         overwrite: true
         draft: true
-        name: '0.0.28'
+        name: 0.0.28
         provider: releases
-        api_key: 
-          secure: JnHZdzg4AsEcRn4uQkn15ELd8KqSQBgC3cOPRAEFVsOCRhh8aH8WFwAG0uZIjwU1F4qinK0sAayYllc5WrjHZ4/93FNDES3H4hEE1K3WDXG0cVxAt1JiDWVq6meEQWKRNO8zoT4aZa6vigOQhnaS5PE3KcdsaD5N6tkHxI+W7a4qBIUtbMjceKSFVDflJLLBWmMibuQ1JZ9gT1FES4yN18wj/bMM8x8V3xM6m7FPKfiVtnD0IpJKYNDVPQOdw7nJpzvVIzYVEgUTiRY2nVbslJkB8Lllh6zAC4B5vc8UTACf/S+j2z1ofAGajY8x8b0K3UDhg7b7vfTmPpmTJl1ZBGB5scyhRDneIOMr15QiAyKfStHpwdCz8MLV7H/tugPM348riT+JqecARjk/rIgc18/tL6lKQA4P4FG4mGp5s+eq+AAg2fdhyj7rL6kLw+z5J9170ch+ot7Ju6BUJVmvRAWxAg+yXCzyKdfen8RL+R7tdwJ0nFawtnkxwwZwLnr0792mchjl4JK+Q0sEb5J8DmBR1WVL+L3TN6G9HwUrFsm2eVCHAi0k5ExJLYoHV54kg+7uD8upACh3LRFIIFcvQWu52a7VTTwY+5Gsz91o8sAcJImo4E8Ii0wmFhcDPQ3HHa1dUGOofhpMcgPG15lsgdumUeulPz6fUQ3IxzBc8Uo=
-        file_glob: true    
+        api_key:
+          secure: VXCzO5904hY79ulatlwL6iTrYrSZU8xhdEotLZU+i/qWmXjKo9VGbc2vEziHa+gb+TeMO/CQVMeMfrAqQrxwjVjXHdg5RaJCtX7s/pM1wf1vDF8buyZakzvtuP1wT8Qq/fSmNt9MH+GPzSQhfO1aamyEkRSKhQY2MxlF7DE6yLo4v9bh7p8SFSp7Y5VstjwoxgNfNIC28dHnsAdAaQcw9BEVcXmfFmibTOjCwP6CwmWJjD+/u47JXgkmU0uueNyl4d5vOVGrCYPyQDbglBNa/0N2XmRGMyyyhLbqw/TXenKdG8VPSNF7fhlf+OTDJ3Fwj617tqX7NtuFYyPoC9lgPTEtJzM8UdIWody/xmmeRHGRtekoLfVveLtrnq8Q8eJ3AZK2/oYfhWi72Xvfr7Z0nwwWXgCAgafbpL6ShxD3vjTFd8b/3Fr0f+V3rpcS0Vf8zLECPnS4shQIvbbMjmAsnwPXPhTbBLVD/RuHrc5vNmLixZhVtEI8HfL4GxzdTk889NWIA4VpFp4Wq8be+vu2FBV2M8Mh201CeB0tl/vT0aFPUYg9pzJjaBBXUCoG6PBXSBpVkV4DXmnj34mXGJ7vsC9+3fwYNDAfNG6yBxi1uy03JoJga07CtYXFcezT3BIopmiYRdujBW3YXwW2L2VurODZLJYl6cqk/f5kolVV/kE=
+        file_glob: true
         file: build/*
         on:
-          branches: '0.0.28'
+          branches: 0.0.28
           repo: Portree-Kid/flightgear-airports
