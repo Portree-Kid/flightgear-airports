@@ -73,12 +73,12 @@ jobs:
         skip_cleanup: true
         overwrite: true
         draft: true
-        name: 0.0.28
+        name: 0.0.27
         provider: releases
         api_key:
           secure: VXCzO5904hY79ulatlwL6iTrYrSZU8xhdEotLZU+i/qWmXjKo9VGbc2vEziHa+gb+TeMO/CQVMeMfrAqQrxwjVjXHdg5RaJCtX7s/pM1wf1vDF8buyZakzvtuP1wT8Qq/fSmNt9MH+GPzSQhfO1aamyEkRSKhQY2MxlF7DE6yLo4v9bh7p8SFSp7Y5VstjwoxgNfNIC28dHnsAdAaQcw9BEVcXmfFmibTOjCwP6CwmWJjD+/u47JXgkmU0uueNyl4d5vOVGrCYPyQDbglBNa/0N2XmRGMyyyhLbqw/TXenKdG8VPSNF7fhlf+OTDJ3Fwj617tqX7NtuFYyPoC9lgPTEtJzM8UdIWody/xmmeRHGRtekoLfVveLtrnq8Q8eJ3AZK2/oYfhWi72Xvfr7Z0nwwWXgCAgafbpL6ShxD3vjTFd8b/3Fr0f+V3rpcS0Vf8zLECPnS4shQIvbbMjmAsnwPXPhTbBLVD/RuHrc5vNmLixZhVtEI8HfL4GxzdTk889NWIA4VpFp4Wq8be+vu2FBV2M8Mh201CeB0tl/vT0aFPUYg9pzJjaBBXUCoG6PBXSBpVkV4DXmnj34mXGJ7vsC9+3fwYNDAfNG6yBxi1uy03JoJga07CtYXFcezT3BIopmiYRdujBW3YXwW2L2VurODZLJYl6cqk/f5kolVV/kE=
         file_glob: true
         file: build/*
         on:
-          branches: 0.0.28
+          branches: 0.0.27
           repo: Portree-Kid/flightgear-airports
