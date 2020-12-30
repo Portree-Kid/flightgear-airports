@@ -206,13 +206,18 @@ You should have received a copy of the GNU General Public License along with FG 
         this.featureLookup = [];
         this.groundnetLayerGroup.eachLayer(l => {
           l.enableEdit()
-          
           l.featureLookup = this.featureLookup;
           if (typeof l.extensions === 'function') {
             l.extensions(this)
           }
           if (typeof l.bringToFront === 'function') {
             l.bringToFront()
+          }
+          if (typeof l.updateStyle === 'function') {
+            l.updateStyle()
+          }
+          if (typeof l.setInteractive === 'function') {
+            l.setInteractive(true)
           }
         })
         this.$store.dispatch('addWip', {icao: this.icao});      },
@@ -221,6 +226,9 @@ You should have received a copy of the GNU General Public License along with FG 
         this.editing = false
         this.$store.commit('SET_EDIT', false)
         this.groundnetLayerGroup.eachLayer(l => {
+          if (typeof l.setInteractive === 'function') {
+            l.setInteractive(false)
+          }
           l.disableEdit()
         })
       },

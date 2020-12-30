@@ -512,6 +512,26 @@ const extendTaxiSegment = function (taxiwaySegment) {
         }    
     }
 
+    taxiwaySegment.__proto__.setInteractive = function (interactive) {
+        if (this.getLayers) {
+            this.getLayers().forEach(layer => {
+                layer.setInteractive(interactive);
+            });
+            return;
+        }
+        if (!this._path) {
+            return;
+        }
+    
+        this.options.interactive = interactive;
+    
+        if (interactive) {
+            L.DomUtil.addClass(this._path, 'leaflet-interactive');
+        } else {
+            L.DomUtil.removeClass(this._path, 'leaflet-interactive');
+        }
+    };
+
     taxiwaySegment.__proto__.updateStyle = function () {
         var style = {};
         if(!this.options.attributes) {
@@ -524,6 +544,11 @@ const extendTaxiSegment = function (taxiwaySegment) {
         }
         else {
             style.color = '#3388ff';
+        }
+        if(this.editEnabled()) {
+            style.interactive = true;
+        } else {
+            style.interactive = false;
         }
         this.setStyle(style);
         if (this._map !== null) {
