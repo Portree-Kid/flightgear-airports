@@ -695,15 +695,15 @@ You should have received a copy of the GNU General Public License along with FG 
             !this.editing) {
           return;
         }
-        console.debug("Edit Type : " + this.$store.state.Editable.data.multiarc.ids);
+        console.debug("Edit Type : " + this.$store.state.Editable.data.multiarc.ids + ' ' +  String(this.$store.state.Editable.data.multiarc.direction));
         this.$store.state.Editable.data.multiarc.ids.forEach(id => {
           console.debug(id);
           var arc = this.groundnetLayerGroup.getLayer(id);
           if (arc && arc instanceof L.Polyline) {
             console.log('Edited Arc : ' + this.$store.state.Editable.index);
-            arc.options.attributes.direction = this.$store.state.Editable.data.multiarc.direction
-            arc.options.attributes.name = this.$store.state.Editable.data.multiarc.name
-            arc.options.attributes.isPushBackRoute = this.$store.state.Editable.data.multiarc.isPushBackRoute
+            arc.options.attributes.direction = String(this.$store.state.Editable.data.multiarc.direction)
+            arc.options.attributes.name = String(this.$store.state.Editable.data.multiarc.name)
+            arc.options.attributes.isPushBackRoute = Number(this.$store.state.Editable.data.multiarc.isPushBackRoute)
             arc.updateStyle();
           }        
         });

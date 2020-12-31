@@ -201,7 +201,10 @@ var mapParkings = function (o) {
         var lat = convertLat(o.getLatLng());
         var lon = convertLon(o.getLatLng());
         // <Parking index="0" type="gate" name="GA_Parking" lat="S9 25.739923" lon="E160 2.927602" heading="67"  radius="44" airlineCodes="" />
-        var parking = { '@index': String(o['id']), '@type': o.options.attributes.type, '@name': o.options.attributes.name, '@lat': lat, '@lon': lon, '@heading': Number(o.options.attributes.heading%360).toFixed(1), '@radius': String(o.options.attributes.radius) };
+        var parking = { '@index': String(o['id']), '@type': o.options.attributes.type, '@lat': lat, '@lon': lon, '@heading': Number(o.options.attributes.heading%360).toFixed(1), '@radius': String(o.options.attributes.radius) };
+        if (o.options.attributes.name !== '' && o.options.attributes.name !== 'undefined' && o.options.attributes.name !== undefined) {
+            parking['@name'] = o.options.attributes.name;
+        }
         if( o.options.attributes.airlineCodes) {
             console.debug(o.options.attributes.airlineCodes);
             parking['@airlineCodes'] = o.options.attributes.airlineCodes;
@@ -247,7 +250,7 @@ var mapHoldPoint = function (o) {
 
 var mapBeginNode = function (o) {
     if (o instanceof L.TaxiwaySegment) {
-        console.debug(o);
+        console.debug('Map Begin : ', o['begin']);
         // <Parking index="0" type="gate" name="GA_Parking" lat="S9 25.739923" lon="E160 2.927602" heading="67"  radius="44" airlineCodes="" />
         return { '@index': String(o['begin']), '@lat': convertLat(o._latlngs[0]), '@lon': convertLon(o._latlngs[0]), '@isOnRunway': '0', '@type': 'begin' };
     }
@@ -255,7 +258,7 @@ var mapBeginNode = function (o) {
 
 var mapEndNode = function (o) {
     if (o instanceof L.TaxiwaySegment) {
-        console.debug(o);
+        console.debug('Map End : ', o['end']);
         // <Parking index="0" type="gate" name="GA_Parking" lat="S9 25.739923" lon="E160 2.927602" heading="67"  radius="44" airlineCodes="" />
         return { '@index': String(o['end']), '@lat': convertLat(o._latlngs[1]), '@lon': convertLon(o._latlngs[1]), '@isOnRunway': '0', '@type': 'end' };
     }
@@ -295,6 +298,8 @@ var styleArc = function (attributes, arc) {
         } else {
             arc['@isPushBackRoute'] = "0";
         }
-        arc['@name'] = attributes.name;    
+        if ( attributes.name !== '' && attributes.name !== 'undefined') {
+            arc['@name'] = attributes.name;            
+        }
     }
 }
