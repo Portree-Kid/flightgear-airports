@@ -278,7 +278,7 @@ var convertLat = function (latlng) {
     var deg = mathjs.floor(mathjs.abs(latlng.lat));
     var min = (mathjs.abs(latlng.lat) - deg) * 60;
     // console.debug(NS + deg + " " + min);
-    return NS + String(deg).padStart(2, '0') + " " + mathjs.round(min, 3);
+    return NS + String(deg).padStart(2, '0') + " " + mathjs.round(min, 6);
 }
 
 var convertLon = function (latlng) {
@@ -287,7 +287,7 @@ var convertLon = function (latlng) {
     var deg = mathjs.floor(mathjs.abs(latlng.lng));
     var min = (mathjs.abs(latlng.lng) - deg) * 60;
     // console.debug(NS + deg + " " + min);
-    return NS + String(deg).padStart(2, '0') + " " + mathjs.round(min, 3);
+    return NS + String(deg).padStart(2, '0') + " " + mathjs.round(min, 6);
 }
 
 var styleArc = function (attributes, arc) {
