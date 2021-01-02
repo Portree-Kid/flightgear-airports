@@ -176,7 +176,12 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                         var beginlatlon = convert(beginNode.attr('lat') + " " + beginNode.attr('lon'));
                         var endlatlon = convert(endNode.attr('lat') + " " + endNode.attr('lon'));
                         
-                        var polyline = new L.Polyline([[beginlatlon.decimalLatitude, beginlatlon.decimalLongitude], [endlatlon.decimalLatitude, endlatlon.decimalLongitude]], { attributes: {} }).addTo(layerGroup);
+                        var pane = 'route-pane';
+                        if(n.attr('isPushBackRoute') === '1') {
+                           pane = 'pushback-pane';
+                        }                        
+
+                        var polyline = new L.Polyline([[beginlatlon.decimalLatitude, beginlatlon.decimalLongitude], [endlatlon.decimalLatitude, endlatlon.decimalLongitude]], { pane: pane, attributes: {} }).addTo(layerGroup);
                         extendTaxiSegment(polyline);
                         polyline.addListeners();
                         polyline._latlngs[0].attributes = {};

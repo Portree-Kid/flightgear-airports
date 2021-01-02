@@ -46,6 +46,12 @@ You should have received a copy of the GNU General Public License along with FG 
       // console.log(LSymbol)
     },
     mounted () {
+      this.$parent.mapObject.createPane('pushback-pane')
+      this.$parent.mapObject.getPane('pushback-pane').style.zIndex = 512
+
+      this.$parent.mapObject.createPane('route-pane')
+      this.$parent.mapObject.getPane('route-pane').style.zIndex = 511
+
       this.selectionLayerGroup = L.layerGroup();
       this.selectionLayerGroup.addTo(this.$parent.mapObject)
       this.$store.watch(
