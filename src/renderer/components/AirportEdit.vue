@@ -15,13 +15,12 @@ You should have received a copy of the GNU General Public License along with FG 
     <el-dialog
       title="Add Airline"
       :visible.sync="dialogVisible"
-      width="20%"
+      width="40%"
       :before-close="handleClose">
       <span>Add an selectable airline to {{ icao }} {{ name }}</span>
           <el-input
-            placeholder="Please input airline"
+            placeholder="Please input airline(s)"
             v-model="airlineCode"
-            maxlength="3"
           ></el-input>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">Cancel</el-button>
@@ -193,7 +192,11 @@ export default {
       },
       addAirline () {
         this.dialogVisible = false
-        this.$store.dispatch('addAirline', this.airlineCode)
+        this.airlineCode.split(/[ ,]/).forEach(element => {
+          if (element.length === 3) {
+            this.$store.dispatch('addAirline', element)
+          }
+        })
       },
       addFrequency () {
         this.$store.dispatch('addFrequency', {type: 'AWOS', value: 0})
