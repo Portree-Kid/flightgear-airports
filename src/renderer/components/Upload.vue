@@ -7,8 +7,12 @@
       <span class="center">E-Mail : {{this.$store.state.Settings.settings.email}}</span><br/>
       <span class="center"><el-checkbox v-model="gplv2" class="center">I agree to release the groundnet under GPL v2</el-checkbox></span><br/>
       <span :class="textClass" v-if="message">{{message}}</span><br/>
+      
+      <el-button @click="handleOkClicked('twr')" :disabled="!tower_comittable" >Upload Tower</el-button>
+      <el-button @click="handleOkClicked('groundnet')" :disabled="!groundnet_comittable" >Upload Groundnet</el-button>
+
       <span slot="footer" class="dialog-footer">
-        <el-button @click="handleOkClicked" :disabled="!comittable">{{buttonText}}</el-button>
+        <el-button @click="closeClicked">{{buttonText}}</el-button>
       </span>
     </el-dialog>
 </template>
@@ -54,7 +58,7 @@
     },
     data () {
       return {
-        gplv2: false, message: null, error: false, progress: 0, max: 0, azure: false, success: false, uploading: false, buttonText: 'Upload'
+        gplv2: false, message: null, error: false, progress: 0, max: 0, azure: false, success: false, uploading: false, buttonText: 'Ok'
       }
     },
     methods: {
@@ -90,18 +94,17 @@
           this.error = true;          
         }
       },
-      handleOkClicked () {
-        if( this.success ) {
-          // Upload success close 
-          Vue.set(this.$parent, 'uploadVisible', false)
-          return;
-        }        
+      closeClicked () {
+        Vue.set(this.$parent, 'uploadVisible', false)
+        return;
+      },
+      handleOkClicked (type) {
         this.uploading = true;
         var f = path.join(this.$store.state.Settings.settings.airportsDirectory, 
         this.icao[0], 
         this.icao[1], 
         this.icao[2], 
-        this.icao + '.groundnet.new.xml');
+        this.icao + `.${type}.new.xml`);
 
         if (f == null || !fs.existsSync(f)) {
           this.message = 'File doesn\'t exist';
@@ -119,7 +122,7 @@
         var formData = new FormData();
         formData.append("gpl", this.gplv2 )
         formData.append("user_email", this.$store.state.Settings.settings.email)
-        formData.append('groundnet', blob, this.icao + '.groundnet.xml');
+        formData.append('groundnet', blob, this.icao + `.${type}.xml`);
         
         var parent = this.$parent;
         var messageField = this.message;
@@ -139,15 +142,15 @@
             parent.$refs.upload.message == e.srcElement.statusText
           } else if(JSON.parse(e.srcElement.response).message.match('[A-Z0-9]* Imported Successfully')) {
             parent.$refs.upload.success = true
-            parent.$refs.upload.message = 'Uploaded Successfully'
-            parent.$refs.upload.buttonText = 'Ok'
+            parent.$refs.upload.message = `${type} Uploaded Successfully`
             parent.$store.commit('UPLOAD_WIP', parent.$store.state.Airports.currentAirport.icao)
             
           } else if(JSON.parse(e.srcElement.response).message === 'XML Errors') {
             var response = JSON.parse(e.srcElement.response);
             if (response.validationErrors) {
+              parent.$refs.upload.message = 'XML Errors : \n';
               response.validationErrors.forEach(element => {
-                parent.$refs.upload.message += element.message + '\r\n';
+                parent.$refs.upload.message += element.message + '\n';
               });
             }
           } else if(JSON.parse(e.srcElement.response) !== undefined) {
@@ -282,7 +285,7 @@
         }
       },
       textClass: function () {
-        return !this.error?'center':'error'
+        return !this.error?'centermessage':'error'
       },
       title: function () {        
         return `Upload ${this.icao} to groundweb.`
@@ -302,6 +305,22 @@
           console.error('ICAO being set ' + newValue);
         }
       },
+      tower_comittable: function () {
+        var f = path.join(this.$store.state.Settings.settings.airportsDirectory, 
+        this.icao[0], 
+        this.icao[1], 
+        this.icao[2], 
+        this.icao + '.twr.new.xml');
+        return fs.existsSync(f) && this.gplv2 && this.max === 0 && this.azure && !this.uploading;
+      },
+      groundnet_comittable: function () {
+        var f = path.join(this.$store.state.Settings.settings.airportsDirectory, 
+        this.icao[0], 
+        this.icao[1], 
+        this.icao[2], 
+        this.icao + '.groundnet.new.xml');
+        return fs.existsSync(f) && this.$store.state.Check.results.filter(a => a.id>=0).length === 0 && this.gplv2 && this.max === 0 && this.azure && !this.uploading
+      },
       comittable: function () {
         return this.$store.state.Check.results.filter(a => a.id>=0).length === 0 && this.gplv2 && this.max === 0 && this.azure && !this.uploading
       },
@@ -313,7 +332,9 @@
 </script>
 
 <style scoped lang="scss">
-  .center { text-align: center; vertical-align: middle; padding: 5px; font-size: 12pt; font-weight: normal;}
+  .el-dialog__body {padding: 10px;}
+  .center { text-align: center; vertical-align: middle; padding: 5px; font-size: 12pt; font-weight: normal}  
+  .centermessage { text-align: left; vertical-align: middle; padding: 5px; font-size: 12pt; font-weight: normal; white-space: pre-line;}  
   .error { text-align: center; color: red; padding: 5px; font-size: 12pt; font-weight: normal;}
   .el-dialog--center .el-dialog__body { padding: 5px;}
 </style>

@@ -14,6 +14,7 @@ You should have received a copy of the GNU General Public License along with FG 
 const convert = require('geo-coordinates-parser');
 const fs = require('fs');
 const path = require('path');
+const store = require('../store');
 
 /**http://wiki.openstreetmap.org/wiki/Zoom_levels*/
 
@@ -60,19 +61,29 @@ L.TowerMarker = L.Marker.extend({
     pixelValue: function (latitude, meters, zoomLevel) {
         return meters / metersPerPixel(latitude, zoomLevel);
     },
-        
-
 });
 
 L.TowerMarker.addInitHook(function(){
     this.svg = this.stripSVG('tower.svg');
     this.iconSize = 64;
+    this.on('dragstart', function (event) { 
+        console.debug("Drag Tower : ", event);
+    });
+    this.on('dragend', function (event) {
+        console.debug("DragEnd Tower : ", event);
+        store.default.dispatch('setTowerCoords', 
+        event.target.getLatLng().lat.toFixed(6) + ' ' + 
+        event.target.getLatLng().lng.toFixed(6) + ' ' + 
+        event.target.elev_m);
+    });
 });
 
 //Builds a marker for a ai or multiplayer aircraft
 var tower = function (n, options) {    
-    var latlon = convert(n.find('lat/text()').text() + " " + n.find('lon/text()').text());
-    return new L.TowerMarker([latlon.decimalLatitude, latlon.decimalLongitude], {heading: 0, pane: 'tower-pane'});
+    var latlon = convert(n.find('lat/text()').text() + " " + n.find('lon/text()').text());    
+    var marker = new L.TowerMarker([latlon.decimalLatitude, latlon.decimalLongitude], {pane: 'tower-pane'}); 
+    marker.elev_m = n.find('elev-m/text()').text(); 
+    return marker;
 }
 
 module.exports = tower;

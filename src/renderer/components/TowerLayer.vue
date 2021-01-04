@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License along with FG 
   import L from 'leaflet'
   import LEdit from 'leaflet-editable/src/Leaflet.Editable.js'
   import {readTowerXML} from '../loaders/tower_loader'
+  import {writeTowerXML} from '../loaders/tower_writer'
 
   export default {
     name: 'tower-layer',
@@ -72,8 +73,17 @@ You should have received a copy of the GNU General Public License along with FG 
         }
       },
       save () {
-      },
+        this.layerGroup.eachLayer(l => {
+          if (l instanceof L.TowerMarker) {
+            var latitude = l.getLatLng().lat.toFixed(6)
+            var longitude = l.getLatLng().lng.toFixed(6)
+            var height = l.elev_m
 
+            var o = {latitude: latitude, longitude: longitude, height: height}
+            writeTowerXML(this.$store.state.Settings.settings.airportsDirectory, l.icao, o)
+          }
+        })
+      },
       setVisible (visible) {
         if (this.layerGroup !== undefined) {
           if (visible !== this.visible) {

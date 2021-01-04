@@ -40,6 +40,7 @@ You should have received a copy of the GNU General Public License along with FG 
           <ParkingEdit></ParkingEdit>
           <ArcEditMulti></ArcEditMulti>
           <ArcEdit></ArcEdit>
+          <TowerEdit></TowerEdit>          
           <NodeEdit></NodeEdit>          
           <ParkingGroupEdit ref="parkingGroupEdit"  @editParking="(msg) => $emit('editParking', msg)"></ParkingGroupEdit>
           <AirportEdit  ref="airportEdit" @edit="$emit('edit', $event)"></AirportEdit>
@@ -75,6 +76,7 @@ You should have received a copy of the GNU General Public License along with FG 
   import L from 'leaflet'
   import AirportEdit from './AirportEdit'
   import ArcEdit from './ArcEdit'
+  import TowerEdit from './TowerEdit'
   import ArcEditMulti from './ArcEditMulti'
   import CheckPanel from './CheckPanel'
   import FileSelect from './FileSelect'
@@ -91,7 +93,7 @@ You should have received a copy of the GNU General Public License along with FG 
 
   export default {
     name: 'leaflet-sidebar',
-    components: { Help, AirportEdit, ArcEdit, ArcEditMulti, CheckPanel, NodeEdit, ParkingEdit, ParkingGroupEdit, RunScan, FileSelect, SettingsPanel, Search, Upload, WorkInProgress },
+    components: { Help, AirportEdit, ArcEdit, ArcEditMulti, CheckPanel, NodeEdit, ParkingEdit, ParkingGroupEdit, RunScan, TowerEdit, FileSelect, SettingsPanel, Search, Upload, WorkInProgress },
     props: [],
     created () {
       window.addEventListener('keydown', this.doCommand)

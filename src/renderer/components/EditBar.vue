@@ -138,6 +138,7 @@ You should have received a copy of the GNU General Public License along with FG 
       },
       saveDefered () {
         this.$parent.$parent.$refs.editLayer.save()
+        this.$parent.$parent.$refs.towerLayer.save()
         this.$parent.$parent.$refs.editLayer.disableEdit()
         this.scanGroundnets()
         Vue.set(this, 'saveDialogVisible', false)              

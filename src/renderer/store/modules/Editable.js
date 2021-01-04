@@ -158,6 +158,13 @@ const mutations = {
   'SET_EDIT_NODE_COORDS' (state, coords) {
     Vue.set(state.data.node, 'coords', coords)
   },
+  'SET_EDIT_TOWER_COORDS' (state, coords) {
+    state.type = 'tower'
+    state.data.tower = { coords: {} }
+    Vue.set(state.data.tower.coords, 'latitude', coords.split(' ')[0])
+    Vue.set(state.data.tower.coords, 'longitude', coords.split(' ')[1])
+    Vue.set(state.data.tower.coords, 'height', coords.split(' ')[2])
+  },
   'SET_EDIT_ISONRUNWAY' (state, isOnRunway) {
     Vue.set(state.data.node, 'isOnRunway', isOnRunway)
   }
@@ -194,6 +201,9 @@ const actions = {
   async setNode (context, node) {
     context.commit('SET_EDIT_NODE', node.attributes)
     context.commit('SET_EDIT_NODE_COORDS', node.lat.toFixed(6) + ' ' + node.lng.toFixed(6))
+  },
+  async setTowerCoords (context, node) {
+    context.commit('SET_EDIT_TOWER_COORDS', node)
   }
 }
 

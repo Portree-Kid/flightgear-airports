@@ -52,16 +52,11 @@ exports.readTowerXML = function (fDir, icao, force) {
             }
 
             var towerNodes = xml.find('PropertyList/tower/twr');
-            console.log("Tower " + towerNodes.length);
-
-            var merged = new Array();
-
-            var nodesLookup = {};
-            featureLookup = [];
-
+            console.log("Towers " + towerNodes.length);
 
             towerNodes.map(n => {
                 var towerIcon = tower(n, layerGroup);
+                towerIcon['icao'] = icao
                 towerIcon.addTo(layerGroup);
                 /*
                 //DEBUG Code 
