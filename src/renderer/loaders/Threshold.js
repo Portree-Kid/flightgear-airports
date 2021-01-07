@@ -37,7 +37,7 @@ L.Threshold = L.Marker.extend({
         console.debug(`Lat Lng Threshold ${this.getLatLng()}`);
         if(map !== null) {
             var metersPP = this.metersPerPixel(map.getCenter().lat, map.getZoom());
-            console.debug('Old Meters per pixel ' + this.metersPP);
+            console.debug('Old Meters per pixel ' + this._metersPP);
             console.debug('New Meters per pixel ' + metersPP);
             if(this._metersPP != metersPP) {                
                 var pixelSize = (this.iconSize/2) / metersPP;

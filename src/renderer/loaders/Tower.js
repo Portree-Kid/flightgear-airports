@@ -30,19 +30,19 @@ L.TowerMarker = L.Marker.extend({
         return svg2[0];
     },
     updateIcon : function(map) {
-        console.debug(`Lat Lng Threshold ${this.getLatLng()}`);
+        console.debug(`Lat Lng Tower ${this.getLatLng()}`);
         if(map !== null) {
             var metersPP = this.metersPerPixel(map.getCenter().lat, map.getZoom());
-            console.debug('Old Meters per pixel ' + this.metersPP);
+            console.debug('Old Meters per pixel ' + this._metersPP);
             console.debug('New Meters per pixel ' + metersPP);
             if(this._metersPP != metersPP) {                
-                var pixelSize = (this.iconSize/2) / metersPP;
+                var pixelSize = this.iconSize / metersPP;
                 var scale = pixelSize/this.iconSize;
                 var offset = 0;//-(this.iconSize/2);                
                 this.setIcon(L.divIcon({
                     iconSize: 64,
                     className: 'threshold-marker-icon',
-                    html: `<div style=\'transform: translateX(${offset}px) translateY(${offset}px) scale(${scale}) rotate(${this.options.heading}deg); border: 1px red\'>${this.svg}</div>`,
+                    html: `<div style=\'transform: translateX(${offset}px) translateY(${offset}px) scale(${scale}); border: 1px red\'>${this.svg}</div>`,
                 }));    
 
                 this.update(this.getLatLng());

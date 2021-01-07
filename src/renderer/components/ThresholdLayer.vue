@@ -50,6 +50,9 @@
       load (icao) {
         this.$parent.mapObject.createPane('threshold-pane')
         this.$parent.mapObject.getPane('threshold-pane').style.zIndex = 550
+        if (this.layerGroup) {
+          this.layerGroup.removeFrom(this.$parent.mapObject)
+        }
         // Callback for add
         this.layerGroup = readThresholdXML(this.$store.state.Settings.settings.airportsDirectory, icao, this.read)
         if (!this.layerGroup) {
