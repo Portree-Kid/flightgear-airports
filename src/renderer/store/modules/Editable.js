@@ -16,7 +16,7 @@ const state = {
   type: 'none',
   index: 'none',
   editing: false,
-  data: {airports: {}, parking: {}, arc: {}, multiarc: {}, node: {}, runway: {}}
+  data: {airports: {}, parking: {}, arc: {}, multiarc: {}, node: {}, runway: {}, threshold: {}}
 }
 
 const SET_EDIT_AIRPORT = 'SET_EDIT_AIRPORT'
@@ -165,6 +165,14 @@ const mutations = {
     Vue.set(state.data.tower.coords, 'longitude', coords.split(' ')[1])
     Vue.set(state.data.tower.coords, 'height', coords.split(' ')[2])
   },
+  'SET_EDIT_THRESHOLD_COORDS' (state, threshold) {
+    state.type = 'threshold'
+    Vue.set(state.data.threshold, 'runway', threshold.rwy)
+    Vue.set(state.data.threshold, 'displacement', threshold.displacement)
+  },
+  'SET_EDIT_THRESHOLD_DISPLACEMENT' (state, displacement) {
+    Vue.set(state.data.threshold, 'displacement', displacement)
+  },
   'SET_EDIT_ISONRUNWAY' (state, isOnRunway) {
     Vue.set(state.data.node, 'isOnRunway', isOnRunway)
   }
@@ -204,6 +212,12 @@ const actions = {
   },
   async setTowerCoords (context, node) {
     context.commit('SET_EDIT_TOWER_COORDS', node)
+  },
+  async setThreshold (context, node) {
+    context.commit('SET_EDIT_THRESHOLD_COORDS', node)
+  },
+  async setDisplacement (context, displacement) {
+    context.commit('SET_EDIT_THRESHOLD_DISPLACEMENT', displacement)
   }
 }
 

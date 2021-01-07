@@ -40,26 +40,21 @@ exports.readThresholdXML = function (fDir, icao, force) {
                 throw err;
             }
 
-            var thresholdNodes = xml.find('PropertyList/runway/threshold');
-            console.log("Threshold Nodes" + thresholdNodes.length);
+            var runwayNodes = xml.find('PropertyList/runway');
+            console.log("Threshold Nodes" + runwayNodes.length);
 
-            var merged = new Array();
-
-            var nodesLookup = {};
             featureLookup = [];
 
-
-            thresholdNodes.map(n => {
-               var icon = threshold(n);
-               icon.addTo(layerGroup);
-
-                var latlon = convert(n.find('lat/text()').text() + " " + n.find('lon/text()').text());
-                /*
-                var marker = new L.Circle([latlon.decimalLatitude, latlon.decimalLongitude], 5);
-                marker.addTo(layerGroup);
-                */
-
-//                features.push(circle);
+            var index = 0;
+            runwayNodes.map(r => {
+                var thresholds = r.find('threshold');
+                thresholds.map(t => {
+                    var icon = threshold(t);
+                    icon.index = index;
+                    icon.addTo(layerGroup);
+                }                
+                )
+                index+=1;
             }).sort();
 
             return layerGroup;

@@ -5,6 +5,7 @@
   import L from 'leaflet'
   import LEdit from 'leaflet-editable/src/Leaflet.Editable.js'
   import {readThresholdXML} from '../loaders/threshold_loader'
+  import {writeThresholdXML} from '../loaders/threshold_writer'
 
   export default {
     name: 'edit-layer',
@@ -12,10 +13,17 @@
     created () {
     },
     mounted () {
-      console.log(LMap)
-      console.log(LMarker)
-      console.log(L)
-      console.log(LEdit)
+      console.debug(LMap, LMarker, L, LEdit)
+      this.$store.watch(
+        function (state) {
+          return state.Editable.data.threshold
+        },
+        () => { this.editedThreshold() }
+        ,
+        {
+          deep: true
+        }
+      )
     },
     beforeDestroy () {
       this.remove()
@@ -25,6 +33,17 @@
       }
     },
     methods: {
+      editedThreshold () {
+        var rwy = this.$store.state.Editable.data.threshold.runway
+        var displacement = this.$store.state.Editable.data.threshold.displacement
+        this.layerGroup.eachLayer(l => {
+          if (l instanceof L.Threshold) {
+            if (l.rwy === rwy) {
+              l.setDisplacement(displacement)
+            }
+          }
+        })
+      },
       getLayer () {
         return this.layerGroup
       },
@@ -63,6 +82,25 @@
             }
             this.visible = visible
           }
+        }
+      },
+      save () {
+        if (this.layerGroup) {
+          var list = {}
+
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.Threshold) {
+              var latitude = l.originLatLng[0].toFixed(6)
+              var longitude = l.originLatLng[1].toFixed(6)
+
+              if (list[l.index] === undefined) {
+                list[l.index] = []
+              }
+              var o = {latitude: latitude, longitude: longitude, index: l.index, rwy: l.rwy, heading: l.heading, displacement: l.displacement, stopw_m: l.stopw_m}
+              list[l.index].push(o)
+            }
+          })
+          writeThresholdXML(this.$store.state.Settings.settings.airportsDirectory, this.icao, list)
         }
       },
       zoomUpdated () {

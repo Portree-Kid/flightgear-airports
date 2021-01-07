@@ -73,16 +73,18 @@ You should have received a copy of the GNU General Public License along with FG 
         }
       },
       save () {
-        this.layerGroup.eachLayer(l => {
-          if (l instanceof L.TowerMarker) {
-            var latitude = l.getLatLng().lat.toFixed(6)
-            var longitude = l.getLatLng().lng.toFixed(6)
-            var height = l.elev_m
+        if (this.layerGroup) {
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.TowerMarker) {
+              var latitude = l.getLatLng().lat.toFixed(6)
+              var longitude = l.getLatLng().lng.toFixed(6)
+              var height = l.elev_m
 
-            var o = {latitude: latitude, longitude: longitude, height: height}
-            writeTowerXML(this.$store.state.Settings.settings.airportsDirectory, l.icao, o)
-          }
-        })
+              var o = {latitude: latitude, longitude: longitude, height: height}
+              writeTowerXML(this.$store.state.Settings.settings.airportsDirectory, l.icao, o)
+            }
+          })
+        }
       },
       setVisible (visible) {
         if (this.layerGroup !== undefined) {

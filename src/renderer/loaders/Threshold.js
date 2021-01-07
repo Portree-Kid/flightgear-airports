@@ -14,14 +14,19 @@ You should have received a copy of the GNU General Public License along with FG 
 const convert = require('geo-coordinates-parser');
 const fs = require('fs');
 const path = require('path');
+const store = require('../store');
+const turf = require('@turf/turf');
+
 
 /**http://wiki.openstreetmap.org/wiki/Zoom_levels*/
 
 
 L.Threshold = L.Marker.extend({
-    options: {
-        zIndexOffset: 20000, 
-    },
+    heading: 0,
+    displacement: 0,
+    stopw_m: 0,
+    originLatLng: null,
+    rwy: '',
     stripSVG: function(fName) {
         var rx = /<\s*svg[^>]*>([\s\S]*)<\s*\/svg[^>]*>/gm;
         var svg = fs.readFileSync(path.join(__static, '/', fName), 'utf8');
@@ -41,11 +46,10 @@ L.Threshold = L.Marker.extend({
                 this.setIcon(L.divIcon({
                     iconSize: 64,
                     className: 'threshold-marker-icon',
-                    html: `<div style=\'transform: translateX(${offset}px) translateY(${offset}px) scale(${scale}) rotate(${this.options.heading}deg); border: 1px red\'>${this.svg}</div>`,
+                    html: `<div style=\'transform: translateX(${offset}px) translateY(${offset}px) scale(${scale}) rotate(${this.heading}deg); border: 1px red\'>${this.svg}</div>`,
                 }));    
 
                 this.update(this.getLatLng());
-                console.debug();
                 this.setLatLng(this.getLatLng());
                 this._metersPP = metersPP;
             }
@@ -60,21 +64,86 @@ L.Threshold = L.Marker.extend({
     pixelValue: function (latitude, meters, zoomLevel) {
         return meters / metersPerPixel(latitude, zoomLevel);
     },
-        
+    setOrigin (originLatLng) {
+        this.originLatLng = originLatLng;
+    },
+    setHeading (heading) {
+        this.heading = Number(heading);
+    },
+    setRunway (rwy) {
+        this.rwy = Number(rwy);
+    },
+    setStopW (stopw_m) {
+        this.stopw_m = stopw_m;
+    },
+    setDisplacement(displacement) {
+      const turfOptions = { units: 'kilometers' };
+      this.displacement = Number(displacement);
 
+      var newPos = turf.destination([this.originLatLng[1], this.originLatLng[0]], displacement/1000, this.normalizeAngle(this.heading), turfOptions);
+      var newValue = {lat: newPos.geometry.coordinates[1].toFixed(6), 
+                      lng: newPos.geometry.coordinates[0].toFixed(6) };
+      console.debug(`Threshold Old : ${this.originLatLng} -> ${this.turfToLatLng(newPos)}`); 
+      this.setLatLng(newValue);
+    },
+    normalizeAngle( angle ) {
+        if(angle >= 180) {
+            return angle - 360;
+        }
+        if(angle <= -180) {
+          return angle + 360;
+        }
+        return angle;
+    },
+    latToTurf (turfPoint) {
+        return [turfPoint.lng, turfPoint.lat];
+    },
+    latLngToTurf (turfPoint) {
+        return [turfPoint.decimalLongitude, turfPoint.decimalLatitude];
+    },
+    turfToLatLng: function (turfPoint) {
+        return '' + turfPoint.geometry.coordinates[1].toFixed(6) + ',' + turfPoint.geometry.coordinates[0].toFixed(6);
+    }
 });
 
 L.Threshold.addInitHook(function(){
     this.svg = this.stripSVG('FGA_THR.svg');
     this.iconSize = 500;
+
+    this.on('click', function (event) { 
+        console.debug("Click Threshold : ", event);
+        store.default.dispatch('setThreshold', {rwy: event.target.rwy, displacement: event.target.displacement});
+    });
+    this.on('add', function (event) {         
+        // event.target.direction.addTo(event.target._map);
+    });
 });
 
-//Builds a marker for a ai or multiplayer aircraft
+//Builds a marker for a threshold 
+/*              
+<threshold>
+  <lon>13.517142</lon>
+  <lat>52.380125</lat>
+  <rwy>07L</rwy>
+  <hdg-deg>68.77</hdg-deg>
+  <displ-m>0.0</displ-m>
+  <stopw-m>160.0</stopw-m>
+</threshold>
+*/
 var threshold = function (n, options) {
     var latlon = convert(n.find('lat/text()').text() + " " + n.find('lon/text()').text());
+    var rwy = n.find('rwy/text()').text();
     var heading = n.find('hdg-deg/text()').text();
+    var displ_m = n.find('displ-m/text()').text();
+    var stopw_m = n.find('stopw-m/text()').text();
 
-    var marker = new L.Threshold([latlon.decimalLatitude, latlon.decimalLongitude], {heading: heading, pane: 'threshold-pane'});
+    var marker = new L.Threshold([latlon.decimalLatitude, latlon.decimalLongitude], 
+        {pane: 'threshold-pane'});
+    marker.setOrigin([latlon.decimalLatitude, latlon.decimalLongitude]);
+    marker.setHeading(heading);    
+    marker.setDisplacement(displ_m);    
+    marker.setRunway(rwy);
+    marker.setStopW(stopw_m);
     return marker;
 }
 

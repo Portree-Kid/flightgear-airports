@@ -1,3 +1,15 @@
+<!--
+Copyright 2020 Keith Paterson
+
+This file is part of FG Airports.
+
+FG Airports is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+FG Airports is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with FG Airports. If not, see http://www.gnu.org/licenses/.
+-->
+
 <template>
     <el-dialog :title.sync="title" :visible.sync="visible" width="30%" center>
       <span v-if="max>0">
@@ -10,6 +22,7 @@
       
       <el-button @click="handleOkClicked('twr')" :disabled="!tower_comittable" >Upload Tower</el-button>
       <el-button @click="handleOkClicked('groundnet')" :disabled="!groundnet_comittable" >Upload Groundnet</el-button>
+      <el-button @click="handleOkClicked('threshold')" :disabled="!threshold_comittable" >Upload Threshold</el-button>
 
       <span slot="footer" class="dialog-footer">
         <el-button @click="closeClicked">{{buttonText}}</el-button>
@@ -320,6 +333,14 @@
         this.icao[2], 
         this.icao + '.groundnet.new.xml');
         return fs.existsSync(f) && this.$store.state.Check.results.filter(a => a.id>=0).length === 0 && this.gplv2 && this.max === 0 && this.azure && !this.uploading
+      },
+      threshold_comittable: function () {
+        var f = path.join(this.$store.state.Settings.settings.airportsDirectory, 
+        this.icao[0], 
+        this.icao[1], 
+        this.icao[2], 
+        this.icao + '.threshold.new.xml');
+        return fs.existsSync(f) && this.gplv2 && this.max === 0 && this.azure && !this.uploading
       },
       comittable: function () {
         return this.$store.state.Check.results.filter(a => a.id>=0).length === 0 && this.gplv2 && this.max === 0 && this.azure && !this.uploading
