@@ -34,15 +34,17 @@
     },
     methods: {
       editedThreshold () {
-        var rwy = this.$store.state.Editable.data.threshold.runway
-        var displacement = this.$store.state.Editable.data.threshold.displacement
-        this.layerGroup.eachLayer(l => {
-          if (l instanceof L.Threshold) {
-            if (l.rwy === rwy) {
-              l.setDisplacement(displacement)
+        if (this.$store.state.Editable.data.threshold) {
+          var rwy = this.$store.state.Editable.data.threshold.runway
+          var displacement = this.$store.state.Editable.data.threshold.displacement
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.Threshold) {
+              if (l.rwy === rwy) {
+                l.setDisplacement(displacement)
+              }
             }
-          }
-        })
+          })
+        }
       },
       getLayer () {
         return this.layerGroup

@@ -22,7 +22,6 @@ You should have received a copy of the GNU General Public License along with FG 
   import L2 from 'leaflet-textpath'
   import Vue from 'vue'
   import { MessageBox } from 'element-ui';
-  import { EventBus } from './event-bus.js';
 
   const turf = require('@turf/turf')
 
@@ -152,11 +151,10 @@ You should have received a copy of the GNU General Public License along with FG 
           }
         })
         console.log(this.groundnetLayerGroup.maxId)
+        this.buildLookup()
 
         this.groundnetLayerGroup.addTo(this.$parent.mapObject)
         this.icao = icao
-        console.log(EventBus)
-        EventBus.$emit('i-got-clicked', 1);        
       },
       visible (feature) {
         let bounds = this.$store.state.Settings.bounds
