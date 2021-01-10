@@ -141,7 +141,7 @@ const extendTaxiSegment = function (taxiwaySegment) {
                 }
             } else {
                 var arcs = event.target.expandArc(event.target.options.attributes);
-                var multiarc = {name: '', index: 900719925474099, ids: [] ,isPushBackRoute: null, direction: null};
+                var multiarc = { name: '', index: 900719925474099, ids: [], isPushBackRoute: null, direction: null };
                 if (store.default.state.Editable.data.multiarc === undefined ||
                     store.default.state.Editable.data.multiarc !== event.target.options.attributes) {
                     if (event.target.options.attributes === undefined) {
@@ -152,18 +152,18 @@ const extendTaxiSegment = function (taxiwaySegment) {
                     this.editLayer.featureLookup[event.target._leaflet_id] = [];
                     this.featureLookup[event.target._leaflet_id].push(this);
                     event.target.options.attributes.selected = true;
-                    
+
                     //multiarc.name = JSON.parse(JSON.stringify(event.target.options.attributes.name));
                     //multiarc.isPushBackRoute = JSON.parse(JSON.stringify(event.target.options.attributes.isPushBackRoute));
                     //multiarc.direction = JSON.parse(JSON.stringify(event.target.options.attributes.direction));
-                    if(event.target.options.attributes.name!==undefined) {
+                    if (event.target.options.attributes.name !== undefined) {
                         multiarc.name = assign(event.target.options.attributes.name);
                     }
                     multiarc.isPushBackRoute = assign(event.target.options.attributes.isPushBackRoute);
                     multiarc.direction = assign(event.target.options.attributes.direction);
-                    
+
                     this.editLayer.featureLookup[900719925474099] = [];
-                        
+
                     multiarc.ids = [];
 
                     //TODO
@@ -175,11 +175,11 @@ const extendTaxiSegment = function (taxiwaySegment) {
                     var arc = editLayer.groundnetLayerGroup.getLayer(id);
                     if (arc && arc instanceof L.Polyline) {
                         editLayer.featureLookup[900719925474099].push(arc);
-                        arc.select();    
-                    }        
+                        arc.select();
+                    }
                 });
                 store.default.dispatch('setMultiArcIds', arcs);
-        }
+            }
         });
         this.on('editable:drawing:move', function (event) {
             if (dragIndex >= 0) {
@@ -195,15 +195,25 @@ const extendTaxiSegment = function (taxiwaySegment) {
                 console.debug('editable:vertex:new ' + event.vertex.getIndex() + '\t' + event.vertex.getLastIndex() + '\t');
                 // Find nearest node
                 let closest = this.editLayer.closestLayerSnap(event.latlng, 5)
-                let taxiwaySegment = event.latlng.__vertex.editor.feature;
+                let taxiwaySegment = event.vertex.editor.feature;
                 if (taxiwaySegment.options.attributes === undefined) {
                     taxiwaySegment.options.attributes = { direction: 'bi-directional' };
                 }
                 taxiwaySegment.updateStyle();
                 if (event.vertex.getIndex() !== 0 && event.vertex.getIndex() !== event.vertex.getLastIndex()) {
+                    var x = taxiwaySegment.getLatLngs().filter(l => l === event.vertex.latlng);
+                    // Somehow the latlng is not in our Segment!?
+                    if (taxiwaySegment.getLatLngs().length < 3 && x.length === 0) {
+                        var fixed = taxiwaySegment.getLatLngs();
+                        fixed.splice(1, 0, event.vertex.latlng);
+                        taxiwaySegment.setLatLngs(fixed);
+                    }
                     var nextIndex = ++taxiwaySegment.editLayer.groundnetLayerGroup.maxId;
                     var splitOffNodes = taxiwaySegment.getLatLngs().splice(-1);
                     var remainingNodes = taxiwaySegment.getLatLngs();
+                    if (remainingNodes.length <= 1 || !remainingNodes[1]) {
+                        console.error(remainingNodes);
+                    }
                     splitOffNodes.unshift(L.latLng(remainingNodes[1].lat, remainingNodes[1].lng, remainingNodes[1].alt));
                     remainingNodes[1]['glueindex'] = nextIndex;
                     remainingNodes[1].attributes = { index: nextIndex, isOnRunway: 0 };
@@ -236,6 +246,8 @@ const extendTaxiSegment = function (taxiwaySegment) {
                         this.editLayer.featureLookup[nextIndex] = [];
                         this.featureLookup[nextIndex].push(taxiwaySegment);
                         this.featureLookup[nextIndex].push(polyline);
+                    } else {
+                        console.error('SplitoffNodes Short ', splitOffNodes);
                     }
                 } else {
                     // Glue to another node
@@ -254,7 +266,7 @@ const extendTaxiSegment = function (taxiwaySegment) {
                             taxiwaySegment.begin = closest.glueindex;
                         }
                         taxiwaySegment.end = closest.glueindex;
-                        console.log(`Closest : ${closest}`)
+                        console.debug(`Closest : ${closest}`)
                     } else {
                         event.vertex.latlng['glueindex'] = ++this.editLayer.groundnetLayerGroup.maxId;
                         event.vertex.latlng.attributes = { index: event.vertex.latlng.glueindex, isOnRunway: 0 };
@@ -287,8 +299,8 @@ const extendTaxiSegment = function (taxiwaySegment) {
             console.debug('editable:vertex:click')
         });
         this.on('editable:vertex:rawclick', event => {
-            event.cancel()
             console.debug('editable:vertex:rawclick')
+            event.cancel()
         });
         this.on('editable:vertex:clicked', function (event) {
             if (Number(store.default.state.Editable.index) >= 0 &&
@@ -355,6 +367,9 @@ const extendTaxiSegment = function (taxiwaySegment) {
                     });
                 }
                 dragIndex = -1;
+                if (!event.vertex.latlng.glueindex) {
+                    console.error('GlueIndex not found : ', event.vertex);
+                }
                 var parking = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.ParkingSpot);
                 if (parking.length > 0) {
                     parking[0].selectParking();
@@ -379,6 +394,7 @@ const extendTaxiSegment = function (taxiwaySegment) {
                 }
             } catch (error) {
                 console.error(error);
+                console.error(event.vertex.latlng.glueindex);
             }
         });
     };
@@ -394,44 +410,44 @@ const extendTaxiSegment = function (taxiwaySegment) {
         return ids;
     }
 
-    taxiwaySegment.__proto__.walkPushbackRoute = function  (index, walkedNodes, isPushBackRoute) {
+    taxiwaySegment.__proto__.walkPushbackRoute = function (index, walkedNodes, isPushBackRoute) {
         console.debug('Walk Level');
         walkedNodes.push(index)
         var segmentIds = [];
         var polyLines = this.featureLookup[index].filter(n => n instanceof L.Polyline);
-        if (polyLines===undefined || polyLines.length>2) {
+        if (polyLines === undefined || polyLines.length > 2) {
             console.debug('Walk ' + index + '\t' + polyLines.length);
             return;
         }
-    
+
         polyLines.forEach(l => {
-          segmentIds.push(l._leaflet_id);
-          console.debug('Walk Next ' + index + '\t' + 
-          (walkedNodes.indexOf(index)<0) + '\t'+
-          l.begin + '\t'+
-          (walkedNodes.indexOf(Number(l.begin))<0) + '\t'+
-          l.end + '\t'+
-          (walkedNodes.indexOf(Number(l.end))<0) + '\t'+
-          l.options.attributes.direction + '\t' +
-          l.options.attributes.begin + '\t' +
-          l.options.attributes.end);
-          console.debug('Walk isPushBackRoute ' + l.options.attributes.isPushBackRoute + '\t' + isPushBackRoute + '\t' +  (l.options.attributes.isPushBackRoute === isPushBackRoute));          
-          if(l.options.attributes.isPushBackRoute === isPushBackRoute ) {
-            console.debug(Number(l.begin) === index && walkedNodes.indexOf(Number(l.end)) < 0);
-            if (Number(l.begin) === index && walkedNodes.indexOf(Number(l.end)) < 0) {
-                console.debug( 'Walk forward ' + l.options.attributes.direction );
-                segmentIds = segmentIds.concat(this.walkPushbackRoute(Number(l.end), walkedNodes, isPushBackRoute))
+            segmentIds.push(l._leaflet_id);
+            console.debug('Walk Next ' + index + '\t' +
+                (walkedNodes.indexOf(index) < 0) + '\t' +
+                l.begin + '\t' +
+                (walkedNodes.indexOf(Number(l.begin)) < 0) + '\t' +
+                l.end + '\t' +
+                (walkedNodes.indexOf(Number(l.end)) < 0) + '\t' +
+                l.options.attributes.direction + '\t' +
+                l.options.attributes.begin + '\t' +
+                l.options.attributes.end);
+            console.debug('Walk isPushBackRoute ' + l.options.attributes.isPushBackRoute + '\t' + isPushBackRoute + '\t' + (l.options.attributes.isPushBackRoute === isPushBackRoute));
+            if (l.options.attributes.isPushBackRoute === isPushBackRoute) {
+                console.debug(Number(l.begin) === index && walkedNodes.indexOf(Number(l.end)) < 0);
+                if (Number(l.begin) === index && walkedNodes.indexOf(Number(l.end)) < 0) {
+                    console.debug('Walk forward ' + l.options.attributes.direction);
+                    segmentIds = segmentIds.concat(this.walkPushbackRoute(Number(l.end), walkedNodes, isPushBackRoute))
+                }
+                console.debug(Number(l.end) === index && walkedNodes.indexOf(Number(l.begin)) < 0);
+                if (Number(l.end) === index && walkedNodes.indexOf(Number(l.begin)) < 0) {
+                    console.debug('Walk backward ' + l.options.attributes.direction);
+                    segmentIds = segmentIds.concat(this.walkPushbackRoute(Number(l.begin), walkedNodes, isPushBackRoute))
+                }
             }
-            console.debug(Number(l.end) === index && walkedNodes.indexOf(Number(l.begin)) < 0);
-            if (Number(l.end) === index && walkedNodes.indexOf(Number(l.begin)) < 0 ) {
-                console.debug( 'Walk backward ' + l.options.attributes.direction );
-                segmentIds = segmentIds.concat(this.walkPushbackRoute(Number(l.begin), walkedNodes, isPushBackRoute))
-            }
-          }
-        });        
+        });
         return segmentIds;
     }
-    
+
     /**
      * 
      */
@@ -486,30 +502,30 @@ const extendTaxiSegment = function (taxiwaySegment) {
     };
 
     taxiwaySegment.__proto__.updateArrows = function (zoom) {
-        if( this._map === null) {
+        if (this._map === null) {
             return;
         }
         if (this.options.attributes.direction === 'forward') {
             this.setText(null);
             if (zoom <= 16) {
-                this.setText(' >', { repeat: true, offset: 6, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 15px serif;' } })                                    
-            } else if (zoom <= 19 ) {
-                this.setText(' > ', { repeat: true, offset: 7, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 20px serif;' } })                    
+                this.setText(' >', { repeat: true, offset: 6, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 15px serif;' } })
+            } else if (zoom <= 19) {
+                this.setText(' > ', { repeat: true, offset: 7, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 20px serif;' } })
             } else {
-                this.setText('  >  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })                    
+                this.setText('  >  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })
             }
         } else if (this.options.attributes.direction === 'backward') {
             this.setText(null);
             if (zoom <= 16) {
-                this.setText(' <', { repeat: true, offset: 6, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 15px serif;' } })                                    
-            } else if (zoom <= 19 ) {
-                this.setText(' < ', { repeat: true, offset: 7, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 20px serif;' } })                    
+                this.setText(' <', { repeat: true, offset: 6, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 15px serif;' } })
+            } else if (zoom <= 19) {
+                this.setText(' < ', { repeat: true, offset: 7, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 20px serif;' } })
             } else {
-                this.setText('  <  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })                    
+                this.setText('  <  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })
             }
         } else {
             this.setText(null);
-        }    
+        }
     }
 
     taxiwaySegment.__proto__.setInteractive = function (interactive) {
@@ -522,9 +538,9 @@ const extendTaxiSegment = function (taxiwaySegment) {
         if (!this._path) {
             return;
         }
-    
+
         this.options.interactive = interactive;
-    
+
         if (interactive) {
             L.DomUtil.addClass(this._path, 'leaflet-interactive');
         } else {
@@ -534,7 +550,7 @@ const extendTaxiSegment = function (taxiwaySegment) {
 
     taxiwaySegment.__proto__.updateStyle = function () {
         var style = {};
-        if(!this.options.attributes) {
+        if (!this.options.attributes) {
             return;
         }
         if (this.options.attributes.selected) {
@@ -545,7 +561,7 @@ const extendTaxiSegment = function (taxiwaySegment) {
         else {
             style.color = '#3388ff';
         }
-        if(this.editEnabled()) {
+        if (this.editEnabled()) {
             style.interactive = true;
         } else {
             style.interactive = false;
@@ -554,10 +570,10 @@ const extendTaxiSegment = function (taxiwaySegment) {
         if (this._map !== null) {
             if (this.options.attributes.direction === 'forward') {
                 this.setText(null);
-                this.setText('  >  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })                    
+                this.setText('  >  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })
             } else if (this.options.attributes.direction === 'backward') {
                 this.setText(null);
-                this.setText('  <  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })                    
+                this.setText('  <  ', { repeat: true, offset: 10, attributes: { fill: 'red', style: 'vertical-align: bottom; vertical-align: bottom; font-weight: bold; font: bold 30px serif;' } })
             } else {
                 this.setText(null);
             }
