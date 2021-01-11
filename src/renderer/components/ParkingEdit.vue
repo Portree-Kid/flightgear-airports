@@ -215,7 +215,7 @@
           var centerCoords = convert(this.$store.state.Editable.data.parking.coords);
           if(this.calculate === 'Nose Wheel') {            
           // we change center
-            const centerLatLng = convert(newValue);
+            const centerLatLng = convert(this.$store.state.Editable.data.parking.coords);
             const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
             if (parkingSize>=0) {
                 var newNoseWheel = turf.destination(this.latToTurf(centerLatLng), this.validN2M[parkingSize]/1000, this.$store.state.Editable.data.parking.heading - 180, turfOptions);
@@ -227,7 +227,7 @@
           var centerCoords = convert(this.$store.state.Editable.data.parking.coords);
           if (this.calculate === 'Center') {            
           // we change center
-            const noseWheelLatLng = convert(this.noseWheel);
+            const noseWheelLatLng = convert(this.$store.state.Editable.data.parking.nosecoords);
             const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
             if (parkingSize>=0) {
                 var newCenter = turf.destination(this.latToTurf(noseWheelLatLng), this.validN2M[parkingSize]/1000, this.$store.state.Editable.data.parking.heading, turfOptions);
@@ -236,7 +236,7 @@
           }
       }
     },
-    data () { return {_calculate: 'Center', noseWheel: '', validRadii: [7.5, 10, 14, 18, 26, 33, 40], validN2M: [5, 5, 6, 10, 15, 24, 24] } },
+    data () { return {calculateState: 'Nose Wheel', noseWheel: '', validRadii: [7.5, 10, 14, 18, 26, 33, 40], validN2M: [5, 5, 6, 10, 15, 24, 24] } },
     computed: {
       editing: {
         get: function () {
@@ -300,10 +300,10 @@
       },
       calculate: {
         get: function () {
-          return this._calculate;
+          return this.calculateState;
         },
         set: function (newValue) {
-          this._calculate = newValue;
+          this.calculateState = newValue;
           if (newValue==='Center') {
             this.calcWheel();
           } else {
