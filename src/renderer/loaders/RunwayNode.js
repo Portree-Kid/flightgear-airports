@@ -26,6 +26,20 @@ L.RunwayNode = L.Marker.extend({
                 store.default.dispatch('setRunway', event.target.options.attributes);
             }
         });
+        this.on('add', function (event) {
+            event.target.setInteractive(false);
+        });
+    },
+    setInteractive(interactive) {
+        if (interactive) {
+            if(this._icon) {
+              L.DomUtil.addClass(this._icon, 'leaflet-interactive');
+            }
+        } else {
+            if(this._icon) {
+                L.DomUtil.removeClass(this._icon, 'leaflet-interactive');
+            }
+        }
     },
     select() {
         try {

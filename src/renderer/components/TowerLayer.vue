@@ -72,6 +72,15 @@ You should have received a copy of the GNU General Public License along with FG 
           })
         }
       },
+      disableEdit () {
+        if (this.layerGroup) {
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.TowerMarker) {
+              l.enableEdit(this.$parent.mapObject)
+            }
+          })
+        }
+      },
       save () {
         if (this.layerGroup) {
           this.layerGroup.eachLayer(l => {

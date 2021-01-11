@@ -77,6 +77,24 @@
           this.deferredMountedTo(this.$parent.mapObject)
         }
       },
+      enableEdit () {
+        if (this.layerGroup) {
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.Threshold) {
+              l.setInteractive(true)
+            }
+          })
+        }
+      },
+      disableEdit () {
+        if (this.layerGroup) {
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.Threshold) {
+              l.setInteractive(false)
+            }
+          })
+        }
+      },
       setVisible (visible) {
         if (this.layerGroup !== undefined) {
           if (visible !== this.visible) {

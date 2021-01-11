@@ -239,7 +239,24 @@ L.ParkingSpot = L.Circle.extend({
         if(this.box) {
             this.box.setStyle(style);
         }
-  },
+    },
+    setInteractive(interactive) {
+        if (interactive) {
+            if(this.direction) {
+              L.DomUtil.addClass(this.direction._path, 'leaflet-interactive');
+            }
+            if(this.box) {
+              L.DomUtil.addClass(this.box._path, 'leaflet-interactive');
+            }
+        } else {
+            if(this.direction) {
+              L.DomUtil.removeClass(this.direction._path, 'leaflet-interactive');
+            }
+            if(this.box) {
+              L.DomUtil.removeClass(this.box._path, 'leaflet-interactive');
+            }
+        }
+    },
     addListeners: function () {
         this.on('editable:drawing:move', function (event) {
             console.debug("Move Parking Spot: ", event);
@@ -265,6 +282,7 @@ L.ParkingSpot = L.Circle.extend({
           if(event.target.box !== undefined) {
             event.target.box.addTo(event.target._map);
           }
+          event.target.setInteractive(false);
         });
         this.on('remove', function (event) {
             console.log(event);

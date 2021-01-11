@@ -115,6 +115,8 @@ You should have received a copy of the GNU General Public License along with FG 
         this.centerDialogVisible = false
         this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         this.$parent.$parent.$refs.editLayer.disableEdit()
+        this.$parent.$parent.$refs.towerLayer.disableEdit()
+        this.$parent.$parent.$refs.thresholdLayer.disableEdit()
         this.$parent.$parent.$refs.editLayer.reload(true)
       },
       undoLast () {
@@ -123,6 +125,8 @@ You should have received a copy of the GNU General Public License along with FG 
         this.centerDialogVisible = false
         this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         this.$parent.$parent.$refs.editLayer.disableEdit()
+        this.$parent.$parent.$refs.towerLayer.disableEdit()
+        this.$parent.$parent.$refs.thresholdLayer.disableEdit()
         this.$parent.$parent.$refs.editLayer.reload(false)
       },
       save () {
@@ -141,6 +145,8 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$parent.$parent.$refs.towerLayer.save()
         this.$parent.$parent.$refs.thresholdLayer.save()
         this.$parent.$parent.$refs.editLayer.disableEdit()
+        this.$parent.$parent.$refs.towerLayer.disableEdit()
+        this.$parent.$parent.$refs.thresholdLayer.disableEdit()
         this.scanGroundnets()
         Vue.set(this, 'saveDialogVisible', false)              
       },

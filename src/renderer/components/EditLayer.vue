@@ -149,6 +149,10 @@ You should have received a copy of the GNU General Public License along with FG 
           if (l.updateArrows !== undefined) {
             l.updateArrows(this.$store.state.Settings.zoom)
           }
+          if (typeof l.setInteractive === 'function') {
+            l.setInteractive(false)
+          }
+
         })
         console.log(this.groundnetLayerGroup.maxId)
         this.buildLookup()
@@ -224,7 +228,8 @@ You should have received a copy of the GNU General Public License along with FG 
             l.setInteractive(true)
           }
         })
-        this.$store.dispatch('addWip', {icao: this.icao});      },
+        this.$store.dispatch('addWip', {icao: this.icao});      
+      },
       disableEdit () {
         this.editable = false
         this.editing = false

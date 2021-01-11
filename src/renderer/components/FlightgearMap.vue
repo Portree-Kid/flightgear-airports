@@ -258,6 +258,7 @@ You should have received a copy of the GNU General Public License along with FG 
         }
         this.$refs.editLayer.enableEdit()
         this.$refs.towerLayer.enableEdit()
+        this.$refs.thresholdLayer.enableEdit()
         this.$refs.editBar.setEditing(event)
         this.$refs.toolBar.setEditing(event)
         this.$refs.sidebar.setEditing(event)

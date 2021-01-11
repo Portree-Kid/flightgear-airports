@@ -27,6 +27,7 @@ L.Threshold = L.Marker.extend({
     stopw_m: 0,
     originLatLng: null,
     rwy: '',
+    interactive: false,
     stripSVG: function(fName) {
         var rx = /<\s*svg[^>]*>([\s\S]*)<\s*\/svg[^>]*>/gm;
         var svg = fs.readFileSync(path.join(__static, '/', fName), 'utf8');
@@ -48,12 +49,25 @@ L.Threshold = L.Marker.extend({
                     className: 'threshold-marker-icon',
                     html: `<div style=\'transform: translateX(${offset}px) translateY(${offset}px) scale(${scale}) rotate(${this.heading}deg); border: 1px red\'>${this.svg}</div>`,
                 }));    
+                this.setInteractive(this.interactive);
 
                 this.update(this.getLatLng());
                 this.setLatLng(this.getLatLng());
                 this._metersPP = metersPP;
             }
         }
+    },
+    setInteractive(interactive) {        
+        if (interactive) {
+            if(this._icon) {
+              L.DomUtil.addClass(this._icon, 'leaflet-interactive');
+            }
+        } else {
+            if(this._icon) {
+                L.DomUtil.removeClass(this._icon, 'leaflet-interactive');
+            }
+        }
+        this.interactive = interactive;
     },
     metersPerPixel: function (latitude, zoomLevel) {
         var earthCircumference = 40075017;
@@ -115,7 +129,7 @@ L.Threshold.addInitHook(function(){
         store.default.dispatch('setThreshold', {rwy: event.target.rwy, displacement: event.target.displacement});
     });
     this.on('add', function (event) {         
-        // event.target.direction.addTo(event.target._map);
+        event.target.setInteractive(false);
     });
 });
 
