@@ -210,9 +210,33 @@
       },
       turfToLatLng: function (turfPoint) {
           return '' + turfPoint.geometry.coordinates[1].toFixed(6) + ',' + turfPoint.geometry.coordinates[0].toFixed(6);
+      },
+      calcWheel () {
+          var centerCoords = convert(this.$store.state.Editable.data.parking.coords);
+          if(this.calculate === 'Nose Wheel') {            
+          // we change center
+            const centerLatLng = convert(newValue);
+            const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
+            if (parkingSize>=0) {
+                var newNoseWheel = turf.destination(this.latToTurf(centerLatLng), this.validN2M[parkingSize]/1000, this.$store.state.Editable.data.parking.heading - 180, turfOptions);
+                this.$store.commit('SET_EDIT_PARKING_NOSE_COORDS', this.turfToLatLng(newNoseWheel));
+            }     
+          }
+      },
+      calcCenter () {
+          var centerCoords = convert(this.$store.state.Editable.data.parking.coords);
+          if (this.calculate === 'Center') {            
+          // we change center
+            const noseWheelLatLng = convert(this.noseWheel);
+            const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
+            if (parkingSize>=0) {
+                var newCenter = turf.destination(this.latToTurf(noseWheelLatLng), this.validN2M[parkingSize]/1000, this.$store.state.Editable.data.parking.heading, turfOptions);
+                this.$store.commit('SET_EDIT_PARKING_COORDS', this.turfToLatLng(newCenter));
+            }     
+          }
       }
     },
-    data () { return {calculate:'Nose Wheel', noseWheel: '', validRadii: [7.5, 10, 14, 18, 26, 33, 40], validN2M: [5, 5, 6, 10, 15, 24, 24] } },
+    data () { return {_calculate: 'Center', noseWheel: '', validRadii: [7.5, 10, 14, 18, 26, 33, 40], validN2M: [5, 5, 6, 10, 15, 24, 24] } },
     computed: {
       editing: {
         get: function () {
@@ -274,6 +298,19 @@
           this.$store.commit('SET_EDIT_PARKING_NUMBER', newValue)
         }
       },
+      calculate: {
+        get: function () {
+          return this._calculate;
+        },
+        set: function (newValue) {
+          this._calculate = newValue;
+          if (newValue==='Center') {
+            this.calcWheel();
+          } else {
+            this.calcCenter();
+          }
+        }
+      },
       coordinates: {
       // getter
         get: function () {
@@ -290,23 +327,14 @@
             newValue = newValue.replace(', ', ' ').replace(/,/g, '.').replace(' ', ', ');
           }                  
           this.$store.commit('SET_EDIT_PARKING_COORDS', newValue)
+          this.calcWheel();
         }
       },
       noseCoordinates: {
       // getter
         get: function () {
-          if(this.$store.state.Editable.index!==undefined) {            
-            const center = convert(this.$store.state.Editable.data.parking.coords);
-            const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
-            if (parkingSize>=0) {
-                var newWheel = turf.destination(this.latToTurf(center), this.validN2M[parkingSize]/1000, this.normalizeAngle(this.$store.state.Editable.data.parking.heading), turfOptions);
-                var newValue = this.turfToLatLng(newWheel);
-                if( newValue.match(/,/g) !== null && newValue.match(/,/g).length === 1) {
-                  newValue = newValue.replace(',', ' ');
-                }
-                this.noseWheel = newValue;
-                return newValue;
-            }     
+          if(this.$store.state.Editable.index!==undefined) {
+            return this.$store.state.Editable.data.parking.nosecoords;
           }
         },
         // setter
@@ -317,17 +345,8 @@
           if( newValue.match(/,/g) !== null && newValue.match(/,/g).length === 3) {
             newValue = newValue.replace(', ', ' ').replace(/,/g, '.').replace(' ', ', ');
           }
-          this.noseWheel = newValue;
-          var centerCoords = convert(this.$store.state.Editable.data.parking.coords);
-          if(this.calculate === 'Center') {            
-          // we change center
-            const noseWheelLatLng = convert(this.noseWheel);
-            const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
-            if (parkingSize>=0) {
-                var newCenter = turf.destination(this.latToTurf(noseWheelLatLng), this.validN2M[parkingSize]/1000, this.$store.state.Editable.data.parking.heading, turfOptions);
-                this.$store.commit('SET_EDIT_PARKING_COORDS', this.turfToLatLng(newCenter));
-            }     
-          }
+          this.$store.commit('SET_EDIT_PARKING_NOSE_COORDS', newValue);
+          this.calcCenter();
         }
       },
       heading: {

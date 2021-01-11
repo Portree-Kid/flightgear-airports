@@ -131,6 +131,9 @@ const mutations = {
   'SET_EDIT_PARKING_COORDS' (state, coords) {
     Vue.set(state.data.parking, 'coords', coords)
   },
+  'SET_EDIT_PARKING_NOSE_COORDS' (state, coords) {
+    Vue.set(state.data.parking, 'nosecoords', coords)
+  },
   'SET_EDIT_ARC_NAME' (state, arcName) {
     if (state.type === 'arc') {
       Vue.set(state.data.arc, 'name', arcName)
@@ -196,6 +199,9 @@ const actions = {
   },
   async setParkingCoords (context, coords) {
     context.commit('SET_EDIT_PARKING_COORDS', coords)
+  },
+  async setParkingNoseCoords (context, coords) {
+    context.commit('SET_EDIT_PARKING_NOSE_COORDS', coords)
   },
   async setArc (context, arc) {
     context.commit(SET_EDIT_ARC, arc)
