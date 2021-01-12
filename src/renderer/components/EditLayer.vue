@@ -955,7 +955,7 @@ You should have received a copy of the GNU General Public License along with FG 
                   nearest.push({d: distance, l: layer, latlng: latlng.__vertex.latlng, glueindex: latlng.glueindex })
                 }
               } else {
-                console.error("No __Vertex");
+                console.error("No __Vertex", latlng);
               }
             })
           }

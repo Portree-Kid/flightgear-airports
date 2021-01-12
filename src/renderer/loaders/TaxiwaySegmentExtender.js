@@ -56,7 +56,7 @@ const extendTaxiSegment = function (taxiwaySegment) {
     taxiwaySegment.__proto__.selectVertex = function (index) {
         this.getLatLngs().forEach(element => {
             if (Number(element.glueindex) === index) {
-                if (element.__vertex._icon != null) {
+                if (element.__vertex !== undefined && element.__vertex._icon != null) {
                     element.__vertex.__proto__.deselect = function () {
                         if (this._icon != null) {
                             this._icon.style.setProperty('background-color', 'white');
@@ -159,7 +159,11 @@ const extendTaxiSegment = function (taxiwaySegment) {
                     if (event.target.options.attributes.name !== undefined) {
                         multiarc.name = assign(event.target.options.attributes.name);
                     }
-                    multiarc.isPushBackRoute = assign(event.target.options.attributes.isPushBackRoute);
+                    if(event.target.options.attributes.isPushBackRoute) {
+                        multiarc.isPushBackRoute = assign(event.target.options.attributes.isPushBackRoute);
+                    } else {
+                        multiarc.isPushBackRoute = false;
+                    }
                     multiarc.direction = assign(event.target.options.attributes.direction);
 
                     this.editLayer.featureLookup[900719925474099] = [];
