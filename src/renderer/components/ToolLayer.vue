@@ -58,11 +58,11 @@ You should have received a copy of the GNU General Public License along with FG 
         var polyLine = this.$parent.mapObject.editTools.startPolygon(undefined, {color: 'green'})
         var layerGroup = this.toolLayerGroup;
         polyLine.addTo(this.toolLayerGroup)
-        polyLine.on('editable:drawing:click', event => {
-          //polyLine.removeFrom(layerGroup);
+        polyLine.on('click', event => {
+          polyLine.removeFrom(layerGroup);
         });
         polyLine.on('editable:drawing:end', event => {          
-          console.debug(event)
+          console.debug('editable:drawing:end', event)
           var latLngs = event.target.getLatLngs()[0].map( latLng => ([latLng.lat, latLng.lng]));          
 
 
