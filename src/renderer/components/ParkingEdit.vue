@@ -132,7 +132,7 @@
       <el-col :span="7">
         <span class="label">Heading :</span>
       </el-col>
-      <el-col :span="17">
+      <el-col :span="13">
         <el-input-number
           v-model="heading"
           :min="-361"
@@ -141,6 +141,11 @@
           :precision="1"
           :disabled="!editing || calculate ==='Heading'"
         ></el-input-number>
+      </el-col>
+      <el-col :span="4">
+          <el-button @click="rotate" class="button">
+            <i class="fas fa-ruler-combined"></i>
+          </el-button>
       </el-col>
     </el-row>
     <el-row>
@@ -193,6 +198,37 @@
 
   export default {
     methods: {
+      rotate() {
+        var heading = this.$store.state.Editable.data.parking.heading + 90;
+        while (heading>=360) {
+          heading -= 360
+        }
+        while (heading<0) {
+          heading += 360
+        }
+        this.headingChange(heading);
+      },
+      headingChange( newValue ) {
+          while (newValue>=360) {
+            newValue -= 360
+          }
+          while (newValue<0) {
+            newValue += 360
+          }
+          if (Number(this.$store.state.Editable.data.parking.heading) !== newValue) {
+            this.$store.commit('SET_EDIT_PARKING_HEADING', newValue)
+          }
+          if(this.calculate === 'Center') {            
+          // we change center
+            const noseWheelLatLng = convert(this.noseWheel);
+            const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
+            if (parkingSize>=0) {
+                var reverseHeading = this.normalizeAngle(this.$store.state.Editable.data.parking.heading+180);
+                var newCenter = turf.destination(this.latToTurf(noseWheelLatLng), this.validN2M[parkingSize]/1000, reverseHeading, turfOptions);
+                this.$store.commit('SET_EDIT_PARKING_COORDS', this.turfToLatLng(newCenter));
+            }     
+          }
+      },
       show (idx) {
         this.$parent.$parent.$parent.$refs.editLayer.show(idx)
       },
@@ -356,25 +392,7 @@
         },
         // setter
         set: function (newValue) {
-          while (newValue>=360) {
-            newValue -= 360
-          }
-          while (newValue<0) {
-            newValue += 360
-          }
-          if (Number(this.$store.state.Editable.data.parking.heading) !== newValue) {
-            this.$store.commit('SET_EDIT_PARKING_HEADING', newValue)
-          }
-          if(this.calculate === 'Center') {            
-          // we change center
-            const noseWheelLatLng = convert(this.noseWheel);
-            const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
-            if (parkingSize>=0) {
-                var reverseHeading = this.normalizeAngle(this.$store.state.Editable.data.parking.heading+180);
-                var newCenter = turf.destination(this.latToTurf(noseWheelLatLng), this.validN2M[parkingSize]/1000, reverseHeading, turfOptions);
-                this.$store.commit('SET_EDIT_PARKING_COORDS', this.turfToLatLng(newCenter));
-            }     
-          }
+          this.headingChange(newValue)
         }
       },
       wingspan: {

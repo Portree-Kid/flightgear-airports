@@ -277,7 +277,7 @@ L.ParkingSpot = L.Circle.extend({
             }
         });
         this.on('add', function (event) {
-          console.log(event);
+          console.debug(event);
           event.target.updateBox();
           if(event.target.box !== undefined) {
             event.target.box.addTo(event.target._map);
@@ -285,7 +285,7 @@ L.ParkingSpot = L.Circle.extend({
           event.target.setInteractive(false);
         });
         this.on('remove', function (event) {
-            console.log(event);
+            console.debug(event);
             if(event.target.box !== undefined) {
                 event.target.box.removeFrom(event.target._map);
             }
@@ -351,10 +351,6 @@ L.ParkingSpot = L.Circle.extend({
                 }
             });
         }
-
-        store.default.dispatch('setParking', this.options.attributes);
-        store.default.dispatch('setParkingCoords', this.getLatLng().lat.toFixed(6) + ' ' + this.getLatLng().lng.toFixed(6));
-
         this.select();
     },
     turfToLatLng: function (turfPoint) {

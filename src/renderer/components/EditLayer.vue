@@ -657,10 +657,10 @@ You should have received a copy of the GNU General Public License along with FG 
         }
         console.debug('Edited Parkings : ' + this.$store.state.Parkings.items)
         this.$store.state.Parkings.items.forEach( newElement => {
-          console.debug(newElement);
           if(this.featureLookup[newElement.index]) {
             this.featureLookup[newElement.index].forEach((element,index) => {
               if (element instanceof L.ParkingSpot) {
+                console.debug(element);
                 element.options.attributes.name = newElement.name
                 element.options.attributes.number = newElement.number
                 element.options.attributes.type = newElement.type
