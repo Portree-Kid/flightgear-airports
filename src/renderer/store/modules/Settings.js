@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 const state = {
-  settings: { flightgearDirectory: '.', testDirectory: '.', email: 'flightgearairports@example.org', name: 'unknown', phi_url: 'http://localhost:8080' },
+  settings: { numberOfSaves: 1, flightgearDirectory: '.', testDirectory: '.', email: 'flightgearairports@example.org', name: 'unknown', phi_url: 'http://localhost:8080' },
   zoom: 14,
   center: [47.413220, -1.219482],
   bounds: undefined,
@@ -49,6 +49,9 @@ const mutations = {
   },
   'SET_NAME'(state, name) {
     state.settings.name = name
+  },
+  'SET_NUMBER_OF_SAVES'(state, numberOfSaves) {
+    state.settings.numberOfSaves = numberOfSaves
   },
   'SET_PHI_URL'(state, phi_url) {
     state.settings.phi_url = phi_url

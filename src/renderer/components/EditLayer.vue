@@ -109,7 +109,7 @@ You should have received a copy of the GNU General Public License along with FG 
     },
     data () {
       return {
-        maxId: 1, icao: String, checking: false, editing: false
+        maxId: 1, icao: '', checking: false, editing: false
       }
     },
     methods: {
@@ -128,13 +128,18 @@ You should have received a copy of the GNU General Public License along with FG 
          this.selection = parkings;
          return parkings;
       },
-      load (icao, force) {        
+      load (icao, filename) {        
         if (this.groundnetLayerGroup !== undefined) {
           this.groundnetLayerGroup.removeFrom(this.$parent.mapObject)
         }        
         this.$parent.$parent.setIcao(icao)
         this.icao = icao
-        this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao, force)
+        var f = path.join(this.$store.state.Settings.settings.airportsDirectory, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');
+        if (!fs.existsSync(f)) {
+          f = path.join(this.$store.state.Settings.settings.airportsDirectory, icao[0], icao[1], icao[2], icao + '.groundnet.xml');        
+        }
+
+        this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao, f)
         if (this.groundnetLayerGroup === undefined) {
           console.warn('Groundnet for ICAO not loaded ' + icao)
           return
@@ -912,8 +917,8 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$parent.mapObject.off('click', this.addParking)
         this.$parent.mapObject._container.style.cursor = ''
       },
-      reload (force) {
-        this.load(this.icao, force)
+      reload (filename) {
+        this.load(this.icao, filename)
       },
       link (index) {
         var layers = []
@@ -1007,8 +1012,7 @@ You should have received a copy of the GNU General Public License along with FG 
           //console.debug(l)
           xml.push(l)
         })
-        writeGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, this.icao, xml)
-        this.load(this.icao, false)
+        writeGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, this.icao, xml)        
       },
       //Copy to test directory
       test() {

@@ -65,11 +65,22 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         try { fs.mkdirSync(path.join(fDir, icao[0], icao[1]), { recursive: true })} catch (err) { }
         try { fs.mkdirSync(path.join(fDir, icao[0], icao[1], icao[2]), { recursive: true })} catch (err) { }
 
+        var fileNames = [];
+        for (let index = 1; index <= store.default.state.Settings.settings.numberOfSaves; index++) {
+            fileNames.push(path.join(fDir, icao[0], icao[1], icao[2], icao + `.groundnet.bak.${index}.xml`));            
+        }
         var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');
-        var fBak = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.bak.xml');
 
         if( fs.existsSync(f) ) {
-            fs.copyFileSync(f, fBak);
+            var previous = '';
+            fileNames.reverse().forEach(fBak => {                
+                if (fs.existsSync(fBak) && previous !== '') {
+                    console.debug( `Copy ${fBak} to ${previous}`);
+                    fs.copyFileSync(fBak, previous);
+                }
+                previous = fBak;
+            });
+            fs.copyFileSync(f, previous);
         }
         if (f == null)
             return;

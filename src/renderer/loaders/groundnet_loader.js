@@ -29,22 +29,37 @@ function addFrequencies (type, value) {
 }
 
 exports.addFeature = function (feature) {
-    featureLookup[feature.id] = new Array();
+    featureLookup[feature.id] = [];
 }
 
-exports.readGroundnetXML = function (fDir, icao, force) {
+exports.listSaves = function (fDir, icao) {
+    var directory = path.join(fDir, icao[0], icao[1], icao[2]);
+    var files = fs.readdirSync(directory);
+    var ret = files
+    .filter(f => f.includes(icao) )
+    .filter(f => f.includes('groundnet') )
+    .map(f => { 
+        try {
+            var fileDate = fs.lstatSync(path.join(directory, f));
+            return {file: f, mtime: `${fileDate.mtime}`, mtimeMs: `${fileDate.mtimeMs}`};                
+        } catch (error) {
+            console.error(error);
+        }
+    });
+    ret.forEach( f => {
+        console.debug(f);
+    });
+    return ret;
+}
+
+exports.readGroundnetXML = function (fDir, icao, f) {
     try {
         store.default.dispatch('setGroundnetLoaded', false);
         var layerGroup = L.layerGroup();
         layerGroup.maxId = 0;
-        var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.xml');
-        var fNew = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');
 
-        if (f == null || (!fs.existsSync(f) && force)|| (!fs.existsSync(f) && !fs.existsSync(fNew) ))
+        if (f == null || (!fs.existsSync(f) ))
             return layerGroup;
-        if (fNew != null && fs.existsSync(fNew) && !force) {
-            f = fNew;
-        }
 
         var features = new Array();
 

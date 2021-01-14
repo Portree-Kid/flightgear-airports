@@ -11,32 +11,84 @@ You should have received a copy of the GNU General Public License along with FG 
 -->
 <template>
   <div id="EditBar">
-    <ZoomButton icon="fas fa-th" v-on:click="zoomin" :show="true" tooltip="Zoomin"></ZoomButton>
-    <ZoomButton icon="fas fa-th-large" v-on:click="zoomout" :show="!editing" tooltip="Zoomout"></ZoomButton>
-    <!--<ZoomButton icon="far fa-eye-slash" v-on:click="hideAPT" :show='true' tooltip="Hide APT"></ZoomButton>-->
 
-    <!--<EditButton icon="fas fa-upload" v-on:click="upload" :show="!editing" tooltip="Upload"></EditButton>-->
-    <!--<EditButton icon="fas fa-edit" v-on:click="edit" :show="!editing" tooltip="Edit"></EditButton>-->
-    <EditButton
-      icon="fas fa-undo"
-      v-on:click="centerDialogVisible = true"
-      :show="editing"
-      tooltip="Undo"
-    ></EditButton>
-    <el-dialog title="Reload" :visible.sync="centerDialogVisible" width="30%" center>
-      <span style="center">Reload from last save? You will lose the current edits.</span>
+    <el-dialog
+      title="Checking"
+      width="30%"
+      center
+      :visible.sync="checkDialogVisible"
+    >
+      <el-container direction="vertical">
+        <el-progress
+          :percentage="Number(((progress / max) * 100).toPrecision(3))"
+          v-if="max > 0"
+        ></el-progress>
+      </el-container>
+    </el-dialog>
+
+    <el-dialog
+      title="Revert"
+      :visible.sync="centerDialogVisible"
+      width="550px"
+      center
+    >
+      <span>
+        Please select the Version to revert to.
+        <el-row v-for="item in saves" :key="item.file">
+           <el-button @click="revert(item.file)">{{item.mtime}}</el-button>
+        </el-row>
+      </span>
+
       <span slot="footer" class="dialog-footer">
-        <el-button @click="undoFirst">Base version (GIT)</el-button>
-        <el-button type="primary" @click="undoLast">Last save</el-button>
+        <el-button type="primary" @click="cancel">Cancel</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="Saving" :visible.sync="saveDialogVisible" width="30%" center>
+    <el-dialog
+      title="Saving"
+      :visible.sync="saveDialogVisible"
+      width="30%"
+      center
+    >
       <span style="center">Saving..</span>
     </el-dialog>
 
-    <EditButton icon="fas fa-save" v-on:click="save" :show="editing" tooltip="Save"></EditButton>
-    <EditButton icon="far fa-check-square" v-on:click="showCheck" :show="editing" tooltip="Check"></EditButton>
+    <ZoomButton
+      icon="fas fa-th"
+      v-on:click="zoomin"
+      :show="true"
+      tooltip="Zoomin"
+    ></ZoomButton>
+    <ZoomButton
+      icon="fas fa-th-large"
+      v-on:click="zoomout"
+      :show="!editing"
+      tooltip="Zoomout"
+    ></ZoomButton>
 
+    <EditButton
+      icon="fa fa-window-close"
+      v-on:click="close"
+      :show="editing"
+      tooltip="Close/Save Editing"
+    ></EditButton>
+    <EditButton
+      icon="fas fa-undo"
+      v-on:click="openReload"
+      :show="editing"
+      tooltip="Revert to Savepoint"
+    ></EditButton>
+    <EditButton
+      icon="fas fa-save"
+      v-on:click="save"
+      :show="editing"
+      tooltip="Save"
+    ></EditButton>
+    <EditButton
+      icon="far fa-check-square"
+      v-on:click="showCheck"
+      :show="editing"
+      tooltip="Check"
+    ></EditButton>
     <EditButton
       icon="fas fa-draw-polygon"
       v-on:click="drawPolyline"
@@ -61,12 +113,12 @@ You should have received a copy of the GNU General Public License along with FG 
       :show="editing"
       tooltip="Draw Parking"
     ></EditButton>
-    <EditButton icon="fas fa-trash-alt" v-on:click="deleteFeature" :show="editing" tooltip="Remove"></EditButton>
-    <el-dialog title="Checking" width="30%" center :visible.sync="checkDialogVisible">
-      <el-container direction="vertical">
-        <el-progress :percentage="Number(((progress / max)*100).toPrecision(3))" v-if="max>0"></el-progress>
-      </el-container>
-    </el-dialog>
+    <EditButton
+      icon="fas fa-trash-alt"
+      v-on:click="deleteFeature"
+      :show="editing"
+      tooltip="Remove"
+    ></EditButton>
   </div>
 </template>
 
@@ -75,6 +127,8 @@ You should have received a copy of the GNU General Public License along with FG 
   const path = require('path')
   const fs = require('fs');
   const mapper = require('../check/mapper');
+
+  import {listSaves} from '../loaders/groundnet_loader'
 
   import EditButton from './EditButton'
   import ZoomButton from './ZoomButton';
@@ -85,11 +139,14 @@ You should have received a copy of the GNU General Public License along with FG 
   export default {
     components: { EditButton, ZoomButton },
     data () {
-      return {isEditing: false, uploadVisible: false, centerDialogVisible: false, saveDialogVisible: false, checkDialogVisible: false, checking: false, progress: 0, max: 0, pavementLayerVisible: true}
+      return {isEditing: false, uploadVisible: false, centerDialogVisible: false, saveDialogVisible: false, checkDialogVisible: false, checking: false, progress: 0, max: 0, pavementLayerVisible: true, saves: [] }
     },
     created () {
     },
     methods: {
+      cancel () {
+        this.centerDialogVisible = false        
+      },
       zoomout() {
         this.$parent.$parent.$refs.editLayer.stopDrawing()
         this.$parent.$parent.zoomUpdated(9)
@@ -109,7 +166,7 @@ You should have received a copy of the GNU General Public License along with FG 
       setEditing (editing) {
         this.isEditing = editing
       },
-      undoFirst () {
+      revert (file) {
         this.isEditing = false
         this.$emit('edit', false)
         this.centerDialogVisible = false
@@ -117,25 +174,32 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$parent.$parent.$refs.editLayer.disableEdit()
         this.$parent.$parent.$refs.towerLayer.disableEdit()
         this.$parent.$parent.$refs.thresholdLayer.disableEdit()
-        this.$parent.$parent.$refs.editLayer.reload(true)
+        this.$parent.$parent.$refs.editLayer.reload(file)
       },
-      undoLast () {
-        this.isEditing = false
-        this.$emit('edit', false)
-        this.centerDialogVisible = false
-        this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
-        this.$parent.$parent.$refs.editLayer.disableEdit()
-        this.$parent.$parent.$refs.towerLayer.disableEdit()
-        this.$parent.$parent.$refs.thresholdLayer.disableEdit()
-        this.$parent.$parent.$refs.editLayer.reload(false)
-      },
-      save () {
+      close () {
         this.$parent.$parent.$refs.editLayer.stopDrawing()
         this.isEditing = false
         this.$emit('edit', false)
         this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         Vue.set(this, 'saveDialogVisible', true)
         this.$emit('edit', false)
+        Vue.nextTick( function () {
+            setTimeout( this.closeDefered.bind(this), 100);
+        }, this)
+      },
+      closeDefered () {
+        this.$parent.$parent.$refs.editLayer.save()
+        this.$parent.$parent.$refs.towerLayer.save()
+        this.$parent.$parent.$refs.thresholdLayer.save()
+        this.$parent.$parent.$refs.editLayer.disableEdit()
+        this.$parent.$parent.$refs.towerLayer.disableEdit()
+        this.$parent.$parent.$refs.thresholdLayer.disableEdit()
+        this.rescanCurrentGroundnet()
+        Vue.set(this, 'saveDialogVisible', false)              
+      },
+      save () {
+        Vue.set(this, 'saveDialogVisible', true)
+        this.$parent.$parent.$refs.editLayer.stopDrawing()
         Vue.nextTick( function () {
             setTimeout( this.saveDefered.bind(this), 100);
           }, this)
@@ -144,13 +208,10 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$parent.$parent.$refs.editLayer.save()
         this.$parent.$parent.$refs.towerLayer.save()
         this.$parent.$parent.$refs.thresholdLayer.save()
-        this.$parent.$parent.$refs.editLayer.disableEdit()
-        this.$parent.$parent.$refs.towerLayer.disableEdit()
-        this.$parent.$parent.$refs.thresholdLayer.disableEdit()
-        this.scanGroundnets()
+        this.rescanCurrentGroundnet()
         Vue.set(this, 'saveDialogVisible', false)              
       },
-      scanGroundnets () {
+      rescanCurrentGroundnet () {
         try {
           const winURL = process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/src/renderer/utils/worker.js`
@@ -297,6 +358,13 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$parent.$parent.$refs.editLayer.stopDrawing()
         Vue.set(this, 'checkDialogVisible', true)
         this.check()
+      },
+      openReload: function() {
+        this.centerDialogVisible = true
+        var icao = this.$parent.$parent.$refs.editLayer.icao
+        if (icao !== undefined && icao !== '') {
+          this.saves = listSaves(this.$store.state.Settings.settings.airportsDirectory, icao).sort((a, b) => a.mtimeMs - b.mtimeMs)
+        }
       }
     },
     computed: {
