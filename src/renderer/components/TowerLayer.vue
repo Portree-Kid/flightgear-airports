@@ -41,6 +41,10 @@ You should have received a copy of the GNU General Public License along with FG 
       load (icao) {
         this.$parent.mapObject.createPane('tower-pane')
         this.$parent.mapObject.getPane('tower-pane').style.zIndex = 550
+        if (this.layerGroup !== undefined) {
+          this.layerGroup.removeFrom(this.$parent.mapObject)
+        }
+
         // Callback for add
         this.layerGroup = readTowerXML(this.$store.state.Settings.settings.airportsDirectory, icao, this.read)
         if (!this.layerGroup) {
