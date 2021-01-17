@@ -5,6 +5,7 @@
   import L from 'leaflet'
   import LEdit from 'leaflet-editable/src/Leaflet.Editable.js'
   import {readPavement} from '../loaders/pavement_loader'
+  import * as turf from '@turf/turf'
 
   export default {
     name: 'edit-layer',
@@ -74,6 +75,21 @@
         if (this.$parent._isMounted) {
           this.deferredMountedTo(this.$parent.mapObject)
         }
+      },
+      isOnRunway (latlng) {
+        var ret = false
+        this.pavement.eachLayer(l => {
+          if (l instanceof L.RunwayPolygon) {
+            console.debug(l)
+            if (turf.booleanContains(l.turfyRunway, this.latToTurf(latlng))) {
+              ret = true
+            }
+          }
+        })
+        return ret
+      },
+      latToTurf  (turfPoint) {
+        return turf.point([turfPoint.lng, turfPoint.lat])
       },
       setVisible (visible) {
         if (this.pavement !== undefined) {

@@ -12,14 +12,30 @@ You should have received a copy of the GNU General Public License along with FG 
 
 /* eslint-disable */
 
+const turf = require('@turf/turf')
+
 L.RunwayPolygon = L.Polygon.extend({
+    turfyRunway: [],
+
+    setTurfy: function (runwayPoints) {
+        var latLngs = runwayPoints.map(this.turfToLatLng);
+        latLngs.push(latLngs[0]);
+        this.turfyRunway = turf.polygon([latLngs]);        
+    },
+
+    turfToLatLng: function (turfPoint) {
+        return [turfPoint.lng, turfPoint.lat];
+    }    
 });
 
 var runwayPoly = function (runwayPoints) {
     var runwayPoly = new L.RunwayPolygon(runwayPoints);
     runwayPoly.setStyle({ color: 'grey', fillColor: 'grey', opacity: 0.5, fillOpacity: 0.5, interactive: false });
-
+    runwayPoly.setTurfy(runwayPoints);
+    console.debug(runwayPoints);
     return runwayPoly;
 }
+
+
 
 module.exports = runwayPoly;

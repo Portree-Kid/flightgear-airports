@@ -87,7 +87,7 @@ async function checkGroundnet(data) {
             var directionalGraph = {};
             var bidirectionalGraph = {};
 
-            console.log(parkings);
+            console.debug(parkings);
             parkings.forEach(element => {
                 directionalGraph[element] = {};
                 bidirectionalGraph[element] = {};
@@ -99,7 +99,7 @@ async function checkGroundnet(data) {
             var notOkNodes = [];
             //debugger;
 
-            console.log(edges);
+            console.debug(edges);
             if (edges === undefined) {
                 resolve([{ id: -1, message: check_msg.NO_EDGES }]);
             }
