@@ -254,7 +254,7 @@
             const centerLatLng = convert(this.$store.state.Editable.data.parking.coords);
             const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
             if (parkingSize>=0) {
-                var newNoseWheel = turf.destination(this.latToTurf(centerLatLng), this.validN2M[parkingSize]/1000, this.$store.state.Editable.data.parking.heading - 180, turfOptions);
+                var newNoseWheel = turf.destination(this.latToTurf(centerLatLng), this.validN2M[parkingSize]/1000, this.$store.state.Editable.data.parking.heading, turfOptions);
                 this.$store.commit('SET_EDIT_PARKING_NOSE_COORDS', this.turfToLatLng(newNoseWheel));
             }     
           }
@@ -266,7 +266,7 @@
             const noseWheelLatLng = convert(this.$store.state.Editable.data.parking.nosecoords);
             const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
             if (parkingSize>=0) {
-                var newCenter = turf.destination(this.latToTurf(noseWheelLatLng), this.validN2M[parkingSize]/1000, this.$store.state.Editable.data.parking.heading, turfOptions);
+                var newCenter = turf.destination(this.latToTurf(noseWheelLatLng), this.validN2M[parkingSize]/1000, this.$store.state.Editable.data.parking.heading - 180, turfOptions);
                 this.$store.commit('SET_EDIT_PARKING_COORDS', this.turfToLatLng(newCenter));
             }     
           }
