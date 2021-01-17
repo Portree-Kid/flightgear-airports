@@ -40,7 +40,7 @@ L.TowerMarker = L.Marker.extend({
                 var scale = pixelSize/this.iconSize;
                 var offset = 0;//-(this.iconSize/2);                
                 this.setIcon(L.divIcon({
-                    iconSize: 64,
+                    iconSize: 32,
                     className: 'threshold-marker-icon',
                     html: `<div style=\'transform: translateX(${offset}px) translateY(${offset}px) scale(${scale}); border: 1px red\'>${this.svg}</div>`,
                 }));    
@@ -65,7 +65,7 @@ L.TowerMarker = L.Marker.extend({
 
 L.TowerMarker.addInitHook(function(){
     this.svg = this.stripSVG('tower.svg');
-    this.iconSize = 64;
+    this.iconSize = 32;
     this.on('dragstart', function (event) { 
         console.debug("Drag Tower : ", event);
     });
