@@ -100,7 +100,7 @@
       </el-col>
       <el-col :span="17">
         <el-popover
-          placement="top-start"
+          placement="bottom-start"
           title="E-Mail"
           width="200"
           trigger="hover"
