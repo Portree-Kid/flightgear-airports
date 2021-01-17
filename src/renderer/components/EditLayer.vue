@@ -134,10 +134,17 @@ You should have received a copy of the GNU General Public License along with FG 
         }        
         this.$parent.$parent.setIcao(icao)
         this.icao = icao
-        var f = path.join(this.$store.state.Settings.settings.airportsDirectory, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');
-        if (!fs.existsSync(f)) {
-          f = path.join(this.$store.state.Settings.settings.airportsDirectory, icao[0], icao[1], icao[2], icao + '.groundnet.xml');        
+        var f = '';
+        if (!filename) {
+          var f = path.join(this.$store.state.Settings.settings.airportsDirectory, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml')
+          if (!fs.existsSync(f)) {
+            f = path.join(this.$store.state.Settings.settings.airportsDirectory, icao[0], icao[1], icao[2], icao + '.groundnet.xml')
+          }
+        } else {
+          f = path.join(this.$store.state.Settings.settings.airportsDirectory, icao[0], icao[1], icao[2], filename)
         }
+
+        console.info(`Reload from : ${f}`)
 
         this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao, f)
         if (this.groundnetLayerGroup === undefined) {
@@ -263,6 +270,9 @@ You should have received a copy of the GNU General Public License along with FG 
           default:
             console.log('Remove : ' + this.$store.state.Editable.type)
         }
+      },
+      isOnRunway(latlng) {
+        return this.$parent.$parent.$refs.pavementLayer.isOnRunway(latlng)
       },
       findRouteToPushback (index) {
         if (this.featureLookup===undefined || this.featureLookup[index]===undefined) {
@@ -795,20 +805,7 @@ You should have received a copy of the GNU General Public License along with FG 
     
         })
         if (!hasRunwayNode && isOnRunway && latlng !== undefined) {
-          this.$store.state.Editable.data.node.holdPointType
-          const icon = new L.DivIcon({
-              className: 'custom-div-icon',
-              html: "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-plane-departure'></i>",
-              iconSize: [30, 42],
-              iconAnchor: [15, 42]
-          });
-          const node = new L.RunwayNode(latlng, { icon: icon });
-          node.glueindex = nIndex;
-          node.addTo(this.groundnetLayerGroup);
-          this.featureLookup[nIndex].push(node);
-          node.featureLookup = this.featureLookup;
-          node.addListeners();
-          node.extensions();
+          this.addRunwayNode(latlng, nIndex)
         }
         if (!hasHoldPointNode && isHoldPoint) {
           var fa_icon = null;
@@ -832,6 +829,21 @@ You should have received a copy of the GNU General Public License along with FG 
           node.addListeners();
           node.extensions();
         }
+      },
+      addRunwayNode (latlng, nIndex) {
+        const icon = new L.DivIcon({
+            className: 'custom-div-icon',
+            html: "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-plane-departure'></i>",
+            iconSize: [30, 42],
+            iconAnchor: [15, 42]
+        });
+        const node = new L.RunwayNode(latlng, { icon: icon });
+        node.glueindex = nIndex;
+        node.addTo(this.groundnetLayerGroup);
+        this.featureLookup[nIndex].push(node);
+        node.featureLookup = this.featureLookup;
+        node.addListeners();
+        node.extensions();
       },
       // Finde nearest node
       closestLayerSnap (eventLatlng, snap) {
