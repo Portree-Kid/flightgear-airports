@@ -74,10 +74,12 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "icon": "build/icons/icon.icns",
+      "publish": []
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "icon": "build/icons/icon.ico",
+      "publish": []
     },
     "nsis": {
       "oneClick": false,
@@ -86,7 +88,8 @@
     },
     "linux": {
       "icon": "build/icons",
-      "target": "AppImage"
+      "target": "AppImage",
+      "publish": []
     }
   },
   "dependencies": {
