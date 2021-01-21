@@ -56,6 +56,7 @@ exports.readGroundnetXML = function (fDir, icao, f) {
     try {
         store.default.dispatch('setGroundnetLoaded', false);
         var layerGroup = L.layerGroup();
+        layerGroup.minId = 9999999999;
         layerGroup.maxId = 0;
 
         if (f == null || (!fs.existsSync(f) ))
@@ -113,6 +114,7 @@ exports.readGroundnetXML = function (fDir, icao, f) {
                 nodesLookup[n.attr('index')] = n;
                 featureLookup[n.attr('index')] = new Array();
                 featureLookup[n.attr('index')].push(circle);
+                layerGroup.minId = Math.min(layerGroup.minId, Number(n.attr('index')))
                 layerGroup.maxId = Math.max(layerGroup.maxId, Number(n.attr('index')))
                 features.push(circle);
             }).sort();
@@ -139,7 +141,9 @@ exports.readGroundnetXML = function (fDir, icao, f) {
                 }
                 //console.log(latlon.decimalLatitude);
 
+                layerGroup.minId = Math.min(layerGroup.minId, Number(n.attr('index')))
                 layerGroup.maxId = Math.max(layerGroup.maxId, Number(n.attr('index')))
+                console.debug(`Min Id : ${layerGroup.minId} Max Id : ${layerGroup.maxId} `);
 
                 nodesLookup[n.attr('index')] = n;
                 if (n.attr('isOnRunway') === '1') {

@@ -57,6 +57,12 @@ function walkPushbackRoute (index, walkedNodes, pushBackNodes) {
     });
 }
 
+/**
+ * 
+ * @param {*} fDir The directory 
+ * @param {*} icao 
+ * @param {*} featureList 
+ */
 
 exports.writeGroundnetXML = function (fDir, icao, featureList) {
     try {
@@ -91,6 +97,8 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         var parkings = featureList.map(mapParkings).filter(n => n);
         var runwayNodes = featureList.map(mapRunwayNodes).filter(n => n);
         var holdNodes = featureList.map(mapHoldPoint).filter(n => n);
+
+        
         holdNodes.forEach(n => {
             pushBackNodeLookup[n['@index']] = n;
         });
@@ -188,6 +196,51 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         var towerList = store.default.state.Frequencies.items.filter(f => f.type === 'TOWER').map(mapFrequency);
 
         var unicomList = store.default.state.Frequencies.items.filter(f => f.type === 'UNICOM').map(mapFrequency);
+
+
+        var gapStart = -1;
+        var gapEnd = -1;
+
+        do {
+            gapStart = -1;
+            gapEnd = -1;
+            var allIds = parkings.map(n => Number(n['@index']))
+            .concat(uniqueNodes.map(n => Number(n['@index'])))
+            .sort((a, b) => a - b);
+            
+            allIds.forEach((element, index, array)  => {
+                if (index > 0 && array[index-1] + 1 != element && gapStart == -1 ) {
+                    gapStart = array[index-1];
+                    gapEnd = element;
+                }
+            });
+            var gap = gapEnd - gapStart -1;
+    
+            parkings = parkings.map(n => { 
+                if (n['@index']>gapStart) {
+                    n['@index'] = String(n['@index'] - gap);                
+                }
+                if (n['@pushbackRoute']>gapStart) {
+                    n['@pushbackRoute'] = String(n['@pushbackRoute'] - gap);                
+                }
+                return n;
+             });
+            uniqueNodes = uniqueNodes.map(n => { 
+                if (n['@index']>gapStart) {
+                    n['@index'] = String(n['@index'] - gap);                
+                }
+                return n;
+             });
+            arcList = arcList.map(n => { 
+                if (n['@begin']>gapStart) {
+                    n['@begin'] = String(n['@begin'] - gap);                
+                }
+                if (n['@end']>gapStart) {
+                    n['@end'] = String(n['@end'] - gap);                
+                }
+                return n;
+             });    
+        } while( gapStart > 0 && gapEnd > 0);
 
         var xmlObj = { groundnet: { version: 1, fgaversion: version, name: name, 
             'frequencies': { APPROACH: approachList, DEPARTURE: departureList, AWOS: awosList, CLEARANCE: clearanceList, GROUND: groundList, TOWER: towerList, UNICOM: unicomList },
