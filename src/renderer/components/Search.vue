@@ -36,7 +36,7 @@
     },
     methods: {
       goto (icao) {
-        console.log(icao)
+        console.debug('Goto : ' + icao)
         let airports = this.$store.state.Airports.airports
           .filter(a => a.properties.icao.match(icao))
         if (airports.length > 0) {
@@ -126,7 +126,7 @@
     },
     computed: {
       searched: function () {
-        console.log(this.searchterm)
+        console.debug('Search : ' + this.searchterm)
         if (this.searchterm !== this.lastSearchTerm) {
           let searchRegex = new RegExp(this.searchterm, 'i')
           let result = this.$store.state.Airports.airports
@@ -136,10 +136,12 @@
             .filter(a => searchRegex.test(a.properties.icao) || searchRegex.test(a.properties.name))
             // .map(a => console.log(a.properties))
             .map(a => ({ icao: a.properties.icao, name: a.properties.name }))
+          let icaoResult = result.filter(a => a.icao === this.searchterm)
           if (result !== undefined &&
-              result.length === 0 &&
+              icaoResult.length === 0 &&
               this.searchterm !== undefined &&
-              this.searchterm.length >= 3) {
+              this.searchterm.length >= 3 &&
+              this.searchterm.length <= 4) {
             this.$store.dispatch('getAirport', this.searchterm)
           }
           this.lastResult = result
