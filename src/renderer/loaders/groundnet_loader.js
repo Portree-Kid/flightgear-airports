@@ -23,9 +23,9 @@ function addFrequencies (type, value) {
     value.split(' ').forEach(frequencyValue => {
         if( value.length > 0) {
             var frequency = {type: type, value: frequencyValue};
-            frequencies.push(frequency);    
+            frequencies.push(frequency);
         }
-    })      
+    })
 }
 
 exports.addFeature = function (feature) {
@@ -38,10 +38,10 @@ exports.listSaves = function (fDir, icao) {
     var ret = files
     .filter(f => f.includes(icao) )
     .filter(f => f.includes('groundnet') )
-    .map(f => { 
+    .map(f => {
         try {
             var fileDate = fs.lstatSync(path.join(directory, f));
-            return {file: f, mtime: `${fileDate.mtime}`, mtimeMs: `${fileDate.mtimeMs}`};                
+            return {file: f, mtime: `${fileDate.mtime}`, mtimeMs: `${fileDate.mtimeMs}`};
         } catch (error) {
             console.error(error);
         }
@@ -99,7 +99,7 @@ exports.readGroundnetXML = function (fDir, icao, f) {
             addFrequencies('UNICOM', unicom);
 
             store.default.dispatch('setFrequencies', frequencies);
-        
+
             var parkingNodes = xml.find('groundnet/parkingList/Parking');
             console.debug("Parking Nodes length" + parkingNodes.length);
 
@@ -118,9 +118,9 @@ exports.readGroundnetXML = function (fDir, icao, f) {
                 layerGroup.maxId = Math.max(layerGroup.maxId, Number(n.attr('index')))
                 features.push(circle);
             }).sort();
-            
-            store.default.dispatch('setParkings', parkingNodes.map( 
-                p => ({index: Number(p.attrs.index), name: String(p.attrs.name), number: String(p.attrs.number), type: String(p.attrs.type)}
+
+            store.default.dispatch('setParkings', parkingNodes.map(
+                p => ({index: Number(p.attrs.index), radius: Number(p.attrs.radius), name: String(p.attrs.name), number: String(p.attrs.number), type: String(p.attrs.type)}
             )).sort((p1, p2) => {
                 if (p1.name === p2.name) {
                     return p1.number?p1.number.localeCompare(p2.number):-1;
@@ -134,7 +134,7 @@ exports.readGroundnetXML = function (fDir, icao, f) {
                 //attrs.lat
                 //console.log(n.attr('lat') + " " + n.attr('lon'));
                 try {
-                    var latlon = convert(n.attr('lat') + " " + n.attr('lon'));                    
+                    var latlon = convert(n.attr('lat') + " " + n.attr('lon'));
                 } catch (error) {
                     console.warn(n.attr('lat') + " " + n.attr('lon'));
                     convert(n.attr('lat') + " " + n.attr('lon'));
@@ -186,7 +186,7 @@ exports.readGroundnetXML = function (fDir, icao, f) {
                             if (element instanceof L.Polyline && element.end === n.attr('begin') && element.begin === n.attr('end')) {
                                 element.bidirectional = true;
                                 element.options.attributes.direction = 'bi-directional'
-                                bidirectional = true;                                
+                                bidirectional = true;
                                 element.updateStyle();
                             }
                         });
@@ -194,11 +194,11 @@ exports.readGroundnetXML = function (fDir, icao, f) {
                     if (!bidirectional) {
                         var beginlatlon = convert(beginNode.attr('lat') + " " + beginNode.attr('lon'));
                         var endlatlon = convert(endNode.attr('lat') + " " + endNode.attr('lon'));
-                        
+
                         var pane = 'route-pane';
                         if(n.attr('isPushBackRoute') === '1') {
                            pane = 'pushback-pane';
-                        }                        
+                        }
 
                         var polyline = new L.Polyline([[beginlatlon.decimalLatitude, beginlatlon.decimalLongitude], [endlatlon.decimalLatitude, endlatlon.decimalLongitude]], { pane: pane, attributes: {} }).addTo(layerGroup);
                         extendTaxiSegment(polyline);

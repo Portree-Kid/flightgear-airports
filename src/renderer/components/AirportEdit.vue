@@ -16,12 +16,13 @@ You should have received a copy of the GNU General Public License along with FG 
       title="Add Airline"
       :visible.sync="dialogVisible"
       width="40%"
-      :before-close="handleClose">
+      :before-close="handleClose"
+    >
       <span>Add an selectable airline to {{ icao }} {{ name }}</span>
-          <el-input
-            placeholder="Please input airline(s)"
-            v-model="airlineCode"
-          ></el-input>
+      <el-input
+        placeholder="Please input airline(s)"
+        v-model="airlineCode"
+      ></el-input>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">Cancel</el-button>
         <el-button type="primary" @click="addAirline">Confirm</el-button>
@@ -31,116 +32,143 @@ You should have received a copy of the GNU General Public License along with FG 
       title="Import File"
       :visible.sync="showImportFile"
       width="20%"
-      :before-close="handleClose">
-        <span>Beware wip will be overwritten</span>
-        <el-row>
-          <el-col :span="20">
-            <el-input
-            placeholder="Please input file"
-            v-model="fileImportName">
-            </el-input>
-          </el-col>
-          <el-col :span="4">
-            <file-select @input="fileImportFileName"></file-select>
-          </el-col>
-        </el-row>
+      :before-close="handleClose"
+    >
+      <span>Beware wip will be overwritten</span>
+      <el-row>
+        <el-col :span="20">
+          <el-input placeholder="Please input file" v-model="fileImportName">
+          </el-input>
+        </el-col>
+        <el-col :span="4">
+          <file-select @input="fileImportFileName"></file-select>
+        </el-col>
+      </el-row>
       <span slot="footer" class="dialog-footer">
         <el-button @click="showImportFile = false">Cancel</el-button>
         <el-button type="primary" @click="importFile">Confirm</el-button>
       </span>
     </el-dialog>
     <h1 class="leaflet-sidebar-header">{{ icao }} {{ name }}</h1>
-    <div width="100%" >
-        <el-row>
-          <el-popover
-            placement="top-start"
-            title="Description"
-            width="50"
-            trigger="hover"
-            content="Edit"
-          >
-              <el-button @click="edit" v-if="!editing"  slot="reference"><i class="fas fa-edit"></i></el-button>
-          </el-popover>
-          <el-popover
-            placement="top-start"
-            title="Description"
-            width="200"
-            trigger="hover"
-            content="Import groundnet"
-          >
-              <el-button @click="showImportFile = true" v-if="!editing" slot="reference"><i class="fas fa-file-import"></i></el-button>
-          </el-popover>
-          <el-popover
-            placement="top-start"
-            title="Description"
-            width="220"
-            trigger="hover"
-            content="Export groundnet to export directory"
-          >
-              <el-button @click="test" v-if="!editing"  slot="reference"><i class="fas fa-file-export"></i></el-button>
-          </el-popover>
-          <el-popover
-            placement="top-start"
-            title="Description"
-            width="200"
-            trigger="hover"
-            content="Upload Airport"
-          >
-              <el-button @click="upload" v-if="!editing"  slot="reference"><i class="fas fa-upload"></i></el-button>
-          </el-popover>
-        </el-row>
-        <el-row>
-          <el-col :span="7"><span class="label"> Airlines :</span></el-col>
-          <el-col :span="15">
-            <el-tag v-for="item in airlines" :key="item.value">{{item.value}}</el-tag>
-          </el-col>
-          <el-col :span="2">
-            <el-button @click="dialogVisible = true" v-if="editing" ><i class="fas fa-plus"></i></el-button>
-          </el-col>
-        </el-row>
+    <div width="100%">
+      <el-row>
+        <el-popover
+          placement="top-start"
+          title="Description"
+          width="50"
+          trigger="hover"
+          content="Edit"
+        >
+          <el-button @click="edit" v-if="!editing" slot="reference"
+            ><i class="fas fa-edit"></i
+          ></el-button>
+        </el-popover>
+        <el-popover
+          placement="top-start"
+          title="Description"
+          width="200"
+          trigger="hover"
+          content="Import groundnet"
+        >
+          <el-button
+            @click="showImportFile = true"
+            v-if="!editing"
+            slot="reference"
+            ><i class="fas fa-file-import"></i
+          ></el-button>
+        </el-popover>
+        <el-popover
+          placement="top-start"
+          title="Description"
+          width="220"
+          trigger="hover"
+          content="Export groundnet to export directory"
+        >
+          <el-button @click="test" v-if="!editing" slot="reference"
+            ><i class="fas fa-file-export"></i
+          ></el-button>
+        </el-popover>
+        <el-popover
+          placement="top-start"
+          title="Description"
+          width="200"
+          trigger="hover"
+          content="Upload Airport"
+        >
+          <el-button @click="upload" v-if="!editing" slot="reference"
+            ><i class="fas fa-upload"></i
+          ></el-button>
+        </el-popover>
+      </el-row>
+      <el-row>
+        <el-col :span="7"><span class="label"> Airlines :</span></el-col>
+        <el-col :span="15">
+          <el-tag v-for="item in airlines" :key="item.value">{{
+            item.value
+          }}</el-tag>
+        </el-col>
+        <el-col :span="2">
+          <el-button @click="dialogVisible = true" v-if="editing"
+            ><i class="fas fa-plus"></i
+          ></el-button>
+        </el-col>
+      </el-row>
     </div>
-    <el-tabs v-model="activeTab" >
-    <el-tab-pane label="Frequencies" name="first"> 
-      <div>
-        <el-row v-for="f in frequencyList" :key="f.index">
-          <Frequency :frequency="f"></Frequency>
-        </el-row>
-        <el-button @click="addFrequency" v-if="editing" >Add</el-button>
+    <el-tabs v-model="activeTab">
+      <el-tab-pane label="Frequencies" name="first">
+        <div>
+          <el-row v-for="f in frequencyList" :key="f.index">
+            <Frequency :frequency="f"></Frequency>
+          </el-row>
+          <el-button @click="addFrequency" v-if="editing">Add</el-button>
         </div>
-    </el-tab-pane>
-    <el-tab-pane label="Parkings" name="second">
-      <ParkingList></ParkingList>
-    </el-tab-pane>
-    <el-tab-pane label="Statistics" name="third">
-        <el-row><el-col :span="8"><span class="label">Traffic :</span></el-col></el-row>
+      </el-tab-pane>
+      <el-tab-pane label="Parkings" name="second">
+        <ParkingList></ParkingList>
+      </el-tab-pane>
+      <el-tab-pane label="Statistics" name="third">
+        <el-row
+          ><el-col :span="8"
+            ><span class="label">Traffic :</span></el-col
+          ></el-row
+        >
         <el-row>
           <el-col :span="8">Flights :</el-col>
           <el-col :span="4">{{ flights }}</el-col>
           <el-col :span="8"></el-col>
           <el-col :span="4"></el-col>
         </el-row>
-        <el-row><el-col :span="16"><span class="label">GIT/Terrasync :</span></el-col></el-row>
+        <el-row
+          ><el-col :span="16"
+            ><span class="label">GIT/Terrasync :</span></el-col
+          ></el-row
+        >
         <el-row>
           <el-col :span="8">Parking Positions :</el-col>
           <el-col :span="4">{{ parking }}</el-col>
           <el-col :span="8">Groundnet Nodes :</el-col>
-          <el-col :span="4">{{groundnet}}</el-col>
+          <el-col :span="4">{{ groundnet }}</el-col>
         </el-row>
-        <el-row><el-col :span="8"><span class="label">Work :</span></el-col></el-row>
+        <el-row
+          ><el-col :span="8"><span class="label">Work :</span></el-col></el-row
+        >
         <el-row v-if="wip">
           <el-col :span="8">Work Parking Positions :</el-col>
           <el-col :span="4">{{ wipparking }}</el-col>
           <el-col :span="8">Work Groundnet Nodes :</el-col>
-          <el-col :span="4">{{wipgroundnet}}</el-col>
+          <el-col :span="4">{{ wipgroundnet }}</el-col>
         </el-row>
         <el-row v-if="wip">
           <el-col :span="4">Saved :</el-col>
-          <el-col :span="8" class="text">{{date}}</el-col>
+          <el-col :span="8" class="text">{{ date }}</el-col>
           <el-col :span="4">Uploaded :</el-col>
-          <el-col :span="8" class="text">{{upload_date}}</el-col>
+          <el-col :span="8" class="text">{{ upload_date }}</el-col>
         </el-row>
-    </el-tab-pane>
-  </el-tabs>
+      </el-tab-pane>
+      <el-tab-pane label="Traffic" name="fourth">
+        <TrafficList></TrafficList>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 
@@ -149,8 +177,9 @@ You should have received a copy of the GNU General Public License along with FG 
   import FileSelect from './FileSelect'
   import Frequency from './Frequency'
   import ParkingList from './ParkingList'
+  import TrafficList from './TrafficList'
   import Upload from './Upload'
-  
+
   const fs = require('fs')
   const path = require('path')
 
@@ -159,7 +188,7 @@ export default {
       return {showImportFile: false, activeTab: 'first', editing: false, uploadVisible: false, dialogVisible: false, airlineCode: '', fileImport: null}
     },
     components: {
-      EditButton, FileSelect, Frequency, ParkingList, Upload
+      EditButton, FileSelect, Frequency, ParkingList, TrafficList, Upload
     },
     methods: {
       fileImportFileName (f) {
@@ -291,10 +320,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-   .el-row {
-     padding: 0em;
-     margin-bottom: 5px;
-   }
+.el-row {
+  padding: 0em;
+  margin-bottom: 5px;
+}
 .label {
   display: flex;
   justify-content: left;

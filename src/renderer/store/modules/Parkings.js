@@ -43,7 +43,7 @@ const mutations = {
 
 const actions = {
   async addParking (context, p) {
-    context.commit('ADD_FREADD_PARKINGQUENCY', p)
+    context.commit('ADD_PARKING', p)
   },
   async updatedParking (context, p) {
     context.commit('UPDATE_PARKING', p)
