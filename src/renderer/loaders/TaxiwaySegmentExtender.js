@@ -15,6 +15,7 @@ const extendTaxiSegment = function (taxiwaySegment) {
             this._latlngs[0].__vertex.setLatLng(latlng);
             this.selectVertex(Number(this._latlngs[0].glueindex));
         }
+
     };
     taxiwaySegment.__proto__.updateEndVertex = function (latlng) {
         if (this._latlngs[1].__vertex) {
@@ -194,7 +195,7 @@ const extendTaxiSegment = function (taxiwaySegment) {
         });
         this.on('editable:middlemarker:mousedown', event => {
             console.debug('editable:middlemarker:mousedown');
-        }),
+        });
         this.on('editable:vertex:new', event => {
             console.debug('editable:vertex:new ' + event.vertex.getIndex() + '\t' + event.vertex.getLastIndex() + '\t');
             // Find nearest node
@@ -266,8 +267,8 @@ const extendTaxiSegment = function (taxiwaySegment) {
                     event.latlng.attributes = { index: event.latlng.glueindex, isOnRunway: isOnRunwayNum };
                     // Push Vertex to lookup
                     this.editLayer.featureLookup[event.latlng.glueindex].push(event.latlng.__vertex);
-                    if (isOnRunwayNum==1) {
-                        this.editLayer.addRunwayNode(event.latlng, event.latlng['glueindex'])                        
+                    if (isOnRunwayNum == 1) {
+                        this.editLayer.addRunwayNode(event.latlng, event.latlng['glueindex'])
                     }
                     if (taxiwaySegment.options.attributes.begin === undefined) {
                         taxiwaySegment.options.attributes.begin = event.latlng['glueindex']
@@ -285,8 +286,8 @@ const extendTaxiSegment = function (taxiwaySegment) {
                     this.editLayer.featureLookup[event.vertex.latlng.glueindex] = [];
                     this.editLayer.featureLookup[event.vertex.latlng.glueindex].push(event.vertex);
                     this.editLayer.featureLookup[event.vertex.latlng.glueindex].push(taxiwaySegment);
-                    if (isOnRunwayNum==1) {
-                        this.editLayer.addRunwayNode(event.latlng, event.vertex.latlng['glueindex'])                        
+                    if (isOnRunwayNum == 1) {
+                        this.editLayer.addRunwayNode(event.latlng, event.vertex.latlng['glueindex'])
                     }
                     // taxiwaySegment.editor.refresh();
                     //taxiwaySegment.editor.reset();
@@ -464,7 +465,7 @@ const extendTaxiSegment = function (taxiwaySegment) {
     }
 
     /**
-     * 
+     *
      */
 
     taxiwaySegment.__proto__.follow = function (dragIndex, event) {
