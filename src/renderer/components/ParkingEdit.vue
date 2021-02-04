@@ -16,13 +16,21 @@
         <span class="label">Name :</span>
       </el-col>
       <el-col :span="8">
-        <el-input placeholder="Name" v-model="name" :disabled="!editing"></el-input>
+        <el-input
+          placeholder="Name"
+          v-model="name"
+          :disabled="!editing"
+        ></el-input>
       </el-col>
       <el-col :span="5">
         <span class="label">Number :</span>
       </el-col>
       <el-col :span="7">
-        <el-input placeholder="Number" v-model="number" :disabled="!editing"></el-input>
+        <el-input
+          placeholder="Number"
+          v-model="number"
+          :disabled="!editing"
+        ></el-input>
       </el-col>
     </el-row>
     <el-row>
@@ -40,7 +48,11 @@
         -->
 
         <el-radio-group v-model="wingspan" :disabled="!editing">
-          <el-tooltip content="PIPER PA-31/CESSNA 404 Titan" placement="top" effect="light">
+          <el-tooltip
+            content="PIPER PA-31/CESSNA 404 Titan"
+            placement="top"
+            effect="light"
+          >
             <el-radio :label="15">A (7.5)</el-radio>
           </el-tooltip>
           <el-tooltip
@@ -48,14 +60,14 @@
             placement="top"
             effect="light"
           >
-          <el-radio :label="20">- (10)</el-radio>
+            <el-radio :label="20">- (10)</el-radio>
           </el-tooltip>
           <el-tooltip
             content="BOMBARDIER Regional Jet CRJ-200/DE HAVILLAND CANADA DHC-6"
             placement="top"
             effect="light"
           >
-          <el-radio :label="28">B (14)</el-radio>
+            <el-radio :label="28">B (14)</el-radio>
           </el-tooltip>
           <el-tooltip
             content="BOEING 737-700/AIRBUS A-320/EMBRAER ERJ 190-100"
@@ -64,13 +76,25 @@
           >
             <el-radio :label="36">C (18)</el-radio>
           </el-tooltip>
-          <el-tooltip content="B767 Series/AIRBUS A-310" placement="top" effect="light">
+          <el-tooltip
+            content="B767 Series/AIRBUS A-310"
+            placement="top"
+            effect="light"
+          >
             <el-radio :label="52">D (26)</el-radio>
           </el-tooltip>
-          <el-tooltip content="B777 Series/B787 Series/A330 Family" placement="top" effect="light">
+          <el-tooltip
+            content="B777 Series/B787 Series/A330 Family"
+            placement="top"
+            effect="light"
+          >
             <el-radio :label="66">E (33)</el-radio>
           </el-tooltip>
-          <el-tooltip content="BOEING 747-8/AIRBUS A-380-800" placement="top" effect="light">
+          <el-tooltip
+            content="BOEING 747-8/AIRBUS A-380-800"
+            placement="top"
+            effect="light"
+          >
             <el-radio :label="80">F (40)</el-radio>
           </el-tooltip>
         </el-radio-group>
@@ -80,9 +104,9 @@
       <el-col :span="7">
         <span class="label">Aircraft :</span>
       </el-col>
-      <el-col :span="17">{{type}}</el-col>
+      <el-col :span="17">{{ type }}</el-col>
     </el-row>
-    <el-row v-if="editing"> 
+    <el-row v-if="editing">
       <el-col :span="7">
         <span class="label">Calculate :</span>
       </el-col>
@@ -91,7 +115,6 @@
           <el-radio-button label="Nose Wheel"></el-radio-button>
           <el-radio-button label="Center"></el-radio-button>
         </el-radio-group>
-
       </el-col>
     </el-row>
     <el-row>
@@ -107,7 +130,14 @@
           content="D.DDD, DMS, DM supported"
           :disabled="!editing || calculate === 'Center'"
         >
-          <el-input placeholder="Please input" v-model="coordinates" slot="reference" :disabled="!editing || calculate ==='Center'"></el-input>
+          <el-input
+            placeholder="Please input"
+            v-model="coordinates"
+            slot="reference"
+            :disabled="!editing || calculate === 'Center'"
+            @focus="coordFocussed = true"
+            @blur="coordFocussed = false"
+          ></el-input>
         </el-popover>
       </el-col>
     </el-row>
@@ -124,7 +154,14 @@
           content="D.DDD, DMS, DM supported"
           :disabled="!editing || calculate === 'Nose Wheel'"
         >
-          <el-input placeholder="Please input" v-model="noseCoordinates" slot="reference" :disabled="!editing || calculate === 'Nose Wheel'"></el-input>
+          <el-input
+            placeholder="Please input"
+            v-model="noseCoordinates"
+            slot="reference"
+            :disabled="!editing || calculate === 'Nose Wheel'"
+            @focus="noseCoordFocussed = true"
+            @blur="noseCoordFocussed = false"
+          ></el-input>
         </el-popover>
       </el-col>
     </el-row>
@@ -139,13 +176,15 @@
           :max="720"
           :step="0.1"
           :precision="1"
-          :disabled="!editing || calculate ==='Heading'"
+          :disabled="!editing || calculate === 'Heading'"
+            @focus="headingFocussed = true"
+            @blur="headingFocussed = false"
         ></el-input-number>
       </el-col>
       <el-col :span="4">
-          <el-button @click="rotate" class="button">
-            <i class="fas fa-ruler-combined"></i>
-          </el-button>
+        <el-button @click="rotate" class="button">
+          <i class="fas fa-ruler-combined"></i>
+        </el-button>
       </el-col>
     </el-row>
     <el-row>
@@ -153,7 +192,11 @@
         <span class="label">Parking Type :</span>
       </el-col>
       <el-col :span="17">
-        <el-select v-model="parking_type" placeholder="Select" :disabled="!editing">
+        <el-select
+          v-model="parking_type"
+          placeholder="Select"
+          :disabled="!editing"
+        >
           <el-option
             v-for="type in options"
             :key="type.value"
@@ -169,7 +212,12 @@
         <span class="label">Airline :</span>
       </el-col>
       <el-col :span="17">
-        <el-select v-model="airlineCodes" multiple placeholder="Select" :disabled="!editing">
+        <el-select
+          v-model="airlineCodes"
+          multiple
+          placeholder="Select"
+          :disabled="!editing"
+        >
           <el-option
             v-for="item in airlines"
             :key="item.value"
@@ -183,7 +231,7 @@
       <el-col :span="7">
         <span class="label">Pushback Route End :</span>
       </el-col>
-      <el-col :span="17">{{pushbackEnd}}</el-col>
+      <el-col :span="17">{{ pushbackEnd }}</el-col>
     </el-row>
   </div>
 </template>
@@ -191,7 +239,7 @@
 <script lang="js">
 /* eslint-disable */
   const convert = require('geo-coordinates-parser');
-  
+
   const turf = require('@turf/turf');
 
   const turfOptions = { units: 'kilometers' };
@@ -206,7 +254,9 @@
         while (heading<0) {
           heading += 360
         }
+        this.rotateFocussed = true;
         this.headingChange(heading);
+        this.rotateFocussed = false;
       },
       headingChange( newValue ) {
           while (newValue>=360) {
@@ -215,18 +265,21 @@
           while (newValue<0) {
             newValue += 360
           }
-          if (Number(this.$store.state.Editable.data.parking.heading) !== newValue) {
-            this.$store.commit('SET_EDIT_PARKING_HEADING', newValue)
-          }
-          if(this.calculate === 'Center') {            
-          // we change center
-            const noseWheelLatLng = convert(this.noseWheel);
-            const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
-            if (parkingSize>=0) {
-                var reverseHeading = this.normalizeAngle(this.$store.state.Editable.data.parking.heading+180);
-                var newCenter = turf.destination(this.latToTurf(noseWheelLatLng), this.validN2M[parkingSize]/1000, reverseHeading, turfOptions);
-                this.$store.commit('SET_EDIT_PARKING_COORDS', this.turfToLatLng(newCenter));
-            }     
+          if ( Math.abs( ( this.$store.state.Editable.data.parking.heading - newValue ) >= 0 && Math.abs( this.$store.state.Editable.data.parking.heading - newValue ) <= 0.1 )
+          || this.headingFocussed || this.rotateFocussed) {
+            if (Number(this.$store.state.Editable.data.parking.heading) !== newValue) {
+              this.$store.commit('SET_EDIT_PARKING_HEADING', newValue)
+            }
+            if(this.calculate === 'Center') {
+            // we change center
+              const noseWheelLatLng = convert(this.$store.state.Editable.data.parking.nosecoords);
+              const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);
+              if (parkingSize>=0) {
+                  var reverseHeading = this.normalizeAngle(this.$store.state.Editable.data.parking.heading+180);
+                  var newCenter = turf.destination(this.latToTurf(noseWheelLatLng), this.validN2M[parkingSize]/1000, reverseHeading, turfOptions);
+                  this.$store.commit('SET_EDIT_PARKING_COORDS', this.turfToLatLng(newCenter));
+              }
+            }
           }
       },
       show (idx) {
@@ -244,35 +297,41 @@
       latToTurf (turfPoint) {
         return [turfPoint.decimalLongitude, turfPoint.decimalLatitude];
       },
-      turfToLatLng: function (turfPoint) {
+      turfToLatLng (turfPoint) {
           return '' + turfPoint.geometry.coordinates[1].toFixed(6) + ',' + turfPoint.geometry.coordinates[0].toFixed(6);
       },
+      beautify (coordString) {
+        var a = coordString.split(' ');
+        if (a.length === 2) {
+          return '' + Number(a[0]).toFixed(6) + ' ' + Number(a[1]).toFixed(6);
+        } else {
+          return coordString;
+        }
+      },
       calcWheel () {
-          var centerCoords = convert(this.$store.state.Editable.data.parking.coords);
-          if(this.calculate === 'Nose Wheel') {            
-          // we change center
-            const centerLatLng = convert(this.$store.state.Editable.data.parking.coords);
-            const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
+          if(this.calculate === 'Nose Wheel') {
+          // we change nosewheel
+            const centerLatLng = convert(this.beautify(this.$store.state.Editable.data.parking.coords));
+            const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);
             if (parkingSize>=0) {
                 var newNoseWheel = turf.destination(this.latToTurf(centerLatLng), this.validN2M[parkingSize]/1000, this.$store.state.Editable.data.parking.heading, turfOptions);
                 this.$store.commit('SET_EDIT_PARKING_NOSE_COORDS', this.turfToLatLng(newNoseWheel));
-            }     
+            }
           }
       },
       calcCenter () {
-          var centerCoords = convert(this.$store.state.Editable.data.parking.coords);
-          if (this.calculate === 'Center') {            
+          if (this.calculate === 'Center') {
           // we change center
-            const noseWheelLatLng = convert(this.$store.state.Editable.data.parking.nosecoords);
-            const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);  
+            const noseWheelLatLng = convert(this.beautify(this.$store.state.Editable.data.parking.nosecoords));
+            const parkingSize = this.validRadii.indexOf(this.$store.state.Editable.data.parking.radius);
             if (parkingSize>=0) {
                 var newCenter = turf.destination(this.latToTurf(noseWheelLatLng), this.validN2M[parkingSize]/1000, this.$store.state.Editable.data.parking.heading - 180, turfOptions);
                 this.$store.commit('SET_EDIT_PARKING_COORDS', this.turfToLatLng(newCenter));
-            }     
+            }
           }
       }
     },
-    data () { return {calculateState: 'Nose Wheel', noseWheel: '', validRadii: [7.5, 10, 14, 18, 26, 33, 40], validN2M: [5, 5, 6, 10, 15, 24, 24] } },
+    data () { return {rotateFocussed: false, headingFocussed: false, coordFocussed: false, noseCoordFocussed: false, calculateState: 'Nose Wheel', noseWheel: '', validRadii: [7.5, 10, 14, 18, 26, 33, 40], validN2M: [5, 5, 6, 10, 15, 24, 24] } },
     computed: {
       editing: {
         get: function () {
@@ -298,16 +357,16 @@
       },
       airlineCodes: {
       // getter
-        get: function () {          
+        get: function () {
           var codes = this.$store.state.Editable.data.parking.airlineCodes
           if (Array.isArray(codes)) {
             return codes
           } else if (codes !== undefined && typeof codes === 'string') {
-            return codes.split(',')            
+            return codes.split(',')
           } else {
             return []
           }
-          return 
+          return
         },
         // setter
         set: function (newValue) {
@@ -341,9 +400,9 @@
         set: function (newValue) {
           this.calculateState = newValue;
           if (newValue==='Center') {
-            this.calcWheel();
-          } else {
             this.calcCenter();
+          } else {
+            this.calcWheel();
           }
         }
       },
@@ -357,12 +416,14 @@
         // setter
         set: function (newValue) {
           if (newValue==='unknown') {
-            
-          } 
+
+          }
           if( newValue.match(/,/g) !== null && newValue.match(/,/g).length === 3) {
             newValue = newValue.replace(', ', ' ').replace(/,/g, '.').replace(' ', ', ');
-          }                  
-          this.$store.commit('SET_EDIT_PARKING_COORDS', newValue)
+          }
+          if (this.coordFocussed) {
+            this.$store.commit('SET_EDIT_PARKING_COORDS', newValue)
+          }
           this.calcWheel();
         }
       },
@@ -370,25 +431,30 @@
       // getter
         get: function () {
           if(this.$store.state.Editable.index!==undefined) {
+            if(!this.$store.state.Editable.data.parking.nosecoords && this.calculate === 'Nose Wheel') {
+              this.calcWheel();
+            }
             return this.$store.state.Editable.data.parking.nosecoords;
           }
         },
         // setter
         set: function (newValue) {
           if (newValue==='unknown') {
-            
-          } 
+
+          }
           if( newValue.match(/,/g) !== null && newValue.match(/,/g).length === 3) {
             newValue = newValue.replace(', ', ' ').replace(/,/g, '.').replace(' ', ', ');
           }
-          this.$store.commit('SET_EDIT_PARKING_NOSE_COORDS', newValue);
+          if (this.noseCoordFocussed) {
+            this.$store.commit('SET_EDIT_PARKING_NOSE_COORDS', newValue);
+          }
           this.calcCenter();
         }
       },
       heading: {
       // getter
         get: function () {
-          return Number(this.$store.state.Editable.data.parking.heading)
+          return this.$store.state.Editable.data.parking.heading
         },
         // setter
         set: function (newValue) {

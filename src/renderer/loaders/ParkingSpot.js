@@ -25,10 +25,10 @@ L.ParkingSpot = L.Circle.extend({
         if (this.direction === undefined ) {
             var center = this._latlng;
             var options = { units: 'kilometers' };
-            
+
             var start = turf.destination([center.lng, center.lat], this.options.attributes.radius / 1000, this.normalizeAngle(this.options.attributes.heading+180), options);
             var end = turf.destination([center.lng, center.lat], this.options.attributes.radius / 1000, this.normalizeAngle(this.options.attributes.heading), options);
-            // Resize, since leaflet is wrong      
+            // Resize, since leaflet is wrong
             var rad2 = center.distanceTo(this.turfToLatLng(end), options);
             console.debug('Dist ', center, [center.lng, center.lat], end.geometry.coordinates, this.options.attributes.radius, rad2);
             this.setRadius(rad2);
@@ -53,7 +53,7 @@ L.ParkingSpot = L.Circle.extend({
           try {
             console.debug("Update Middle ", this.editor.editLayer._layers[0]);
             var o = this.editor.editLayer._layers;
-    
+
             console.debug(o);
             for (var key in o) {
                 if (o.hasOwnProperty(key)) {
@@ -63,7 +63,7 @@ L.ParkingSpot = L.Circle.extend({
                     console.debug(o[key] == this.direction);
                     if (this.editor._resizeLatLng.__vertex!=o[key] &&
                          o[key] != this.direction &&
-                         o[key] != this.frontWheel && 
+                         o[key] != this.frontWheel &&
                          o[key] != this.box) {
                             o[key].setLatLng(this.getLatLng());
                     }
@@ -72,9 +72,9 @@ L.ParkingSpot = L.Circle.extend({
             //Object.values(o);
             /*
             .forEach(vertex => {
-              console.debug(this.editor._resizeLatLng.__vertex==vertex);          
+              console.debug(this.editor._resizeLatLng.__vertex==vertex);
             });
-            */                  
+            */
           } catch (error) {
             console.error(error);
           }
@@ -85,15 +85,15 @@ L.ParkingSpot = L.Circle.extend({
     },
     updateHeading(heading) {
         this.options.attributes.heading = heading;
-        this.updateVertexFromDirection();     
-        this.updateWheelPos();       
+        this.updateVertexFromDirection();
+        this.updateWheelPos();
         this.updateBox();
     },
     updateRadius(radius) {
         this._mRadius = radius;
-        this.updateDirectionFromVertex();     
-        this.updateVertexFromDirection();     
-        this.updateWheelPos();       
+        this.updateDirectionFromVertex();
+        this.updateVertexFromDirection();
+        this.updateWheelPos();
         this.updateBox();
     },
     // Update the direction vertex from the direction
@@ -131,14 +131,15 @@ L.ParkingSpot = L.Circle.extend({
     updateWheelPos() {
         var start = this._latlng;
         var options = { units: 'kilometers' };
-        const parkingSize = validRadii.indexOf(this.options.attributes.radius);       
+        const parkingSize = validRadii.indexOf(this.options.attributes.radius);
         if (parkingSize>=0) {
             var frontWheelEnd = turf.destination([start.lng, start.lat], validN2M[parkingSize] / 1000, this.options.attributes.heading, options);
 
             if(this.frontWheel!==undefined) {
                 this.frontWheel.setLatLng(this.turfToLatLng(frontWheelEnd));
+                return this.turfToLatLng(frontWheelEnd);
             }
-        }     
+        }
     },
     updateBox() {
         var start = [this._latlng.lng, this._latlng.lat];
@@ -176,7 +177,7 @@ L.ParkingSpot = L.Circle.extend({
                 var latlngs = [leftBack, rightBack, rightMiddle, rightIntermediate, rightFront, leftFront, leftIntermediate, leftMiddle].map(l => this.turfToLatLng(l));
                 this.box = L.polygon(latlngs);
                 //this.box.addTo(this.editor.editLayer);
-                this.box._parkingSpot = this;    
+                this.box._parkingSpot = this;
                 this.box.on('click', function (event) {
                     console.debug("Click Parking Box : " + event.target);
                     if (Number(store.default.state.Editable.index) >= 0 &&
@@ -188,7 +189,7 @@ L.ParkingSpot = L.Circle.extend({
                             }
                         });
                     }
-                    event.target._parkingSpot.select(); 
+                    event.target._parkingSpot.select();
                 });
                 if(this.editor && this.editor.editLayer) {
                     this.box.addTo(this.editor.editLayer);
@@ -199,7 +200,7 @@ L.ParkingSpot = L.Circle.extend({
                 console.debug(latlngs);
                 this.box.setLatLngs(latlngs);
             }
-        }     
+        }
     },
     normalizeAngle( angle ) {
       if(angle >= 180) {
@@ -217,21 +218,25 @@ L.ParkingSpot = L.Circle.extend({
         style['color'] = 'red';
         this.setStyle(style);
         if(this.direction) {
-            this.direction.setStyle(style);  
+            this.direction.setStyle(style);
             this.frontWheel.setStyle(style);
         }
-        this.updateWheelPos();
+        var wheelPos = this.updateWheelPos();
+        if(wheelPos) {
+            store.default.dispatch('setParkingNoseCoords', wheelPos.lat.toFixed(6) + ' ' + wheelPos.lng.toFixed(6));
+        }
+
         this.updateBox();
-        if(this.box) {            
+        if(this.box) {
             this.box.setStyle(style);
         }
-    },    
+    },
     deselect() {
         var style = {};
         style['color'] = '#3388ff';
         this.setStyle(style);
         if(this.direction) {
-            this.direction.setStyle(style);  
+            this.direction.setStyle(style);
             this.frontWheel.setStyle(style);
         }
         this.updateWheelPos();
@@ -267,11 +272,11 @@ L.ParkingSpot = L.Circle.extend({
                 event.target.updateVertexFromDirection();
                 event.target.updateWheelPos();
                 event.target.updateBox();
-                this.follow(event.target.id, event);                        
+                this.follow(event.target.id, event);
             }
             else if(event.target.editor._resizeLatLng.__vertex._icon === event.sourceTarget._element) {
-                event.target.updateDirectionFromVertex();     
-                event.target.updateVertexFromDirection();     
+                event.target.updateDirectionFromVertex();
+                event.target.updateVertexFromDirection();
                 event.target.updateWheelPos();
                 event.target.updateBox();
             }
@@ -290,14 +295,15 @@ L.ParkingSpot = L.Circle.extend({
                 event.target.box.removeFrom(event.target._map);
             }
         });
-        this.on('editable:vertex:drag', function (event) { 
+        this.on('editable:vertex:drag', function (event) {
             console.debug("Drag Parking : ", event);
         });
         this.on('editable:vertex:dragend', function (event) {
             console.debug("DragEnd Parking : ", event);
             store.default.dispatch('setParking', event.target.options.attributes);
             store.default.dispatch('setParkingCoords', event.target.getLatLng().lat.toFixed(6) + ' ' + event.target.getLatLng().lng.toFixed(6));
-            event.target.updateWheelPos();
+            var wheelPos = event.target.updateWheelPos();
+            store.default.dispatch('setParkingNoseCoords', wheelPos.lat.toFixed(6) + ' ' + wheelPos.lng.toFixed(6));
             event.target.updateBox();
             /*
             store.default.dispatch('setParkingHeading', this.options.attributes.heading)
@@ -314,8 +320,8 @@ L.ParkingSpot = L.Circle.extend({
                     }
                 });
             }
-            event.target.select(); 
-        });        
+            event.target.select();
+        });
         this.on('editable:vertex:clicked', function (event) {
             console.debug(this.featureLookup[event.vertex.glueindex]);
             if (Number(store.default.state.Editable.index) >= 0 &&
@@ -330,14 +336,14 @@ L.ParkingSpot = L.Circle.extend({
             if(event.target.editor._resizeLatLng.__vertex._icon !== event.sourceTarget._element){
                 event.vertex._icon.style['background-color'] = 'red';
                 store.default.dispatch('setParking', event.target.options.attributes);
-                this.select();    
+                this.select();
             }
 
         });
 
         this.on('editable:disable', function (event) {
             event.target.removeDirection();
-        });    
+        });
     },
     updateStyle: function () {
 
@@ -357,14 +363,14 @@ L.ParkingSpot = L.Circle.extend({
         return {lat: turfPoint.geometry.coordinates[1], lng: turfPoint.geometry.coordinates[0]};
     },
     extensions: function (editLayer) {
-       this.createDirection(); 
+       this.createDirection();
        if (typeof this.featureLookup[this.id] === 'undefined') {
         this.featureLookup[this.id] = [];
        }
        this.featureLookup[this.id].push(this);
     },
       /**
-       * 
+       *
        */
 
       follow (dragIndex, event) {
@@ -410,7 +416,7 @@ L.ParkingSpot = L.Circle.extend({
                     });
                     element.editor.feature.setLatLngs(element.latlngs);
                     element.editor.feature.updateMiddle();
-                }    
+                }
             }
         })
     },
@@ -445,21 +451,21 @@ lat="N44 52.799"
 lon="W93 11.947"
 heading="-147.51"
 radius="18"
-pushBackRoute="541" 
+pushBackRoute="541"
 airlineCodes="VIR,KAL,DAL,KLM" />
 */
     //circle.attributes = { type: n.attr('type'), name: n.attr('name'), radius: Number(n.attr('radius')), airlineCodes: n.attr('airlineCodes'), heading: Number(n.attr('heading')) };
 
     $.each( n.attrs, function( key, value ) {
         console.debug( '$', circle.id, key , value);
-        
+
         if(isNaN(value))
           circle.options.attributes[ key ] = value;
         else
           circle.options.attributes[ key ] = Number( value);
     });
-    circle.addListeners(); 
-    
+    circle.addListeners();
+
     circle.addTo(layerGroup);
     return circle;
 }

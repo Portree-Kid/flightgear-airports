@@ -668,7 +668,7 @@ You should have received a copy of the GNU General Public License along with FG 
             this.featureLookup===undefined) {
           return
         }
-        console.log('Edited Parking : ' + this.$store.state.Editable.data.parking)
+        console.debug('Edited Parking : ' + this.$store.state.Editable.data.parking)
         //Notify list
         if (this.featureLookup[this.$store.state.Editable.index]===undefined) {
           return
