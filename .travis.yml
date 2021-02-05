@@ -54,7 +54,6 @@ jobs:
     - stage: Deploy
       install:
       - pwd
-      - tar -xzf ${CASHER_DIR}/osx-binaries-fetch.tgz
       - find -name flightgear-airports*
       - cp ./Users/travis/build/Portree-Kid/flightgear-airports/osx-binaries/*.dmg build/
       - cp ./C:/Users/travis/build/Portree-Kid/flightgear-airports/windows-binaries/*.exe build/
