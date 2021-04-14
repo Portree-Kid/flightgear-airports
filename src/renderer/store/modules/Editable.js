@@ -16,7 +16,7 @@ const state = {
   type: 'none',
   index: 'none',
   editing: false,
-  data: {airports: {}, parking: {}, arc: {}, multiarc: {}, node: {}, runway: {}, threshold: {}}
+  data: {airports: {}, parking: {}, arc: {}, multiarc: {}, node: {}, runway: {}, threshold: {}, tower: {}}
 }
 
 const SET_EDIT_AIRPORT = 'SET_EDIT_AIRPORT'
@@ -38,7 +38,6 @@ const mutations = {
     state.type = 'airport'
   },
   SET_EDIT_PARKING (state, parking) {
-    Vue.set(state, 'data', {})
     var p = Object.assign({}, parking)
     Vue.set(state.data, 'parking', p)
     Vue.set(state, 'index', p.index)
@@ -48,15 +47,11 @@ const mutations = {
     if (node === undefined) {
       return
     }
-    if (!state.data || state.type !== 'node') {
-      Vue.set(state, 'data', {})
-    }
     Vue.set(state.data, 'node', node)
     Vue.set(state, 'index', node.index)
     Vue.set(state, 'type', 'node')
   },
   SET_EDIT_RUNWAY (state, runway) {
-    Vue.set(state, 'data', {})
     Vue.set(state.data, 'node', runway)
     Vue.set(state, 'index', runway.index)
     Vue.set(state, 'type', 'runway')
@@ -64,9 +59,6 @@ const mutations = {
   SET_EDIT_ARC (state, arc) {
     if (arc === undefined) {
       return
-    }
-    if (!state.data || state.type !== 'arc') {
-      Vue.set(state, 'data', {})
     }
     Vue.set(state.data, 'arc', arc)
     if (state.data.arc.name === undefined) {
@@ -78,9 +70,6 @@ const mutations = {
   SET_EDIT_MULTI_ARC (state, arc) {
     if (arc === undefined) {
       return
-    }
-    if (!state.data || state.type !== 'multiarc') {
-      Vue.set(state, 'data', {multiarc: {}})
     }
     Vue.set(state.data.multiarc, 'isPushBackRoute', arc.isPushBackRoute)
     Vue.set(state.data.multiarc, 'direction', arc.direction)
@@ -163,10 +152,17 @@ const mutations = {
   },
   'SET_EDIT_TOWER_COORDS' (state, coords) {
     state.type = 'tower'
-    state.data.tower = { coords: {} }
+    if (!state.data.tower) {
+      state.data.tower = {}
+    }
+    if (!state.data.tower.coords) {
+      state.data.tower.coords = {}
+    }
     Vue.set(state.data.tower.coords, 'latitude', coords.split(' ')[0])
     Vue.set(state.data.tower.coords, 'longitude', coords.split(' ')[1])
-    Vue.set(state.data.tower.coords, 'height', coords.split(' ')[2])
+  },
+  'SET_EDIT_TOWER_HEIGHT' (state, height) {
+    Vue.set(state.data.tower, 'height', height)
   },
   'SET_EDIT_THRESHOLD_COORDS' (state, threshold) {
     state.type = 'threshold'
@@ -218,6 +214,9 @@ const actions = {
   },
   async setTowerCoords (context, node) {
     context.commit('SET_EDIT_TOWER_COORDS', node)
+  },
+  async setTowerHeight (context, height) {
+    context.commit('SET_EDIT_TOWER_HEIGHT', height)
   },
   async setThreshold (context, node) {
     context.commit('SET_EDIT_THRESHOLD_COORDS', node)

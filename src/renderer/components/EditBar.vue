@@ -145,7 +145,7 @@ You should have received a copy of the GNU General Public License along with FG 
     },
     methods: {
       cancel () {
-        this.centerDialogVisible = false        
+        this.centerDialogVisible = false
       },
       zoomout() {
         this.$parent.$parent.$refs.editLayer.stopDrawing()
@@ -195,7 +195,7 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$parent.$parent.$refs.towerLayer.disableEdit()
         this.$parent.$parent.$refs.thresholdLayer.disableEdit()
         this.rescanCurrentGroundnet()
-        Vue.set(this, 'saveDialogVisible', false)              
+        Vue.set(this, 'saveDialogVisible', false)
       },
       save () {
         Vue.set(this, 'saveDialogVisible', true)
@@ -209,7 +209,7 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$parent.$parent.$refs.towerLayer.save()
         this.$parent.$parent.$refs.thresholdLayer.save()
         this.rescanCurrentGroundnet()
-        Vue.set(this, 'saveDialogVisible', false)              
+        Vue.set(this, 'saveDialogVisible', false)
       },
       rescanCurrentGroundnet () {
         try {
@@ -220,7 +220,7 @@ You should have received a copy of the GNU General Public License along with FG 
 
           var icao = this.$parent.$parent.$refs.editLayer.icao
           const worker = new Worker(winURL)
-          
+
           var aptDir = path.join(this.$store.state.Settings.settings.airportsDirectory, icao[0], icao[1], icao[2]);
           worker.postMessage(['scan', aptDir ])
           // the reply
@@ -276,7 +276,7 @@ You should have received a copy of the GNU General Public License along with FG 
 
           const worker = new Worker(winURL)
           worker.onerror = function(e) {
-            worker.terminate() 
+            worker.terminate()
             worker.view.max = 0
             worker.view.checkDialogVisible = false
             e.preventDefault(); // <-- "Hey browser, I handled it!"
@@ -302,7 +302,7 @@ You should have received a copy of the GNU General Public License along with FG 
             console.log(l)
             pavement.push(l)
           })
-          var features2 = pavement.map(mapper.checkMapper).filter(n => n)          
+          var features2 = pavement.map(mapper.checkMapper).filter(n => n)
 
           worker.postMessage(['check', features.concat(features2) ] )
           this.pollData()

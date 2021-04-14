@@ -6,8 +6,8 @@
           <span class="label">Latitude :</span>
         </el-col>
         <el-col :span="17">
-          <el-input placeholder="Please input" v-model="latitude" :disabled="!editing"  
-          @focus="coordFocussed = true" 
+          <el-input placeholder="Please input" v-model="latitude" :disabled="true"
+          @focus="coordFocussed = true"
           @blur="coordFocussed = false"></el-input>
         </el-col>
       </el-row>
@@ -16,8 +16,8 @@
           <span class="label">Longitude :</span>
         </el-col>
         <el-col :span="17">
-          <el-input placeholder="Please input" v-model="longitude" :disabled="!editing"  
-          @focus="coordFocussed = true" 
+          <el-input placeholder="Please input" v-model="longitude" :disabled="true"
+          @focus="coordFocussed = true"
           @blur="coordFocussed = false"></el-input>
         </el-col>
       </el-row>
@@ -26,9 +26,9 @@
           <span class="label">Height :</span>
         </el-col>
         <el-col :span="17">
-          <el-input placeholder="Please input" v-model="height" :disabled="!editing"  
-          @focus="coordFocussed = true" 
-          @blur="coordFocussed = false"></el-input>
+          <el-input-number placeholder="Please input" @change="handleChange" v-model="height" :disabled="!editing" :step="0.01"
+          @focus="coordFocussed = true"
+          @blur="coordFocussed = false"></el-input-number>
         </el-col>
       </el-row>
     </div>
@@ -59,12 +59,15 @@
       save () {
         var o = {latitude: this.latitude, longitude: this.longitude, height: this.height};
         writeTowerXML(this.$store.state.Settings.settings.airportsDirectory, this.$parent.$parent.$parent.icao, o)
+      },
+      handleChange (newValue) {
+          this.$store.dispatch('setTowerHeight', newValue);
       }
     },
     computed: {
       editing: {
         get: function () {
-          return false //this.$parent.$parent.$parent.$refs.editLayer.editing 
+          return this.$parent.$parent.$parent.$refs.editLayer.editing
         }
       },
       tower: function () {
@@ -77,8 +80,13 @@
       longitude: function () {
         return this.$store.state.Editable.data.tower.coords.longitude;
       },
-      height: function () {
-        return this.$store.state.Editable.data.tower.coords.height;
+      height: {
+        get: function () {
+          return this.$store.state.Editable.data.tower.height;
+        },
+        set: function (newValue) {
+          this.$store.dispatch('setTowerHeight', newValue);
+        }
       }
     }
   }

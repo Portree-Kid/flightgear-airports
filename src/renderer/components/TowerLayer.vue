@@ -25,7 +25,16 @@ You should have received a copy of the GNU General Public License along with FG 
       console.debug([LMap, LMarker, L, LEdit])
     },
     mounted () {
-
+      this.$store.watch(
+        function (state) {
+          return state.Editable.data.tower
+        },
+        () => { this.editedTower() }
+        ,
+        {
+          deep: true
+        }
+      )
     },
     beforeDestroy () {
       this.remove()
@@ -35,6 +44,15 @@ You should have received a copy of the GNU General Public License along with FG 
       }
     },
     methods: {
+      editedTower () {
+        if (this.$store.state.Editable.data.tower) {
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.TowerMarker) {
+              l.setTowerHeight(this.$store.state.Editable.data.tower.height)
+            }
+          })
+        }
+      },
       getLayer () {
         return this.layerGroup
       },
@@ -71,7 +89,7 @@ You should have received a copy of the GNU General Public License along with FG 
         if (this.layerGroup) {
           this.layerGroup.eachLayer(l => {
             if (l instanceof L.TowerMarker) {
-              l.enableEdit(this.$parent.mapObject)
+              l.setInteractive(true)
             }
           })
         }
@@ -80,7 +98,7 @@ You should have received a copy of the GNU General Public License along with FG 
         if (this.layerGroup) {
           this.layerGroup.eachLayer(l => {
             if (l instanceof L.TowerMarker) {
-              l.enableEdit(this.$parent.mapObject)
+              l.setInteractive(false)
             }
           })
         }
