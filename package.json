@@ -95,7 +95,7 @@
     "coordinate-parser": "^1.0.3",
     "dijkstrajs": "^1.0.1",
     "electron-debug": "^3.0.1",
-    "element-ui": "^2.13.2",
+    "element-ui": "^2.15.1",
     "file-url": "^3.0.0",
     "fs": "0.0.1-security",
     "fs-extra": "^9.0.1",
