@@ -31,6 +31,7 @@ function createWindow () {
       nodeIntegration: true,
       nodeIntegrationInWorker: true
     },
+    closable: true,
     width: 1000
   })
   mainWindow.loadURL(winURL)
