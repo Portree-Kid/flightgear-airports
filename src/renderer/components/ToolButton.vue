@@ -6,6 +6,7 @@
   import ToolControl from '../leaflet/ToolControl.js'
   export default {
     name: 'edit-bar',
+    components: { ToolControl, L },
     props: {
       icon: String,
       show: Boolean,
@@ -22,8 +23,6 @@
       }
     },
     mounted () {
-      console.debug(L)
-      console.debug(ToolControl)
       this.add()
     },
     beforeDestroy () {
