@@ -71,12 +71,12 @@ jobs:
         skip_cleanup: true
         overwrite: true
         draft: true
-        name: '0.0.30'
+        name: '0.0.31'
         provider: releases
         api_key:
           secure: xBF7Jld2WbEXVg5QOxZIC/T2hlKOkajebrNi7kfE8vGVRuZG1cbHWEtBVPxggxmIWvzSyKOACSufFywx8rjgXNP3e310+dp1WuEnOBlkTr6HO3FneTue5gKoPsFB8/r8/BMPWqY50lS2Vei367eINsdNiw4wWv2bzbB6uNBlo9ILRZjbyWnUv+j8+h9gmCg2nHLmHBGhXRMLqYFEHYvq1LrV+tjMNtMBdNiRVYBjpeWI1y7TMsxpdwKvrYF84L7r9IOkjg2DHIACy4SMnIeKi6b7Lr83aK5QwksHByMETxjaNPxgvmg9hPFaRoJsvwOLdgSDU/VpEar8uweOnumt2bdqdwV2t+99A1g41KcvbUI1aATPOWhpGxW+WLBBz40hpDBBwWJ/Il4rMUHfsQ162xoO9NvlKp4IE7pgK3ydGlJx6mYzMx3QB2eKnTFySaIekrkzZPIS3GX50cMclRw6jS3fueUmtNxjIv4hNHgRqE6pQfxhQnaUkHjdP7nglYs0muJotM2Tksyw3YRlLoFzc/siktCDr8ZXxj+rlV3TeoH2vba7f4zr0tYY9vlGAUlcrkBoJ4kDeA8Hm0GnbpWHBsSY4g199jOkgbr/kJ0HDrELv/JJl1c8yp3uSlcN82UgNS15H60D+0zg3Ls4KxvqXslrPh815Se5FqKoEpvZ5VQ=
         file_glob: true
         file: build/*
         on:
-          branches: '0.0.30'
+          branches: '0.0.31'
           repo: Portree-Kid/flightgear-airports
