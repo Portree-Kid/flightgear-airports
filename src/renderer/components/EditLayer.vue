@@ -246,10 +246,22 @@ You should have received a copy of the GNU General Public License along with FG 
         this.groundnetLayerGroup.eachLayer(l => {
           if (l instanceof L.Polyline) {
             l.getLatLngs().forEach(l => {
-                if (l.__vertex && !l.__vertex.getTooltip()) {
-                    l.__vertex.bindTooltip(l.glueindex, {permanent: true});
+                if (this.$parent.mapObject.getBounds().contains(l)) {
+                  if (l.__vertex && !l.__vertex.getTooltip()) {
+                      l.__vertex.bindTooltip(l.glueindex, {permanent: true});
+                  }
                 }
             });
+          }
+          if (l instanceof L.ParkingSpot) {
+            if (this.$parent.mapObject.getBounds().contains(l.getLatLng())) {
+              var parkingHub = l.glueindex + " " + l.options.attributes.name + " " + l.options.attributes.number;
+              if(l.box) {
+                l.box.bindTooltip(parkingHub, {permanent: true, direction: 'right'});
+              } else {
+                l.bindTooltip(parkingHub, {permanent: true, direction: 'right'});
+              }
+            }
           }
         });
         setTimeout(this.closeTooltips.bind(this), 2000);
@@ -262,6 +274,13 @@ You should have received a copy of the GNU General Public License along with FG 
                     l.__vertex.unbindTooltip();
                 }
             });
+          }
+          if (l instanceof L.ParkingSpot) {
+            if(l.box) {
+              l.box.unbindTooltip();
+            } else {
+              l.unbindTooltip();
+            }
           }
         });
       },
