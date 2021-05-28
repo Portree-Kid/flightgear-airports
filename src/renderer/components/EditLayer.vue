@@ -224,6 +224,9 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$store.commit('SET_EDIT', true)
 
         this.featureLookup = [];
+        if(!this.groundnetLayerGroup) {
+          return;
+        }
         this.groundnetLayerGroup.eachLayer(l => {
           l.enableEdit()
           l.featureLookup = this.featureLookup;
