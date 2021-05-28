@@ -29,7 +29,7 @@ You should have received a copy of the GNU General Public License along with FG 
     -->
     <!--<l-marker :lat-lng="marker"></l-marker>-->
     <LeafletSidebar ref="sidebar" @editParking="onEditSidebar" @edit="onEdit($event)"></LeafletSidebar>
-    <AiLayer ref="aiLayer"></AiLayer> 
+    <AiLayer ref="aiLayer"></AiLayer>
     <l-layer-group layerType="overlay" name="airports" ref="airportLayer">
       <l-circle
         v-for="(item, index) in this.$store.state.Airports.airports"
@@ -42,7 +42,7 @@ You should have received a copy of the GNU General Public License along with FG 
       ></l-circle>
     </l-layer-group>
     <EditLayer ref="editLayer"></EditLayer>
-    <PavementLayer ref="pavementLayer"></PavementLayer>    
+    <PavementLayer ref="pavementLayer"></PavementLayer>
     <ThresholdLayer ref="thresholdLayer"></ThresholdLayer>
     <TowerLayer ref="towerLayer"></TowerLayer>
     <ToolLayer ref="toolLayer" @select-poly="onSelectedPolygon"></ToolLayer>
@@ -54,7 +54,7 @@ You should have received a copy of the GNU General Public License along with FG 
 <script lang="js">
   import 'leaflet/dist/leaflet.css'
   import '@/assets/button.css'
-  import { LMap, LTileLayer, LMarker, LCircle, LLayerGroup, LControl } from 'vue2-leaflet'
+  import { LMap, LTileLayer, LMarker, LCircle, LLayerGroup, LControl, LTooltip } from 'vue2-leaflet'
   import LeafletSidebar from './LeafletSidebar'
   import AiLayer from './AiLayer'
   import EditBar from './EditBar'
@@ -77,7 +77,7 @@ You should have received a copy of the GNU General Public License along with FG 
   })
   export default {
     name: 'flightgear-map',
-    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, AiLayer, EditBar, ToolBar, EditLayer, TowerLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer, ToolLayer },
+    components: { LMap, LTileLayer, LMarker, LCircle, LTooltip, LeafletSidebar, AiLayer, EditBar, ToolBar, EditLayer, TowerLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer, ToolLayer },
     props: [],
     created () {
       this.loadingInstance = null
@@ -324,6 +324,7 @@ You should have received a copy of the GNU General Public License along with FG 
         event.target.airport = item
         // console.log(event, item)
         this.normalStyle(event.target)
+        event.target.bindTooltip(event.target.airport.properties.icao + ' ' + event.target.airport.properties.name)
       },
       onClick (event, item) {
         console.log(item)
