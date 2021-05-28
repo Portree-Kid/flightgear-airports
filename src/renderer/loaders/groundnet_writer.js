@@ -14,13 +14,13 @@ const mathjs = require('mathjs');
 
 var builder = require('xmlbuilder');
 
-var featureLookup = [];        
+var featureLookup = [];
 var parkings = [];
 var pushBackNodeLookup = [];
 
 /**
- * Walk nodes until the pushback node is found. 
- * @param {*} index 
+ * Walk nodes until the pushback node is found.
+ * @param {*} index
  */
 
 function findRouteToPushback (index) {
@@ -58,10 +58,10 @@ function walkPushbackRoute (index, walkedNodes, pushBackNodes) {
 }
 
 /**
- * 
- * @param {*} fDir The directory 
- * @param {*} icao 
- * @param {*} featureList 
+ *
+ * @param {*} fDir The directory
+ * @param {*} icao
+ * @param {*} featureList
  */
 
 exports.writeGroundnetXML = function (fDir, icao, featureList) {
@@ -73,13 +73,13 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
 
         var fileNames = [];
         for (let index = 1; index <= store.default.state.Settings.settings.numberOfSaves; index++) {
-            fileNames.push(path.join(fDir, icao[0], icao[1], icao[2], icao + `.groundnet.bak.${index}.xml`));            
+            fileNames.push(path.join(fDir, icao[0], icao[1], icao[2], icao + `.groundnet.bak.${index}.xml`));
         }
         var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');
 
         if( fs.existsSync(f) ) {
             var previous = '';
-            fileNames.reverse().forEach(fBak => {                
+            fileNames.reverse().forEach(fBak => {
                 if (fs.existsSync(fBak) && previous !== '') {
                     console.debug( `Copy ${fBak} to ${previous}`);
                     fs.copyFileSync(fBak, previous);
@@ -90,7 +90,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         }
         if (f == null)
             return;
-        pushBackNodeLookup = []; 
+        pushBackNodeLookup = [];
 
         console.debug(featureList);
 
@@ -98,19 +98,19 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         var runwayNodes = featureList.map(mapRunwayNodes).filter(n => n);
         var holdNodes = featureList.map(mapHoldPoint).filter(n => n);
 
-        
+
         holdNodes.forEach(n => {
             pushBackNodeLookup[n['@index']] = n;
         });
-    
+
         var nodes = [];
         var arcList = [];
         var frequencies = [];
 
         var version = new Date().toUTCString() + ' by FlightgearAirports ' + require('electron').remote.app.getVersion();
-        var name = store.default.state.Settings.settings.name;        
+        var name = store.default.state.Settings.settings.name;
 
-        featureLookup = [];        
+        featureLookup = [];
         // Loaded segments
         featureList.filter(o => o instanceof L.TaxiwaySegment).filter(n => n).forEach(element => {
             var begin = mapBeginNode(element);
@@ -122,9 +122,9 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
               console.warn("End missing");
             nodes[end['@index']] = end;
         });
-        // New segments 
+        // New segments
         featureList.filter(o => o instanceof L.Polyline).filter(n => n).forEach(arcElement => {
-            //            element._latlngs.forEach(latlng => { nodes[latlng.glueindex] = mapVertexNode(latlng) });    
+            //            element._latlngs.forEach(latlng => { nodes[latlng.glueindex] = mapVertexNode(latlng) });
             var startIndex = -1;
             console.debug(arcElement.options.attributes);
             var currentArc = arcElement.options.attributes;
@@ -142,7 +142,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
                             arc = { '@begin': startIndex, '@end': String(latlng.glueindex) };
                             styleArc(currentArc, arc);
                             arcList.push(arc);
-                            featureLookup[startIndex][latlng.glueindex] = arc;    
+                            featureLookup[startIndex][latlng.glueindex] = arc;
                         }
                         if( currentArc.direction === 'bi-directional' || currentArc.direction === 'backward' ){
                             arc = { '@begin': String(latlng.glueindex), '@end': startIndex };
@@ -151,7 +151,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
                             featureLookup[latlng.glueindex][startIndex] = arc;
                         }
                         if (currentArc.direction === '' || !currentArc.direction) {
-                            console.error( "Arc without direction " + util.inspect(currentArc) );                            
+                            console.error( "Arc without direction " + util.inspect(currentArc) );
                         }
                     }
                     startIndex = latlng.glueindex;
@@ -162,12 +162,12 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         });
         runwayNodes.forEach(element => {
             if (nodes[element['@index']] != undefined) {
-                nodes[element['@index']]['@isOnRunway'] = "1";                
+                nodes[element['@index']]['@isOnRunway'] = "1";
             }
         });
 
 
-        // Find the index of the pushback node 
+        // Find the index of the pushback node
         parkings.forEach(n => {
             nodes[n['@index']] = null;
             var pushBackNode = findRouteToPushback(Number(n['@index']))[0];
@@ -207,7 +207,7 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
             var allIds = parkings.map(n => Number(n['@index']))
             .concat(uniqueNodes.map(n => Number(n['@index'])))
             .sort((a, b) => a - b);
-            
+
             allIds.forEach((element, index, array)  => {
                 if (index > 0 && array[index-1] + 1 != element && gapStart == -1 ) {
                     gapStart = array[index-1];
@@ -215,34 +215,36 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
                 }
             });
             var gap = gapEnd - gapStart -1;
-    
-            parkings = parkings.map(n => { 
-                if (n['@index']>gapStart) {
-                    n['@index'] = String(n['@index'] - gap);                
-                }
-                if (n['@pushbackRoute']>gapStart) {
-                    n['@pushbackRoute'] = String(n['@pushbackRoute'] - gap);                
-                }
-                return n;
-             });
-            uniqueNodes = uniqueNodes.map(n => { 
-                if (n['@index']>gapStart) {
-                    n['@index'] = String(n['@index'] - gap);                
-                }
-                return n;
-             });
-            arcList = arcList.map(n => { 
-                if (n['@begin']>gapStart) {
-                    n['@begin'] = String(n['@begin'] - gap);                
-                }
-                if (n['@end']>gapStart) {
-                    n['@end'] = String(n['@end'] - gap);                
-                }
-                return n;
-             });    
+            if ( gap >= 0 ) {
+                parkings = parkings.map(n => {
+                    if (n['@index']>gapStart) {
+                        n['@index'] = String(n['@index'] - gap);
+                    }
+                    if (n['@pushbackRoute']>gapStart) {
+                        n['@pushbackRoute'] = String(n['@pushbackRoute'] - gap);
+                    }
+                    return n;
+                 });
+                uniqueNodes = uniqueNodes.map(n => {
+                    if (n['@index']>gapStart) {
+                        n['@index'] = String(n['@index'] - gap);
+                    }
+                    return n;
+                 });
+                arcList = arcList.map(n => {
+                    if (n['@begin']>gapStart) {
+                        n['@begin'] = String(n['@begin'] - gap);
+                    }
+                    if (n['@end']>gapStart) {
+                        n['@end'] = String(n['@end'] - gap);
+                    }
+                    return n;
+                 });
+            }
+
         } while( gapStart > 0 && gapEnd > 0);
 
-        var xmlObj = { groundnet: { version: 1, fgaversion: version, name: name, 
+        var xmlObj = { groundnet: { version: 1, fgaversion: version, name: name,
             'frequencies': { APPROACH: approachList, DEPARTURE: departureList, AWOS: awosList, CLEARANCE: clearanceList, GROUND: groundList, TOWER: towerList, UNICOM: unicomList },
             parkingList: { Parking: parkings }, TaxiNodes: { node: uniqueNodes }, TaxiWaySegments: { arc: arcList } } };
 
@@ -273,7 +275,7 @@ var mapParkings = function (o) {
             console.debug(o.options.attributes.airlineCodes);
             parking['@airlineCodes'] = o.options.attributes.airlineCodes;
         }
-        if(o.options.attributes.number !== undefined && 
+        if(o.options.attributes.number !== undefined &&
             typeof o.options.attributes.number === 'number' || (
                 typeof o.options.attributes.number === 'string' &&
                 o.options.attributes.number.trim() !== ''
@@ -290,10 +292,10 @@ var mapParkings = function (o) {
 var mapRunwayNodes = function (o) {
     console.debug(o);
     if (o instanceof L.RunwayNode) {
-        var runwayNode = { '@index': String(o['glueindex']), 
-        '@lat': convertLat(o._latlng), 
-        '@lon': convertLon(o._latlng), 
-        '@isOnRunway': '1', 
+        var runwayNode = { '@index': String(o['glueindex']),
+        '@lat': convertLat(o._latlng),
+        '@lon': convertLon(o._latlng),
+        '@isOnRunway': '1',
         '@holdPointType': 'none' };
         return runwayNode;
     }
@@ -363,7 +365,7 @@ var styleArc = function (attributes, arc) {
             arc['@isPushBackRoute'] = "0";
         }
         if ( attributes.name !== '' && attributes.name !== 'undefined') {
-            arc['@name'] = attributes.name;            
+            arc['@name'] = attributes.name;
         }
     }
 }
