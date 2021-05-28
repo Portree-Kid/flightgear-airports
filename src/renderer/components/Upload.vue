@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License along with FG 
       <span class="center">E-Mail : {{this.$store.state.Settings.settings.email}}</span><br/>
       <span class="center"><el-checkbox v-model="gplv2" class="center">I agree to release the groundnet under GPL v2</el-checkbox></span><br/>
       <span :class="textClass" v-if="message">{{message}}</span><br/>
-      
+
       <el-button @click="handleOkClicked('twr')" :disabled="!tower_comittable" >Upload Tower</el-button>
       <el-button @click="handleOkClicked('groundnet')" :disabled="!groundnet_comittable" >Upload Groundnet</el-button>
       <el-button @click="handleOkClicked('threshold')" :disabled="!threshold_comittable" >Upload Threshold</el-button>
@@ -47,8 +47,8 @@ You should have received a copy of the GNU General Public License along with FG 
         function (state) {
           return state.Loading.groundnetLoaded;
         },
-              () => { if(this.$store.state.Loading.groundnetLoaded && 
-              this.$store.state.Loading.pavementLoaded && 
+              () => { if(this.$store.state.Loading.groundnetLoaded &&
+              this.$store.state.Loading.pavementLoaded &&
               this.visible) this.check() }
               ,
               {
@@ -59,8 +59,8 @@ You should have received a copy of the GNU General Public License along with FG 
         function (state) {
           return state.Loading.pavementLoaded;
         },
-              () => { if(this.$store.state.Loading.groundnetLoaded && 
-              this.$store.state.Loading.pavementLoaded && 
+              () => { if(this.$store.state.Loading.groundnetLoaded &&
+              this.$store.state.Loading.pavementLoaded &&
               this.visible) this.check() }
               ,
               {
@@ -76,13 +76,17 @@ You should have received a copy of the GNU General Public License along with FG 
     },
     methods: {
       reqListener(e) {
-        if(JSON.parse(e.srcElement.response).status==='OK') {
-          this.message = null;
-          this.azure = true;
-          this.error = false;
-        } else {
-          this.message = 'Azure down';
-        }            
+        try {
+          if(JSON.parse(e.srcElement.response).status==='OK') {
+            this.message = null;
+            this.azure = true;
+            this.error = false;
+          } else {
+            this.message = 'Azure down';
+          }
+        } catch (error) {
+          console.error(error);
+        }
 
       },
       status () {
@@ -96,15 +100,15 @@ You should have received a copy of the GNU General Public License along with FG 
   	    	if (xhr.status !== 200){
             parent.$refs.upload.message = 'Azure down';
             parent.$refs.upload.error = true;
-            console.error(xhr);                      
+            console.error(xhr);
 	       	}
 	      }
-        xhr.addEventListener("load", this.reqListener); 
+        xhr.addEventListener("load", this.reqListener);
         try {
-          xhr.send();          
+          xhr.send();
         } catch (err) {
           console.error(err);
-          this.error = true;          
+          this.error = true;
         }
       },
       closeClicked () {
@@ -113,10 +117,10 @@ You should have received a copy of the GNU General Public License along with FG 
       },
       handleOkClicked (type) {
         this.uploading = true;
-        var f = path.join(this.$store.state.Settings.settings.airportsDirectory, 
-        this.icao[0], 
-        this.icao[1], 
-        this.icao[2], 
+        var f = path.join(this.$store.state.Settings.settings.airportsDirectory,
+        this.icao[0],
+        this.icao[1],
+        this.icao[2],
         this.icao + `.${type}.new.xml`);
 
         if (f == null || !fs.existsSync(f)) {
@@ -136,7 +140,7 @@ You should have received a copy of the GNU General Public License along with FG 
         formData.append("gpl", this.gplv2 )
         formData.append("user_email", this.$store.state.Settings.settings.email)
         formData.append('groundnet', blob, this.icao + `.${type}.xml`);
-        
+
         var parent = this.$parent;
         var messageField = this.message;
         // action after uploading happens
@@ -144,7 +148,7 @@ You should have received a copy of the GNU General Public License along with FG 
   	    	if (xhr.status !== 200){
             parent.$refs.upload.message = 'Upload Error'
             parent.$refs.upload.error = true;
-            console.error(xhr);                      
+            console.error(xhr);
 	       	}
 	      }
         xhr.onload = function(e) {
@@ -157,7 +161,7 @@ You should have received a copy of the GNU General Public License along with FG 
             parent.$refs.upload.success = true
             parent.$refs.upload.message = `${type} Uploaded Successfully`
             parent.$store.commit('UPLOAD_WIP', parent.$store.state.Airports.currentAirport.icao)
-            
+
           } else if(JSON.parse(e.srcElement.response).message === 'XML Errors') {
             var response = JSON.parse(e.srcElement.response);
             if (response.validationErrors) {
@@ -169,7 +173,7 @@ You should have received a copy of the GNU General Public License along with FG 
           } else if(JSON.parse(e.srcElement.response) !== undefined) {
             var response = JSON.parse(e.srcElement.response);
             parent.$refs.upload.message = response.err;
-          } else {            
+          } else {
             parent.$refs.upload.message = response.message;
           }
         };
@@ -177,7 +181,7 @@ You should have received a copy of the GNU General Public License along with FG 
 
         // do the uploading
         console.log("File uploading started!");
-        xhr.send(formData);          
+        xhr.send(formData);
       },
       pollData () {
         var workery = this.worker
@@ -193,7 +197,7 @@ You should have received a copy of the GNU General Public License along with FG 
       },
       check () {
         try {
-          if(!(this.$store.state.Loading.groundnetLoaded && 
+          if(!(this.$store.state.Loading.groundnetLoaded &&
               this.$store.state.Loading.pavementLoaded)) {
                 return
               }
@@ -236,7 +240,7 @@ You should have received a copy of the GNU General Public License along with FG 
             console.log(l)
             pavement.push(l)
           })
-          var features2 = pavement.map(mapper.checkMapper).filter(n => n)          
+          var features2 = pavement.map(mapper.checkMapper).filter(n => n)
 
           worker.postMessage(['check', features.concat(features2) ] )
           this.pollData()
@@ -251,7 +255,7 @@ You should have received a copy of the GNU General Public License along with FG 
               worker.terminate()
               worker.view.max = 0
               worker.view.checkDialogVisible = false
-              clearInterval(this.polling)              
+              clearInterval(this.polling)
               this.checking = false
             } else if (e.data.length > 0) {
               if (e.data[0] === 'max') {
@@ -275,7 +279,7 @@ You should have received a copy of the GNU General Public License along with FG 
             return parent.$refs.editLayer;
           }
         }
-      },      
+      },
       pavementLayer () {
         var parent = this.$parent;
         while (!parent.icao||parent.$refs.pavementLayer==undefined) {
@@ -284,7 +288,7 @@ You should have received a copy of the GNU General Public License along with FG 
             return parent.$refs.pavementLayer;
           }
         }
-      }      
+      }
     },
     computed: {
       visible: {
@@ -300,7 +304,7 @@ You should have received a copy of the GNU General Public License along with FG 
       textClass: function () {
         return !this.error?'centermessage':'error'
       },
-      title: function () {        
+      title: function () {
         return `Upload ${this.icao} to groundweb.`
       },
       icao: {
@@ -319,26 +323,26 @@ You should have received a copy of the GNU General Public License along with FG 
         }
       },
       tower_comittable: function () {
-        var f = path.join(this.$store.state.Settings.settings.airportsDirectory, 
-        this.icao[0], 
-        this.icao[1], 
-        this.icao[2], 
+        var f = path.join(this.$store.state.Settings.settings.airportsDirectory,
+        this.icao[0],
+        this.icao[1],
+        this.icao[2],
         this.icao + '.twr.new.xml');
         return fs.existsSync(f) && this.gplv2 && this.max === 0 && this.azure && !this.uploading;
       },
       groundnet_comittable: function () {
-        var f = path.join(this.$store.state.Settings.settings.airportsDirectory, 
-        this.icao[0], 
-        this.icao[1], 
-        this.icao[2], 
+        var f = path.join(this.$store.state.Settings.settings.airportsDirectory,
+        this.icao[0],
+        this.icao[1],
+        this.icao[2],
         this.icao + '.groundnet.new.xml');
         return fs.existsSync(f) && this.$store.state.Check.results.filter(a => a.id>=0).length === 0 && this.gplv2 && this.max === 0 && this.azure && !this.uploading
       },
       threshold_comittable: function () {
-        var f = path.join(this.$store.state.Settings.settings.airportsDirectory, 
-        this.icao[0], 
-        this.icao[1], 
-        this.icao[2], 
+        var f = path.join(this.$store.state.Settings.settings.airportsDirectory,
+        this.icao[0],
+        this.icao[1],
+        this.icao[2],
         this.icao + '.threshold.new.xml');
         return fs.existsSync(f) && this.gplv2 && this.max === 0 && this.azure && !this.uploading
       },
@@ -354,8 +358,8 @@ You should have received a copy of the GNU General Public License along with FG 
 
 <style scoped lang="scss">
   .el-dialog__body {padding: 10px;}
-  .center { text-align: center; vertical-align: middle; padding: 5px; font-size: 12pt; font-weight: normal}  
-  .centermessage { text-align: left; vertical-align: middle; padding: 5px; font-size: 12pt; font-weight: normal; white-space: pre-line;}  
+  .center { text-align: center; vertical-align: middle; padding: 5px; font-size: 12pt; font-weight: normal}
+  .centermessage { text-align: left; vertical-align: middle; padding: 5px; font-size: 12pt; font-weight: normal; white-space: pre-line;}
   .error { text-align: center; color: red; padding: 5px; font-size: 12pt; font-weight: normal;}
   .el-dialog--center .el-dialog__body { padding: 5px;}
 </style>
