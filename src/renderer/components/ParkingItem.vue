@@ -11,7 +11,7 @@ You should have received a copy of the GNU General Public License along with FG 
 -->
 <template>
 <div>
-  <el-link v-if="!editing" type="primary" @click="show(parking.index)">{{parking.name}} {{number}} {{parking.type}}</el-link>          
+  <el-link v-if="!editing" type="primary" @click="show(parking.index)">{{parking.name}} {{number}} {{parking.type}} {{type}}</el-link>
   <el-input @focus="show(parking.index)" v-if="editing" placeholder="Name" v-model="name" class="wide"></el-input>
   <el-input @focus="show(parking.index)" v-if="editing" placeholder="Number" v-model="number" class="narrow"></el-input>
   <el-select @focus="show(parking.index)" v-if="editing" v-model="parking_type" placeholder="Select">
@@ -84,7 +84,11 @@ You should have received a copy of the GNU General Public License along with FG 
       number: {
       // getter
         get: function () {
-          return this.parking.number
+          if (this.parking.number && this.parking.number !== 'undefined') {
+            return this.parking.number
+          } else {
+            return ''
+          }
         },
         // setter
         set: function (newValue) {
@@ -103,8 +107,36 @@ You should have received a copy of the GNU General Public License along with FG 
         set: function (newValue) {
           this.$store.commit('SET_EDIT_PARKING_ITEM_TYPE', [this.parking.index, newValue])
         }
-      }
+      },
+      type: function () {
+        /**
+         * Cat Models                   FG Radii N2M Radii
+         * B Small Regionals ERJ CRJ ATR    14       6
+         * C A319 A320 A321 B737            18      10
+         * D B757, B767                     26      15
+         * E B777 B787 A330 A340 A360       33      24
+         * F A380                           40      24
+         */
 
+        switch (this.parking.radius * 2) {
+          case 15:
+            return 'Piper J-3 Cub/Cessna 172'
+          case 20:
+            return 'Beech 200/Cessna 425'
+          case 28:
+            return 'BOMBARDIER Regional Jet CRJ-200/DE HAVILLAND CANADA DHC-6'
+          case 36:
+            return 'BOEING 737-700/AIRBUS A-320/EMBRAER ERJ 190-100'
+          case 52:
+            return 'B767 Series/AIRBUS A-310'
+          case 66:
+            return 'B777 Series/B787 Series/A330 Family'
+          case 80:
+            return 'BOEING 747-8/AIRBUS A-380-800'
+          default:
+            return 'Unknown radius : ' + this.parking.radius
+        }
+      }
     }
 }
 </script>
