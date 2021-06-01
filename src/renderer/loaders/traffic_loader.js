@@ -68,6 +68,7 @@ function flightMapper(params) {
     return {
         id: `${btoa(buildId(params))}`,
         callsign: params.find('callsign').text(),
+        'required-aircraft': params.find('required-aircraft').text(),
         arrival: {
           port: params.find('arrival/port').text(),
           time: params.find('arrival/time').text()

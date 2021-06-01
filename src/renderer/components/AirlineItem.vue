@@ -12,9 +12,8 @@ You should have received a copy of the GNU General Public License along with FG 
 <template>
   <div>
     <div v-for="item in traffic" v-bind:key="item.id">
-      <div v-if="direction == 0">{{ item.departure.time }} {{ item.callsign }} {{ item.departure.port }} --> {{ item.arrival.port }}</div>
-      <div v-if="direction == 1">{{ item.arrival.time }} {{ item.callsign }} {{ item.departure.port }} --> {{ item.arrival.port }}</div>
-
+      <div v-if="direction == 0">{{ item.departure.time }} {{ item.callsign }} {{ item.departure.port }} --> {{ item.arrival.port }}  {{ item['required-aircraft'] }} {{ item.flighttype }}</div>
+      <div v-if="direction == 1">{{ item.arrival.time }} {{ item.callsign }} {{ item.departure.port }} --> {{ item.arrival.port }} {{ item['required-aircraft'] }} {{ item.flighttype }}</div>
     </div>
   </div>
 </template>
@@ -68,12 +67,17 @@ export default {
       },
       traffic: function () {
         if (this.filename) {
-          return this.trafficFile.filter(f => f.callsign).filter(f =>
+          var aircraftLookup = this.trafficFile.filter(a => a['required-aircraft'])
+            .reduce((req, acc) => {
+              req[acc['required-aircraft']] = acc
+              return req
+            }, {})
+          var ret = this.trafficFile.filter(f => f.callsign).filter(f =>
             (f.departure.port === this.$store.state.Airports.currentAirport.icao && this.direction === 0) ||
             (f.arrival.port === this.$store.state.Airports.currentAirport.icao && this.direction === 1)
-          )
+          ).map(obj => ({ ...obj, flighttype: aircraftLookup[obj['required-aircraft']].flighttype }))
+          return ret
         }
-        console.debug(this.filename)
       },
       aircraft: function () {
         if (this.filename) {
