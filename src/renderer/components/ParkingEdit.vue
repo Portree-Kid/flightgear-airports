@@ -177,8 +177,7 @@
           :step="0.1"
           :precision="1"
           :disabled="!editing || calculate === 'Heading'"
-            @focus="headingFocussed = true"
-            @blur="headingFocussed = false"
+            @change="headingChange"
         ></el-input-number>
       </el-col>
       <el-col :span="4">
@@ -245,7 +244,24 @@
   const turfOptions = { units: 'kilometers' };
 
   export default {
+    mounted() {
+      this.$store.watch(
+        function (state) {
+              return state.Editable.data.parking;
+          },
+          () => { this.editedParking() }
+          ,
+          {
+            deep: true //add this if u need to watch object properties change etc.
+          }
+        );
+    },
     methods: {
+      editedParking() {
+        this.externalChange = true
+        this.heading = Number(this.$store.state.Editable.data.parking.heading);
+        this.externalChange = false
+      },
       rotate() {
         var heading = this.$store.state.Editable.data.parking.heading + 90;
         while (heading>=360) {
@@ -254,9 +270,7 @@
         while (heading<0) {
           heading += 360
         }
-        this.rotateFocussed = true;
         this.headingChange(heading);
-        this.rotateFocussed = false;
       },
       headingChange( newValue ) {
           while (newValue>=360) {
@@ -265,8 +279,8 @@
           while (newValue<0) {
             newValue += 360
           }
-          if ( Math.abs( ( this.$store.state.Editable.data.parking.heading - newValue ) >= 0 && Math.abs( this.$store.state.Editable.data.parking.heading - newValue ) <= 0.1 )
-          || this.headingFocussed || this.rotateFocussed) {
+          if ( ( Math.abs( this.$store.state.Editable.data.parking.heading - newValue ) >= 0 && Math.abs( this.$store.state.Editable.data.parking.heading - newValue ) <= 0.1 )
+          || !this.externalChange) {
             if (Number(this.$store.state.Editable.data.parking.heading) !== newValue) {
               this.$store.commit('SET_EDIT_PARKING_HEADING', newValue)
             }
@@ -331,7 +345,7 @@
           }
       }
     },
-    data () { return {rotateFocussed: false, headingFocussed: false, coordFocussed: false, noseCoordFocussed: false, calculateState: 'Nose Wheel', noseWheel: '', validRadii: [7.5, 10, 14, 18, 26, 33, 40], validN2M: [5, 5, 6, 10, 15, 24, 24] } },
+    data () { return {rotateFocussed: false, externalChange: false, coordFocussed: false, noseCoordFocussed: false, calculateState: 'Nose Wheel', noseWheel: '', validRadii: [7.5, 10, 14, 18, 26, 33, 40], validN2M: [5, 5, 6, 10, 15, 24, 24], heading: 0 }},
     computed: {
       editing: {
         get: function () {
@@ -449,16 +463,6 @@
             this.$store.commit('SET_EDIT_PARKING_NOSE_COORDS', newValue);
           }
           this.calcCenter();
-        }
-      },
-      heading: {
-      // getter
-        get: function () {
-          return this.$store.state.Editable.data.parking.heading
-        },
-        // setter
-        set: function (newValue) {
-          this.headingChange(newValue)
         }
       },
       wingspan: {
