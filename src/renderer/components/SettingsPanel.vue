@@ -223,10 +223,8 @@
       return { ok: true, activeName: '0', scanStoreLogging: false }
     },
     mounted () {
-      console.debug('Mount')
       this.$store.watch(
         function (state) {
-          console.debug('Mount ' + JSON.stringify(state))
           return state.Settings.settings
         },
         () => { this.loggingChanged() }

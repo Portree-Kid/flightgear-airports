@@ -14,9 +14,12 @@ d.getMilliseconds() + '.log';
 var logStream = null;
 
 var loggerInit = function (logging) {
+  debugger;
   if (logging) {
     try {
-      logStream = require('fs').createWriteStream( fName, {autoClose: true});
+      const homedir = require('os').homedir();
+      const logFileName = require('path').join(homedir, fName);
+      logStream = require('fs').createWriteStream( logFileName, {autoClose: true});
     } catch (error) {
       console.error('Logging not possible ' + error);
     }
