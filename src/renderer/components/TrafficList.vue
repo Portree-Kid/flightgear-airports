@@ -81,7 +81,7 @@ You should have received a copy of the GNU General Public License along with FG 
             airlineCodes.push({value: element, label: element})
           })
         }
-        return airlineCodes
+        return airlineCodes.filter((v, i, a) => a.indexOf(v) === i)
       }
     }
 }

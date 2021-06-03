@@ -10,10 +10,10 @@ FG Airports is distributed in the hope that it will be useful, but WITHOUT ANY W
 You should have received a copy of the GNU General Public License along with FG Airports. If not, see http://www.gnu.org/licenses/.
 -->
 <template>
-  <div>
-    <div v-for="item in traffic" v-bind:key="item.id">
-      <div v-if="direction == 0">{{ item.departure.time }} {{ item.callsign }} {{ item.departure.port }} --> {{ item.arrival.port }}  {{ item['required-aircraft'] }} {{ item.flighttype }}</div>
-      <div v-if="direction == 1">{{ item.arrival.time }} {{ item.callsign }} {{ item.departure.port }} --> {{ item.arrival.port }} {{ item['required-aircraft'] }} {{ item.flighttype }}</div>
+  <div :key="airline.label + '-div'">
+    <div v-for="item in traffic" v-bind:key="airline.label + '-' + item.id + '-innerdiv'">
+      <div :key="item.id + '-dep'" v-if="direction == 0">{{ item.departure.time }} {{ item.callsign }} {{ item.departure.port }} --> {{ item.arrival.port }}  {{ item['required-aircraft'] }} {{ item.flighttype }}</div>
+      <div :key="item.id + '-arr'" v-if="direction == 1">{{ item.arrival.time }} {{ item.callsign }} {{ item.departure.port }} --> {{ item.arrival.port }} {{ item['required-aircraft'] }} {{ item.flighttype }}</div>
     </div>
   </div>
 </template>
@@ -74,8 +74,9 @@ export default {
             }, {})
           var ret = this.trafficFile.filter(f => f.callsign).filter(f =>
             (f.departure.port === this.$store.state.Airports.currentAirport.icao && this.direction === 0) ||
-            (f.arrival.port === this.$store.state.Airports.currentAirport.icao && this.direction === 1)
-          ).map(obj => ({ ...obj, flighttype: aircraftLookup[obj['required-aircraft']].flighttype }))
+            (f.arrival.port === this.$store.state.Airports.currentAirport.icao && this.direction === 1))
+            .map(obj => ({ ...obj, flighttype: aircraftLookup[obj['required-aircraft']].flighttype }))
+            .filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i)
           return ret
         }
       },
