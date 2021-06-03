@@ -302,11 +302,11 @@ async function checkGroundnet(data) {
             this.postMessage(['progress', 1]);
 
             if (parkings.length === 0) {
-                notOkNodes.push({ id: 0, message: check_msg.NO_PARKINGS });
+                notOkNodes.push({ id: -2, message: check_msg.NO_PARKINGS });
             }
             this.postMessage(['progress', 1]);
             if (runwayNodeIDs.length === 0) {
-                notOkNodes.push({ id: 0, message: check_msg.NO_RUNWAY_NODES });
+                notOkNodes.push({ id: -2, message: check_msg.NO_RUNWAY_NODES });
             }
             this.postMessage(['progress', 1]);
             var allEnds = Object.entries(bidirectionalGraph).filter(
