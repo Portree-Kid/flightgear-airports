@@ -219,13 +219,27 @@
     name: 'settings-panel',
     components: { DirectorySelect, FileSelect },
     props: [],
-    mounted () {
-    },
-
     data () {
-      return { ok: true, activeName: '0' }
+      return { ok: true, activeName: '0', scanStoreLogging: false }
+    },
+    mounted () {
+      console.debug('Mount')
+      this.$store.watch(
+        function (state) {
+          console.debug('Mount ' + JSON.stringify(state))
+          return state.Settings.settings
+        },
+        () => { this.loggingChanged() }
+        ,
+        {
+          deep: true // add this if u need to watch object properties change etc.
+        }
+      )
     },
     methods: {
+      loggingChanged () {
+        this.scanStoreLogging = this.$store.state.Settings.settings.scanLogging === 1
+      },
       flightgearDirectorySelect: function (flightgearDirectory) {
         console.log(flightgearDirectory)
         this.$store.commit('FLIGHTGEAR_DIRECTORY', flightgearDirectory)
@@ -344,7 +358,7 @@
       scanLogging: {
       // getter
         get: function () {
-          return this.$store.state.Settings.settings.scanLogging === 1
+          return this.scanStoreLogging
         },
         // setter
         set: function (newValue) {
