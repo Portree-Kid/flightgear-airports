@@ -28,5 +28,6 @@
     "TO_MANY_PUSHBACK_TAXI_ROUTES": ["Too many Taxi routes from Pushback Holding Point", ""],
     "PUSHBACK_EXIT_NOT_BIDRECTIONAL": ["Pushback Holding Point Exit route is not bidirectional", ""],
     "NO_EDGES": ["No Edges", "No checks are run if there are no edges present"],
-    "NO_RUNWAYS": ["No Runways", "No checks are run if there are no runways present. APT layer visible?"]
+    "NO_RUNWAYS": ["No Runways", "No checks are run if there are no runways present. APT layer visible?"],
+    "DOUBLE_EDGE": ["No Double Edges", "This edge is doubled"]
 }

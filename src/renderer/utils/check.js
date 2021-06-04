@@ -397,6 +397,13 @@ async function checkGroundnet(data) {
             });
             this.postMessage(['progress', 1]);
 
+            var doubleEdges = edges.filter((v, i, a) => a.findIndex(t => (t.start === v.start && t.end === v.end) ) !== i);
+            doubleEdges.forEach(e => {
+                notOkNodes.push({ id: e.id, message: check_msg.DOUBLE_EDGE });
+            });
+
+            // debugger;
+
             notOkNodes = notOkNodes.concat(invalidParkings);
             if (invalidParkings.length === 0) {
                 notOkNodes.push({ id: -1, message: check_msg.PARKINGS_VALID });
@@ -517,12 +524,10 @@ var mapRunways = function (o) {
 
 var mapEdges = function (o) {
     if (o.type === 'poly')
-        // debugger;
         return {
-            start: o.start, end: o.end, isPushBackRoute: o.isPushBackRoute !== undefined &&
+            id: o._leaflet_id, start: o.start, end: o.end, isPushBackRoute: o.isPushBackRoute !== undefined &&
                 o.isPushBackRoute !== 0, direction: o.direction, latLngs: o.latLngs
         };
-    console.debug(o);
 }
 
 var latToTurf = function (turfPoint) {

@@ -14,7 +14,6 @@ d.getMilliseconds() + '.log';
 var logStream = null;
 
 var loggerInit = function (logging) {
-  debugger;
   if (logging) {
     try {
       const homedir = require('os').homedir();
