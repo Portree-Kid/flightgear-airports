@@ -369,9 +369,24 @@ You should have received a copy of the GNU General Public License along with FG 
         if(Number.isNaN(index)) {
           return;
         }
-        if(this.featureLookup===undefined || this.featureLookup[index]===undefined) {
-          console.error("Lookup " + index + " failed ");
-          this.buildLookup()
+        if (this.featureLookup===undefined || this.featureLookup[index]===undefined) {
+          var found = false;
+          this.groundnetLayerGroup.eachLayer((layer) => {
+            if (layer instanceof L.Polyline && layer._leaflet_id == index) {
+              layer.select();
+              this.$store.dispatch('setCenter', layer.getCenter());
+              found = true;
+            } else {
+              layer.deselect();
+            }
+          });
+          if (found) {
+            return;
+          } else {
+            console.error("Lookup " + index + " failed ");
+            this.buildLookup();
+            return;
+          }
         }
         if (Number(this.$store.state.Editable.index) >= 0 &&
           this.featureLookup[this.$store.state.Editable.index]!==undefined) {
@@ -383,7 +398,6 @@ You should have received a copy of the GNU General Public License along with FG 
         this.featureLookup[index].forEach((element, i) => {
           if (element instanceof L.Polyline) {
             element._latlngs.forEach((e1, index1) => {
-              console.log(e1);
               if (e1.attributes.index===Number(index)) {
                 var latlng = {};
                 latlng.lat =  e1.lat;
