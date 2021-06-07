@@ -16,10 +16,7 @@
 
 <script lang="js">
   // import scanner from '../utils/scan'
-  import fileUrl from 'file-url'
   import {Table, TableColumn} from 'element-ui'
-
-  const path = require('path')
 
   export default {
     name: 'search',
@@ -46,82 +43,6 @@
       formatter (row, column) {
         console.log('Row ' + row)
         return row
-      },
-      scanAPT () {
-        try {
-          const winURL = process.env.NODE_ENV === 'development'
-            ? `http://localhost:9080/src/renderer/utils/worker.js`
-            : `file://${__dirname}/worker.js`
-          console.log('make a worker: ', path.resolve(__dirname, 'worker.js'))
-
-          const worker = new Worker(winURL)
-          console.log(fileUrl('src/renderer/utils/worker.js'))
-
-          // var worker = new Worker(fileUrl('src/renderer/utils/worker.js'))
-          worker.postMessage(['scanapt'])
-          // the reply
-          var store = this.$store
-          worker.onmessage = function (e) {
-            if (e.data === 'DONE') {
-              console.log('DONE')
-              store.dispatch('getAirports')
-              worker.terminate()
-            }
-            console.log(e.data)
-          }
-        } catch (err) {
-          console.error(err)
-        }
-      },
-      scanGroundnets () {
-        try {
-          const winURL = process.env.NODE_ENV === 'development'
-            ? `http://localhost:9080/src/renderer/utils/worker.js`
-            : `file://${__dirname}/worker.js`
-          console.log('make a worker: ', path.resolve(__dirname, 'worker.js'))
-
-          const worker = new Worker(winURL)
-          console.log(fileUrl('src/renderer/utils/worker.js'))
-
-          worker.postMessage(['scan', this.$store.state.Settings.settings.airportsDirectory])
-          // the reply
-          var store = this.$store
-          worker.onmessage = function (e) {
-            if (e.data === 'DONE') {
-              console.log('DONE')
-              store.dispatch('getAirports')
-              worker.terminate()
-            }
-            console.log(e.data)
-          }
-        } catch (err) {
-          console.error(err)
-        }
-      },
-      scanTraffic () {
-        // let flightgearDirectory = this.$store.state.settings.flightgearDirectory
-        try {
-          const winURL = process.env.NODE_ENV === 'development'
-            ? `http://localhost:9080/src/renderer/utils/worker.js`
-            : `file://${__dirname}/worker.js`
-          console.log('make a worker: ', path.resolve(__dirname, 'worker.js'))
-
-          const worker = new Worker(winURL)
-          console.log(fileUrl('src/renderer/utils/worker.js'))
-          worker.postMessage(['scanai', this.$store.state.Settings.settings.flightgearDirectory])
-          // the reply
-          var store = this.$store
-          worker.onmessage = function (e) {
-            if (e.data === 'DONE') {
-              console.log('DONE')
-              store.dispatch('getAirports')
-              worker.terminate()
-            }
-            console.log(e.data)
-          }
-        } catch (err) {
-          console.error(err)
-        }
       }
     },
     computed: {
@@ -136,12 +57,14 @@
             .filter(a => searchRegex.test(a.properties.icao) || searchRegex.test(a.properties.name))
             // .map(a => console.log(a.properties))
             .map(a => ({ icao: a.properties.icao, name: a.properties.name }))
-          let icaoResult = result.filter(a => a.icao === this.searchterm)
+            .filter((v, i, a) => a.findIndex(t => (t.icao === v.icao)) === i)
+          let icaoResult = result.filter(a => a.icao === this.searchterm).filter((v, i, a) => a.findIndex(t => (t.icao === v.icao)) === i)
           if (result !== undefined &&
               icaoResult.length === 0 &&
               this.searchterm !== undefined &&
               this.searchterm.length >= 3 &&
               this.searchterm.length <= 4) {
+                // Not found so it might have been excluded due to no traffic
             this.$store.dispatch('getAirport', this.searchterm)
           }
           this.lastResult = result
