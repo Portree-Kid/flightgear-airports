@@ -234,6 +234,8 @@ exports.readGroundnetXML = function (fDir, icao, f) {
 
                         polyline.begin = beginNode.attr('index');
                         polyline.end = endNode.attr('index');
+                        polyline.feature = { properties: { searchTerm:  'Arc ' + beginNode.attr('index') + '-' + endNode.attr('index')}};
+
                         // polyline.enableEdit();
 
                         // polyline.on('dblclick', function (event) { L.DomEvent.stop; polyline.toggleEdit; });
