@@ -10,6 +10,7 @@ const extendTaxiSegment = function (taxiwaySegment) {
     taxiwaySegment.__proto__.begin;
     taxiwaySegment.__proto__.end;
     taxiwaySegment.__proto__.bidirectional;
+
     taxiwaySegment.__proto__.updateBeginVertex = function (latlng) {
         if (this._latlngs[0].__vertex) {
             this._latlngs[0].__vertex.setLatLng(latlng);
@@ -244,6 +245,8 @@ const extendTaxiSegment = function (taxiwaySegment) {
                     polyline.editor.refresh();
                     //polyline.editor.reset();
                     polyline.featureLookup = this.featureLookup;
+                    polyline.feature =  { properties: {searchTerm:  'Arc ' + nextIndex + '-' + taxiwaySegment.end}};
+
                     polyline.options.attributes.name = taxiwaySegment.options.attributes.name;
                     polyline.options.attributes.direction = taxiwaySegment.options.attributes.direction;
                     polyline.options.attributes.isPushBackRoute = taxiwaySegment.options.attributes.isPushBackRoute;

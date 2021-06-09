@@ -64,7 +64,7 @@
               this.searchterm !== undefined &&
               this.searchterm.length >= 3 &&
               this.searchterm.length <= 4) {
-                // Not found so it might have been excluded due to no traffic
+            // Not found so it might have been excluded due to no traffic
             this.$store.dispatch('getAirport', this.searchterm)
           }
           this.lastResult = result

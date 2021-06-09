@@ -110,6 +110,9 @@ You should have received a copy of the GNU General Public License along with FG 
       }
     },
     methods: {
+      getLayer () {
+        return this.groundnetLayerGroup;
+      },
       getIdLayerGroup() {
         return this.idLayerGroup;
       },

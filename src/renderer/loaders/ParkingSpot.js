@@ -442,6 +442,8 @@ var parkingSpot = function (n, layerGroup) {
     });
     circle.id = n.attr('index');
     circle.glueindex = n.attr('index');
+    circle.feature = { properties: { searchTerm: n.attr('index') + ' ' + n.attr('name')}};
+
     /*
 <Parking index="2"
 type="gate"

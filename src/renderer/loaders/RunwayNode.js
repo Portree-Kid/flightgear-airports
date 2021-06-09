@@ -43,18 +43,18 @@ L.RunwayNode = L.Marker.extend({
     },
     select() {
         try {
-            this._icon.style['color'] = 'red';            
+            this._icon.style['color'] = 'red';
         } catch (error) {
             console.error(error);
         }
-    },    
+    },
     deselect() {
         try {
-            this._icon.style['color'] = 'black';            
+            this._icon.style['color'] = 'black';
         } catch (error) {
             console.error(error);
         }
-    },    
+    },
     extensions: function (editLayer) {
         this.options.attributes = {};
         if (typeof this.featureLookup[this.glueindex] === 'undefined') {
@@ -63,7 +63,7 @@ L.RunwayNode = L.Marker.extend({
         this.featureLookup[this.glueindex].push(this);
     },
     /**
-     * 
+     *
      */
 
     follow(dragIndex, event) {
@@ -93,18 +93,18 @@ L.RunwayNode = L.Marker.extend({
                         element.updateEndVertex(event.latlng);
                         element.updateMiddle();
                     }
-                } else if (element instanceof L.Editable.VertexMarker) {                    
+                } else if (element instanceof L.Editable.VertexMarker) {
                     console.log(element);
                     element.setLatLng(event.latlng);
                     element.latlngs.forEach((latlng, index) => {
-                        console.log(latlng);                        
+                        console.log(latlng);
                         if(latlng.__vertex === element) {
                           latlng.update(event.latlng);
                         }
                     });
                     element.editor.feature.setLatLngs(element.latlngs);
                     element.editor.feature.updateMiddle();
-                }    
+                }
             }
         })
     }
@@ -120,7 +120,9 @@ var runwayNode = function (n, layerGroup) {
     });
     var node = new L.RunwayNode([latlon.decimalLatitude, latlon.decimalLongitude], { icon: icon, attributes: {} });
     node.glueindex = n.attr('index');
-    $.each( n.attrs, function( key, value ) {        
+    node.feature = n.attr('index');
+
+    $.each( n.attrs, function( key, value ) {
         if(isNaN(value))
           node.options.attributes[ key ] = value;
         else

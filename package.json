@@ -106,6 +106,7 @@
     "leaflet": "^1.5.1",
     "leaflet-editable": "^1.2.0",
     "leaflet-polylinedecorator": "^1.6.0",
+    "leaflet-search": "^2.9.9",
     "leaflet-sidebar-v2": "^3.2.1",
     "leaflet-textpath": "^1.2.0",
     "lokijs": "^1.5.8",

@@ -53,6 +53,7 @@ You should have received a copy of the GNU General Public License along with FG 
 
 <script lang="js">
   import 'leaflet/dist/leaflet.css'
+  import 'leaflet-search/dist/leaflet-search.src.css'
   import '@/assets/button.css'
   import { LMap, LTileLayer, LMarker, LCircle, LLayerGroup, LControl, LTooltip } from 'vue2-leaflet'
   import LeafletSidebar from './LeafletSidebar'
@@ -67,6 +68,7 @@ You should have received a copy of the GNU General Public License along with FG 
 
   import { Loading } from 'element-ui'
   import L from 'leaflet'
+  import { LeafletSearch } from 'leaflet-search'
 
   // https://github.com/KoRiGaN/Vue2Leaflet/issues/103
   delete L.Icon.Default.prototype._getIconUrl
@@ -77,7 +79,7 @@ You should have received a copy of the GNU General Public License along with FG 
   })
   export default {
     name: 'flightgear-map',
-    components: { LMap, LTileLayer, LMarker, LCircle, LTooltip, LeafletSidebar, AiLayer, EditBar, ToolBar, EditLayer, TowerLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer, ToolLayer },
+    components: { LMap, LTileLayer, LMarker, LCircle, LTooltip, LeafletSidebar, AiLayer, EditBar, ToolBar, EditLayer, TowerLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer, ToolLayer, LeafletSearch },
     props: [],
     created () {
       this.loadingInstance = null
@@ -241,6 +243,16 @@ You should have received a copy of the GNU General Public License along with FG 
           }
           this.$refs.towerLayer.zoomUpdated()
         }
+        if (this.$refs.editLayer !== undefined && this.searchControl === undefined && this.$refs.editLayer.getLayer() === e.layer) {
+          this.searchControl = new L.Control.Search({
+            layer: this.$refs.editLayer.getLayer(),
+            position: 'topleft',
+            propertyName: 'searchTerm',
+            marker: {animate: false},
+            initial: false
+          })
+          this.searchControl.addTo(this.$refs.map.mapObject)
+        }
       },
       onSelectedPolygon (ring) {
         var parkings = this.$refs.editLayer.getParkings(ring)
@@ -367,7 +379,7 @@ You should have received a copy of the GNU General Public License along with FG 
       },
       async centerUpdated (center) {
         if (center !== this.$store.state.Settings.center) {
-          this.$store.dispatch('setCenter', center)
+          this.$store.dispatch('setCenter', {lat: Number(center.lat), lng: Number(center.lng)})
           this.$refs.airportLayer.setVisible(this.zoom < 12)
           if (this.$refs.thresholdLayer) {
             this.$refs.thresholdLayer.setVisible(this.zoom >= 12)
