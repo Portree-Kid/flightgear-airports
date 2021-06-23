@@ -233,7 +233,19 @@ L.ParkingSpot = L.Circle.extend({
     },
     deselect() {
         var style = {};
-        style['color'] = '#3388ff';
+        if(this.options.attributes.type == 'ga') {
+            style['color'] = 'green';
+        } else if(this.options.attributes.type == 'cargo') {
+            style['color'] = 'yellow';
+        } else if(this.options.attributes.type == 'gate') {
+            style['color'] = '#3388ff';
+        } else if(this.options.attributes.type == 'mil-fighter') {
+            style['color'] = 'red';
+        } else if(this.options.attributes.type == 'mil-cargo') {
+            style['color'] = 'DarkRed';
+        } else {
+            style['color'] = '#3388ff';
+        }
         this.setStyle(style);
         if(this.direction) {
             this.direction.setStyle(style);
@@ -247,17 +259,17 @@ L.ParkingSpot = L.Circle.extend({
     },
     setInteractive(interactive) {
         if (interactive) {
-            if(this.direction) {
+            if(this.direction&&this.direction._path) {
               L.DomUtil.addClass(this.direction._path, 'leaflet-interactive');
             }
-            if(this.box) {
+            if(this.box&&this.box._path) {
               L.DomUtil.addClass(this.box._path, 'leaflet-interactive');
             }
         } else {
-            if(this.direction) {
+            if(this.direction&&this.direction._path) {
               L.DomUtil.removeClass(this.direction._path, 'leaflet-interactive');
             }
-            if(this.box) {
+            if(this.box&&this.box._path) {
               L.DomUtil.removeClass(this.box._path, 'leaflet-interactive');
             }
         }
@@ -436,13 +448,13 @@ var parkingSpot = function (n, layerGroup) {
     var latlon = convert(n.attr('lat') + " " + n.attr('lon'));
     //console.log(latlon.decimalLatitude);
     //console.log(convert(n.attr('lat') + " " + n.attr('lon')).decimalLongitude);
-    const circle = new L.ParkingSpot([latlon.decimalLatitude, latlon.decimalLongitude], { radius: n.attr('radius'), attributes: {}  });
-    circle.on('editable:enable', function (event) {
+    const parking = new L.ParkingSpot([latlon.decimalLatitude, latlon.decimalLongitude], { radius: n.attr('radius'), attributes: {}  });
+    parking.on('editable:enable', function (event) {
       // event.target.createDirection();
     });
-    circle.id = n.attr('index');
-    circle.glueindex = n.attr('index');
-    circle.feature = { properties: { searchTerm: n.attr('index') + ' ' + n.attr('name')}};
+    parking.id = n.attr('index');
+    parking.glueindex = n.attr('index');
+    parking.feature = { properties: { searchTerm: n.attr('index') + ' ' + n.attr('name')}};
 
     /*
 <Parking index="2"
@@ -459,17 +471,18 @@ airlineCodes="VIR,KAL,DAL,KLM" />
     //circle.attributes = { type: n.attr('type'), name: n.attr('name'), radius: Number(n.attr('radius')), airlineCodes: n.attr('airlineCodes'), heading: Number(n.attr('heading')) };
 
     $.each( n.attrs, function( key, value ) {
-        console.debug( '$', circle.id, key , value);
+        console.debug( '$', parking.id, key , value);
 
         if(isNaN(value))
-          circle.options.attributes[ key ] = value;
+          parking.options.attributes[ key ] = value;
         else
-          circle.options.attributes[ key ] = Number( value);
+          parking.options.attributes[ key ] = Number( value);
     });
-    circle.addListeners();
+    parking.addListeners();
 
-    circle.addTo(layerGroup);
-    return circle;
+    parking.addTo(layerGroup);
+    parking.deselect();
+    return parking;
 }
 
 module.exports = parkingSpot;
