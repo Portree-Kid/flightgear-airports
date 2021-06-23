@@ -70,7 +70,7 @@ async function checkGroundnet(data) {
             var normalNodes = data.map(mapEdges).filter(n => n !== undefined)
                 .flatMap(m => m.latLngs).filter(n => runwayNodeIDs.indexOf(Number(n.index)) < 0);
 
-            var runways = data.map(mapRunways).filter(n => n !== undefined);
+            var takeoffPads = data.map(mapTakeoffPads).filter(n => n !== undefined);
 
             this.max = 30;
             this.postMessage(['max', this.max]);
@@ -104,7 +104,8 @@ async function checkGroundnet(data) {
                 resolve([{ id: -1, message: check_msg.NO_EDGES }]);
             }
             this.postMessage(['progress', 1]);
-            if (runways.length === 0) {
+            //debugger;
+            if (takeoffPads.length === 0) {
                 resolve([{ id: -1, message: check_msg.NO_RUNWAYS }]);
             }
             this.postMessage(['progress', 1]);
@@ -297,7 +298,7 @@ async function checkGroundnet(data) {
             var notOkNodesRunways = runwayNodeIDs.filter(
                 (v, i) => okNodes.indexOf(v) < 0
             ).map(
-                id => { return { id: id, message: check_msg.NO_RUNWAY_ROUTE } }
+                id => { return { id: id, message: check_msg.NO_PARKING_ROUTE } }
             );
             this.postMessage(['progress', 1]);
 
@@ -382,7 +383,8 @@ async function checkGroundnet(data) {
             this.postMessage(['progress', 1]);
             //Check if runwaynodes are on runway
             runwayNodes.forEach(runwayNode => {
-                if (runways.filter(r => turf.booleanContains(r, latToTurf(runwayNode))).length === 0) {
+                // debugger;
+                if (takeoffPads.filter(r => turf.booleanContains(r, latToTurf(runwayNode))).length === 0) {
                     notOkNodes.push({ id: runwayNode.index, message: check_msg.RUNWAY_NODE_NOT_ON_RUNWAY });
                 }
             });
@@ -391,7 +393,7 @@ async function checkGroundnet(data) {
             //Check if nodes no normal nodes are on runway
             normalNodes.forEach(normalNode => {
                 //debugger;
-                if (runways.filter(r => turf.booleanContains(r, latToTurf(normalNode))).length > 0) {
+                if (takeoffPads.filter(r => turf.booleanContains(r, latToTurf(normalNode))).length > 0) {
                     notOkNodes.push({ id: normalNode.index, message: check_msg.NON_RUNWAYNODE_ON_RUNWAY });
                 }
             });
@@ -514,8 +516,8 @@ var mapRunwayNode = function (o) {
     }
 }
 
-var mapRunways = function (o) {
-    if (o.type === 'runway_poly') {
+var mapTakeoffPads = function (o) {
+    if (o.type === 'takeoffpad_poly') {
         var pts = o.pavement[0].map(latLngToArray);
         pts.push(pts[0]);
         return turf.polygon([pts]);

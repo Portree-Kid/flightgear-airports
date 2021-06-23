@@ -109,6 +109,7 @@
     "leaflet-search": "^2.9.9",
     "leaflet-sidebar-v2": "^3.2.1",
     "leaflet-textpath": "^1.2.0",
+    "leaflet.pattern": "^0.1.0",
     "lokijs": "^1.5.8",
     "mathjs": "^6.2.5",
     "path": "^0.12.7",

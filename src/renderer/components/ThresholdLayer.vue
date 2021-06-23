@@ -3,6 +3,7 @@
 <script lang="js">
   import { LMap, LMarker } from 'vue2-leaflet'
   import L from 'leaflet'
+  import leafletPattern from 'leaflet.pattern'
   import LEdit from 'leaflet-editable/src/Leaflet.Editable.js'
   import {readThresholdXML} from '../loaders/threshold_loader'
   import {writeThresholdXML} from '../loaders/threshold_writer'
@@ -13,7 +14,7 @@
     created () {
     },
     mounted () {
-      console.debug(LMap, LMarker, L, LEdit)
+      console.debug(LMap, LMarker, L, LEdit, leafletPattern)
       this.$store.watch(
         function (state) {
           return state.Editable.data.threshold
@@ -24,6 +25,8 @@
           deep: true
         }
       )
+      var stripes = new L.StripePattern({color: 'yellow'})
+      stripes.addTo(this.$parent.mapObject)
     },
     beforeDestroy () {
       this.remove()
@@ -55,8 +58,11 @@
         if (this.layerGroup) {
           this.layerGroup.removeFrom(this.$parent.mapObject)
         }
+        var stripes = new L.StripePattern({color: 'yellow'})
+        stripes.addTo(this.$parent.mapObject)
+
         // Callback for add
-        this.layerGroup = readThresholdXML(this.$store.state.Settings.settings.airportsDirectory, icao, this.read)
+        this.layerGroup = readThresholdXML(this.$store.state.Settings.settings.airportsDirectory, icao, this.read, stripes)
         if (!this.layerGroup) {
           console.warn('Threshold for ICAO not loaded ' + icao)
           return

@@ -31,7 +31,7 @@ export function checkMapper(o) {
             'box': o.box !== undefined ? o.box.getLatLngs() : null
         };
     } else if (o instanceof L.RunwayNode) {
-        console.log(o)        
+        console.log(o)
         return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'lat': o._latlng.lat, 'lng': o._latlng.lng, 'type': 'runway' };
     } else if (o instanceof L.HoldNode) {
         console.log(o)
@@ -39,6 +39,11 @@ export function checkMapper(o) {
     } else if (o instanceof L.RunwayPolygon) {
         return {
             'type': 'runway_poly',
+            'pavement': o.getLatLngs()
+        }
+    } else if (o instanceof L.TakeoffPolygon) {
+        return {
+            'type': 'takeoffpad_poly',
             'pavement': o.getLatLngs()
         }
     } else if (o instanceof L.Polyline) {
@@ -56,7 +61,7 @@ export function checkMapper(o) {
 }
 
 export function groMapper(o) {
-    if (o instanceof L.Polygon) { 
+    if (o instanceof L.Polygon) {
 
     }
 }

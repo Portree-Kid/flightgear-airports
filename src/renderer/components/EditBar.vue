@@ -302,9 +302,16 @@ You should have received a copy of the GNU General Public License along with FG 
             console.log(l)
             pavement.push(l)
           })
-          var features2 = pavement.map(mapper.checkMapper).filter(n => n)
+          var thresholds = []
+          this.$parent.$parent.$refs.thresholdLayer.getLayer().eachLayer(l => {
+            console.log(l)
+            thresholds.push(l)
+          })
+          var pavementFeatures = pavement.map(mapper.checkMapper).filter(n => n)
+          //TODO
+          var thresholdFeatures = thresholds.map(mapper.checkMapper).filter(n => n)
 
-          worker.postMessage(['check', features.concat(features2) ] )
+          worker.postMessage(['check', features.concat(pavementFeatures).concat(thresholdFeatures) ] )
           this.pollData()
           // the reply
           var store = this.$store

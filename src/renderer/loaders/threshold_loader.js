@@ -1,19 +1,22 @@
 /* eslint-disable */
 const fs = require('fs');
 const path = require('path');
-var xamel = require('xamel');
+const xamel = require('xamel');
 const convert = require('geo-coordinates-parser');
+const LatLonEllipsoidal = require('geodesy/latlon-ellipsoidal-vincenty.js').default;
 
 const store = require('../store');
 
 const util = require('util');
+
+const takeoffPadPoly = require('../leaflet/TakeoffPad.js');
 
 const threshold = require('./Threshold.js');
 
 
 var $ = require('jquery');
 
-exports.readThresholdXML = function (fDir, icao, force) {
+exports.readThresholdXML = function (fDir, icao, force, stripes) {
     try {
         var layerGroup = L.layerGroup();
         layerGroup.maxId = 0;
@@ -48,12 +51,30 @@ exports.readThresholdXML = function (fDir, icao, force) {
             var index = 0;
             runwayNodes.map(r => {
                 var thresholds = r.find('threshold');
-                thresholds.map(t => {
-                    var icon = threshold(t);
+                thresholds.map(n => {
+                    var icon = threshold(n);
                     icon.index = index;
                     icon.addTo(layerGroup);
-                }                
+                    // Width in m
+                    var runwayWidth = 20;
+                    var latlon = convert(n.find('lat/text()').text() + " " + n.find('lon/text()').text());
+                    var displ_m = Number(n.find('displ-m/text()').text());
+                    var pointMiddle = new LatLonEllipsoidal(latlon.decimalLatitude, latlon.decimalLongitude);
+                    var heading = Number(n.find('hdg-deg/text()').text());
+                    var point1 = pointMiddle.destinationPoint(displ_m, heading);
+                    var point2 = pointMiddle.destinationPoint(displ_m + 80, heading);
+
+                    var runwayPoints = [];
+                    runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (heading + 90)));
+                    runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (heading + 90)));
+                    runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (heading - 90)));
+                    runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (heading - 90)));
+
+                    var runwayPoly = takeoffPadPoly(runwayPoints);
+                    runwayPoly.addTo(layerGroup);
+                }
                 )
+
                 index+=1;
             }).sort();
 
