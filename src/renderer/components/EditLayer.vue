@@ -216,6 +216,11 @@ You should have received a copy of the GNU General Public License along with FG 
               element.updateRadius(event.wingspan/2)
             });
             break;
+          case 'parking-group-type':
+            this.selection.forEach(element => {
+              element.updateType(event.parking_type)
+            });
+            break;
           default:
             break;
         }

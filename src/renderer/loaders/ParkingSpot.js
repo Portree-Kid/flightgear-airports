@@ -96,6 +96,10 @@ L.ParkingSpot = L.Circle.extend({
         this.updateWheelPos();
         this.updateBox();
     },
+    updateType(type) {
+        this.options.attributes.type = type;
+        this.deselect();
+    },
     // Update the direction vertex from the direction
     updateVertexFromDirection() {
         if (this.editEnabled()) {
