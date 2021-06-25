@@ -111,7 +111,7 @@
     "leaflet-textpath": "^1.2.0",
     "leaflet.pattern": "^0.1.0",
     "lokijs": "^1.5.8",
-    "mathjs": "^6.2.5",
+    "mathjs": "^7.5.1",
     "path": "^0.12.7",
     "tiny-worker": "^2.3.0",
     "vue": "^2.5.16",
