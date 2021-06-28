@@ -74,7 +74,7 @@ jobs:
         name: '0.0.33'
         provider: releases
         api_key:
-          secure: ECdYNrvCA7+qSnbktJPstwXrluqKZTWDD7K3X/dyoxRO4+ZL/K19r60LXF9g90troWgdZSN3tFxNktkGeIOuTo83Q3B6qjXnKtdW3JhefvztlHQadUIf2p8Ype2spicNAl2629Mwr7ksqJuV0rR0T4zYT1SIFWkuwGYhR+tmS94m6QmnocGPzjset3y23lJ/rczJiiWIkaLrOfeCj5VjWtSaVQEWWlolmuji0qGHvOT/mq1X+jfI9RIlJTpV2ZNYaa3fr+M+8tIreaHDjbKrYAuIA/JzpDxmXtWGnxkxLbDxonp6OhzcJ7z9hpdkg38HKxNTL9Bdv0LpZKCTo2C+0G6yR3kQqXhoIzbfFeTX0G6d7I8oYxL1JGCsrnmU3OyhCLMRcOWL294hhDIUMWveBRNVRGVaOzeXRphO4nnMhGNd4KxwxvRPBMNeguhL/ZBwjcw6puYL3m86UT5iwjMuYvcbEVEDXwHSyi96zjHzolkMUn8hPOIUfgmCOIsqIMMpbCXJqdyha0pu9x1qKrXbF+hQ5JXPvTN8/ZG4dLXhvsZJdD50vZu+GW33vU96c+mwIkCz0CS5t+vuHfdT/OOuBN7HV46q/9WrZMSlz5ZD+A2dY57QVL+CucjMZlVoU/iJhfRpV5XPYvLlYI+tpH0yX5JQqtcRdZJzKsYknwZNj5o=
+          secure: YOZloW096748HIBKbntBznFujflK6276yQsYbkhbQmcAs7nZoQVAAtX9QRHTbPQ1T5XYE/OK2c430LseEsF74c9Hl4kVcnExgOTPuqlMaiQqyrBJbl0lCjGuxmIkE9MhRQsvjDEVgjiz70+fXj9wg4lB9XlPDD0dAE5lTqMEgbVvdihx7ypznH4EHVVc4xebSDyNSXC6scemHgVPfVM1mC0jgjPPkj380WMINrzOqxBNNLYYQTkl8E8A2K0j3piuhWMXnF9txFfhwhb89VH/GZB1OcnAmaPedsvJAGZyGpuVOEb9JT6D3u+1TdsIk5bHCq6UYOCwxy1Lfo3jKzJ7QH1Woe4U3uoBdhFuq3x99tCoq5r4TQm689oIEKsmcap7ppjFoHFH11E8wvssKt0T/FWUDm5+pNwDxBiB5yOETeto8vKzrxFoqL15pWgU8Hma0lpXYGV+wv9xq2bC9uBKjGLhRTAFoVJmTb9mksv2prMiJgHgSY6xDFBVRjaj7RgbDLuMVIg3bfMJvOo1mSBUtmby2ZOcv2xg8ds9aQUGFTjVPc53OPHLfdsDY/jI/kWUAvDCDoieyAe4clKzkBsxwwVekFGvAxxicTQ6Iu6j+LpGM3w6DHuv6mkD/XC1ha2w/ZnER8JCkpHZhqWlyj0QDF3Vw8boJNdbB+w/CW30124=
         file_glob: true    
         file: build/*
         on:
