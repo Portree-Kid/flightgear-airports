@@ -11,34 +11,84 @@ You should have received a copy of the GNU General Public License along with FG 
 -->
 <template>
   <div id="EditBar">
-    <Upload :visible.sync="uploadVisible" ref="upload"></Upload>
-    <ZoomButton icon="fas fa-th" v-on:click="zoomin" :show="true" tooltip="Zoomin"></ZoomButton>
-    <ZoomButton icon="fas fa-th-large" v-on:click="zoomout" :show="!editing" tooltip="Zoomout"></ZoomButton>
-    <!--<ZoomButton icon="far fa-eye-slash" v-on:click="hideAPT" :show='true' tooltip="Hide APT"></ZoomButton>-->
 
-    <EditButton icon="fas fa-upload" v-on:click="upload" :show="!editing" tooltip="Upload"></EditButton>
-    <EditButton icon="fas fa-plane" v-on:click="test" :show="!editing" tooltip="Export"></EditButton>
-    <EditButton icon="fas fa-edit" v-on:click="edit" :show="!editing" tooltip="Edit"></EditButton>
-    <EditButton
-      icon="fas fa-undo"
-      v-on:click="centerDialogVisible = true"
-      :show="editing"
-      tooltip="Undo"
-    ></EditButton>
-    <el-dialog title="Reload" :visible.sync="centerDialogVisible" width="30%" center>
-      <span style="center">Reload from last save? You will lose the current edits.</span>
+    <el-dialog
+      title="Checking"
+      width="30%"
+      center
+      :visible.sync="checkDialogVisible"
+    >
+      <el-container direction="vertical">
+        <el-progress
+          :percentage="Number(((progress / max) * 100).toPrecision(3))"
+          v-if="max > 0"
+        ></el-progress>
+      </el-container>
+    </el-dialog>
+
+    <el-dialog
+      title="Revert"
+      :visible.sync="centerDialogVisible"
+      width="550px"
+      center
+    >
+      <span>
+        Please select the Version to revert to.
+        <el-row v-for="item in saves" :key="item.file">
+           <el-button @click="revert(item.file)">{{item.mtime}}</el-button>
+        </el-row>
+      </span>
+
       <span slot="footer" class="dialog-footer">
-        <el-button @click="undoFirst">Base version (GIT)</el-button>
-        <el-button type="primary" @click="undoLast">Last save</el-button>
+        <el-button type="primary" @click="cancel">Cancel</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="Saving" :visible.sync="saveDialogVisible" width="30%" center>
+    <el-dialog
+      title="Saving"
+      :visible.sync="saveDialogVisible"
+      width="30%"
+      center
+    >
       <span style="center">Saving..</span>
     </el-dialog>
 
-    <EditButton icon="fas fa-save" v-on:click="save" :show="editing" tooltip="Save"></EditButton>
-    <EditButton icon="far fa-check-square" v-on:click="showCheck" :show="editing" tooltip="Check"></EditButton>
+    <ZoomButton
+      icon="fas fa-th"
+      v-on:click="zoomin"
+      :show="true"
+      tooltip="Zoomin"
+    ></ZoomButton>
+    <ZoomButton
+      icon="fas fa-th-large"
+      v-on:click="zoomout"
+      :show="!editing"
+      tooltip="Zoomout"
+    ></ZoomButton>
 
+    <EditButton
+      icon="fa fa-window-close"
+      v-on:click="close"
+      :show="editing"
+      tooltip="Close/Save Editing"
+    ></EditButton>
+    <EditButton
+      icon="fas fa-undo"
+      v-on:click="openReload"
+      :show="editing"
+      tooltip="Revert to Savepoint"
+    ></EditButton>
+    <EditButton
+      icon="fas fa-save"
+      v-on:click="save"
+      :show="editing"
+      tooltip="Save"
+    ></EditButton>
+    <EditButton
+      icon="far fa-check-square"
+      v-on:click="showCheck"
+      :show="editing"
+      tooltip="Check"
+    ></EditButton>
     <EditButton
       icon="fas fa-draw-polygon"
       v-on:click="drawPolyline"
@@ -63,38 +113,39 @@ You should have received a copy of the GNU General Public License along with FG 
       :show="editing"
       tooltip="Draw Parking"
     ></EditButton>
-    <EditButton icon="fas fa-trash-alt" v-on:click="deleteFeature" :show="editing" tooltip="Remove"></EditButton>
-    <el-dialog title="Checking" width="30%" center :visible.sync="checkDialogVisible">
-      <el-container direction="vertical">
-        <el-progress :percentage="Number(((progress / max)*100).toPrecision(3))" v-if="max>0"></el-progress>
-      </el-container>
-    </el-dialog>
+    <EditButton
+      icon="fas fa-trash-alt"
+      v-on:click="deleteFeature"
+      :show="editing"
+      tooltip="Remove"
+    ></EditButton>
   </div>
 </template>
 
 <script lang="js">
 /* eslint-disable */
+  const path = require('path')
+  const fs = require('fs');
+  const mapper = require('../check/mapper');
+
+  import {listSaves} from '../loaders/groundnet_loader'
+
   import EditButton from './EditButton'
   import ZoomButton from './ZoomButton';
-  import Upload from './Upload'
   import Vue from 'vue'
 
   import fileUrl from 'file-url'
-  const path = require('path')
-  const fs = require('fs');
 
   export default {
-    components: { EditButton, Upload, ZoomButton },
+    components: { EditButton, ZoomButton },
     data () {
-      return {isEditing: false, uploadVisible: false, centerDialogVisible: false, saveDialogVisible: false, checkDialogVisible: false, checking: false, progress: 0, max: 0, pavementLayerVisible: true}
+      return {isEditing: false, uploadVisible: false, centerDialogVisible: false, saveDialogVisible: false, checkDialogVisible: false, checking: false, progress: 0, max: 0, pavementLayerVisible: true, saves: [] }
     },
     created () {
     },
     methods: {
-      upload() {
-        this.uploadVisible = true
-        this.$refs.upload.status()
-        this.$refs.upload.check()
+      cancel () {
+        this.centerDialogVisible = false
       },
       zoomout() {
         this.$parent.$parent.$refs.editLayer.stopDrawing()
@@ -110,42 +161,57 @@ You should have received a copy of the GNU General Public License along with FG 
       },
       edit () {
         this.isEditing = true
-        this.$emit('edit')
+        this.$emit('edit', true)
       },
-      undoFirst () {
+      setEditing (editing) {
+        this.isEditing = editing
+      },
+      revert (file) {
         this.isEditing = false
-        this.$emit('edit')
+        this.$emit('edit', false)
         this.centerDialogVisible = false
         this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         this.$parent.$parent.$refs.editLayer.disableEdit()
-        this.$parent.$parent.$refs.editLayer.reload(true)
+        this.$parent.$parent.$refs.towerLayer.disableEdit()
+        this.$parent.$parent.$refs.thresholdLayer.disableEdit()
+        this.$parent.$parent.$refs.editLayer.reload(file)
       },
-      undoLast () {
-        this.isEditing = false
-        this.$emit('edit')
-        this.centerDialogVisible = false
-        this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
-        this.$parent.$parent.$refs.editLayer.disableEdit()
-        this.$parent.$parent.$refs.editLayer.reload(false)
-      },
-      save () {
+      close () {
         this.$parent.$parent.$refs.editLayer.stopDrawing()
         this.isEditing = false
-        this.$emit('edit')
+        this.$emit('edit', false)
         this.$parent.$parent.$refs.map.mapObject.options.minZoom = 1;
         Vue.set(this, 'saveDialogVisible', true)
-        this.$emit('edit')
+        this.$emit('edit', false)
+        Vue.nextTick( function () {
+            setTimeout( this.closeDefered.bind(this), 100);
+        }, this)
+      },
+      closeDefered () {
+        this.$parent.$parent.$refs.editLayer.save()
+        this.$parent.$parent.$refs.towerLayer.save()
+        this.$parent.$parent.$refs.thresholdLayer.save()
+        this.$parent.$parent.$refs.editLayer.disableEdit()
+        this.$parent.$parent.$refs.towerLayer.disableEdit()
+        this.$parent.$parent.$refs.thresholdLayer.disableEdit()
+        this.rescanCurrentGroundnet()
+        Vue.set(this, 'saveDialogVisible', false)
+      },
+      save () {
+        Vue.set(this, 'saveDialogVisible', true)
+        this.$parent.$parent.$refs.editLayer.stopDrawing()
         Vue.nextTick( function () {
             setTimeout( this.saveDefered.bind(this), 100);
           }, this)
       },
       saveDefered () {
         this.$parent.$parent.$refs.editLayer.save()
-        this.$parent.$parent.$refs.editLayer.disableEdit()
-        this.scanGroundnets()
-        Vue.set(this, 'saveDialogVisible', false)              
+        this.$parent.$parent.$refs.towerLayer.save()
+        this.$parent.$parent.$refs.thresholdLayer.save()
+        this.rescanCurrentGroundnet()
+        Vue.set(this, 'saveDialogVisible', false)
       },
-      scanGroundnets () {
+      rescanCurrentGroundnet () {
         try {
           const winURL = process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/src/renderer/utils/worker.js`
@@ -154,7 +220,7 @@ You should have received a copy of the GNU General Public License along with FG 
 
           var icao = this.$parent.$parent.$refs.editLayer.icao
           const worker = new Worker(winURL)
-          
+
           var aptDir = path.join(this.$store.state.Settings.settings.airportsDirectory, icao[0], icao[1], icao[2]);
           worker.postMessage(['scan', aptDir ])
           // the reply
@@ -188,10 +254,7 @@ You should have received a copy of the GNU General Public License along with FG 
             view.scanning = Boolean(workery.checking)
             workery.view = view
           }
-        }, 1000)
-      },
-      test() {
-        this.$parent.$parent.$refs.editLayer.test()
+        }, 500)
       },
       check () {
         try {
@@ -200,8 +263,25 @@ You should have received a copy of the GNU General Public License along with FG 
             ? `http://localhost:9080/src/renderer/utils/check.js`
             : `file://${process.resourcesPath}/workers/check.js`
           console.log('make a check worker: ', path.resolve(__dirname, 'check.js'))
+          if(!this.$parent.$parent.$refs.pavementLayer.pavement) {
+            this.max = 0
+            this.checkDialogVisible = false
+            this.$message({
+              type: 'Error',
+              showClose: true,
+              message: `Check can't run without pavementlayer since runways aren't known. Is the APT file set correctly?`
+            })
+            return
+          }
 
           const worker = new Worker(winURL)
+          worker.onerror = function(e) {
+            worker.terminate()
+            worker.view.max = 0
+            worker.view.checkDialogVisible = false
+            e.preventDefault(); // <-- "Hey browser, I handled it!"
+          }
+
           console.log(fileUrl('src/renderer/utils/check.js'))
 
           worker.checking = this.checking
@@ -211,15 +291,27 @@ You should have received a copy of the GNU General Public License along with FG 
           worker.progress = 0
           // var worker = new Worker(fileUrl('src/renderer/utils/worker.js'))
           this.worker = worker
-          var xml = []
+          var groundnet = []
           this.$parent.$parent.$refs.editLayer.groundnetLayerGroup.eachLayer(l => {
             console.log(l)
-            xml.push(l)
+            groundnet.push(l)
           })
+          var features = groundnet.map(mapper.checkMapper).filter(n => n)
+          var pavement = []
+          this.$parent.$parent.$refs.pavementLayer.pavement.eachLayer(l => {
+            console.log(l)
+            pavement.push(l)
+          })
+          var thresholds = []
+          this.$parent.$parent.$refs.thresholdLayer.getLayer().eachLayer(l => {
+            console.log(l)
+            thresholds.push(l)
+          })
+          var pavementFeatures = pavement.map(mapper.checkMapper).filter(n => n)
+          //TODO
+          var thresholdFeatures = thresholds.map(mapper.checkMapper).filter(n => n)
 
-          var features = xml.map(this.featuresMapper).filter(n => n)
-
-          worker.postMessage(['check', features ] )
+          worker.postMessage(['check', features.concat(pavementFeatures).concat(thresholdFeatures) ] )
           this.pollData()
           // the reply
           var store = this.$store
@@ -274,36 +366,11 @@ You should have received a copy of the GNU General Public License along with FG 
         Vue.set(this, 'checkDialogVisible', true)
         this.check()
       },
-      featuresMapper(o) {
-        if (o instanceof L.ParkingSpot) {
-          /*
-          if( o.box === undefined ) {
-            debugger;
-          } */         
-          return { 'index': Number(o['id']), 
-          '_leaflet_id': o._leaflet_id, 
-          'type': 'parking', 
-          'parkingType': o.options.attributes.type, 
-          'name': o.options.attributes.name, 
-          'radius': String(o.options.attributes.radius),
-          'lat': o._latlng.lat,
-          'lng': o._latlng.lng,
-          'box': o.box!==undefined?o.box.getLatLngs():null
-           };
-        } else if (o instanceof L.RunwayNode) {
-          console.log(o)
-          return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'type': 'runway' };
-        } else if (o instanceof L.HoldNode) {
-          console.log(o)
-          return { 'index': Number(o['glueindex']), '_leaflet_id': o._leaflet_id, 'type': o.holdPointType };
-        } else if (o instanceof L.Polyline) {
-          console.log(o)
-          //_latlngs[""0""].__vertex.glueindex
-          var latLngs = o.getLatLngs().map(l => ({lat: l.lat, lng: l.lng, index: l.glueindex}));
-          return { 'start': Number(o['begin']), 'end': Number(o['end']), '_leaflet_id': o._leaflet_id, 'type': 'poly', 'isPushBackRoute': o.options.attributes.isPushBackRoute, latLngs: latLngs };
-        } else {
-          console.log('Unknown Type ')
-          console.log(typeof o)
+      openReload: function() {
+        this.centerDialogVisible = true
+        var icao = this.$parent.$parent.$refs.editLayer.icao
+        if (icao !== undefined && icao !== '') {
+          this.saves = listSaves(this.$store.state.Settings.settings.airportsDirectory, icao).sort((a, b) => a.mtimeMs - b.mtimeMs)
         }
       }
     },

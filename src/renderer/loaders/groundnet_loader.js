@@ -23,27 +23,44 @@ function addFrequencies (type, value) {
     value.split(' ').forEach(frequencyValue => {
         if( value.length > 0) {
             var frequency = {type: type, value: frequencyValue};
-            frequencies.push(frequency);    
+            frequencies.push(frequency);
         }
-    })      
+    })
 }
 
 exports.addFeature = function (feature) {
-    featureLookup[feature.id] = new Array();
+    featureLookup[feature.id] = [];
 }
 
-exports.readGroundnetXML = function (fDir, icao, force) {
-    try {
-        var layerGroup = L.layerGroup();
-        layerGroup.maxId = 0;
-        var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.xml');
-        var fNew = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');
-
-        if (f == null || (!fs.existsSync(f) && force)|| (!fs.existsSync(f) && !fs.existsSync(fNew) ))
-            return layerGroup;
-        if (fNew != null && fs.existsSync(fNew) && !force) {
-            f = fNew;
+exports.listSaves = function (fDir, icao) {
+    var directory = path.join(fDir, icao[0], icao[1], icao[2]);
+    var files = fs.readdirSync(directory);
+    var ret = files
+    .filter(f => f.includes(icao) )
+    .filter(f => f.includes('groundnet') )
+    .map(f => {
+        try {
+            var fileDate = fs.lstatSync(path.join(directory, f));
+            return {file: f, mtime: `${fileDate.mtime}`, mtimeMs: `${fileDate.mtimeMs}`};
+        } catch (error) {
+            console.error(error);
         }
+    });
+    ret.forEach( f => {
+        console.debug(f);
+    });
+    return ret;
+}
+
+exports.readGroundnetXML = function (fDir, icao, f) {
+    try {
+        store.default.dispatch('setGroundnetLoaded', false);
+        var layerGroup = L.layerGroup();
+        layerGroup.minId = 9999999999;
+        layerGroup.maxId = 0;
+
+        if (f == null || (!fs.existsSync(f) ))
+            return layerGroup;
 
         var features = new Array();
 
@@ -82,9 +99,9 @@ exports.readGroundnetXML = function (fDir, icao, force) {
             addFrequencies('UNICOM', unicom);
 
             store.default.dispatch('setFrequencies', frequencies);
-        
+
             var parkingNodes = xml.find('groundnet/parkingList/Parking');
-            console.log("Parking Nodes" + parkingNodes.length);
+            console.debug("Parking Nodes length" + parkingNodes.length);
 
             var merged = new Array();
 
@@ -97,15 +114,16 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                 nodesLookup[n.attr('index')] = n;
                 featureLookup[n.attr('index')] = new Array();
                 featureLookup[n.attr('index')].push(circle);
+                layerGroup.minId = Math.min(layerGroup.minId, Number(n.attr('index')))
                 layerGroup.maxId = Math.max(layerGroup.maxId, Number(n.attr('index')))
                 features.push(circle);
             }).sort();
-            
-            store.default.dispatch('setParkings', parkingNodes.map( 
-                p => ({index: Number(p.attrs.index), name: String(p.attrs.name), number: String(p.attrs.number), type: String(p.attrs.type)}
+
+            store.default.dispatch('setParkings', parkingNodes.map(
+                p => ({index: Number(p.attrs.index), radius: Number(p.attrs.radius), name: String(p.attrs.name), number: String(p.attrs.number), type: String(p.attrs.type)}
             )).sort((p1, p2) => {
                 if (p1.name === p2.name) {
-                    return p1.number - p2.number
+                    return p1.number?p1.number.localeCompare(p2.number):-1;
                 } else {
                   return p1.name.localeCompare(p2.name)
                 }}));
@@ -116,14 +134,16 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                 //attrs.lat
                 //console.log(n.attr('lat') + " " + n.attr('lon'));
                 try {
-                    var latlon = convert(n.attr('lat') + " " + n.attr('lon'));                    
+                    var latlon = convert(n.attr('lat') + " " + n.attr('lon'));
                 } catch (error) {
                     console.warn(n.attr('lat') + " " + n.attr('lon'));
                     convert(n.attr('lat') + " " + n.attr('lon'));
                 }
                 //console.log(latlon.decimalLatitude);
 
+                layerGroup.minId = Math.min(layerGroup.minId, Number(n.attr('index')))
                 layerGroup.maxId = Math.max(layerGroup.maxId, Number(n.attr('index')))
+                console.debug(`Min Id : ${layerGroup.minId} Max Id : ${layerGroup.maxId} `);
 
                 nodesLookup[n.attr('index')] = n;
                 if (n.attr('isOnRunway') === '1') {
@@ -166,7 +186,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                             if (element instanceof L.Polyline && element.end === n.attr('begin') && element.begin === n.attr('end')) {
                                 element.bidirectional = true;
                                 element.options.attributes.direction = 'bi-directional'
-                                bidirectional = true;                                
+                                bidirectional = true;
                                 element.updateStyle();
                             }
                         });
@@ -174,7 +194,13 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                     if (!bidirectional) {
                         var beginlatlon = convert(beginNode.attr('lat') + " " + beginNode.attr('lon'));
                         var endlatlon = convert(endNode.attr('lat') + " " + endNode.attr('lon'));
-                        var polyline = new L.Polyline([[beginlatlon.decimalLatitude, beginlatlon.decimalLongitude], [endlatlon.decimalLatitude, endlatlon.decimalLongitude]], { attributes: {} }).addTo(layerGroup);
+
+                        var pane = 'route-pane';
+                        if(n.attr('isPushBackRoute') === '1') {
+                           pane = 'pushback-pane';
+                        }
+
+                        var polyline = new L.Polyline([[beginlatlon.decimalLatitude, beginlatlon.decimalLongitude], [endlatlon.decimalLatitude, endlatlon.decimalLongitude]], { pane: pane, attributes: {} }).addTo(layerGroup);
                         extendTaxiSegment(polyline);
                         polyline.addListeners();
                         polyline._latlngs[0].attributes = {};
@@ -208,6 +234,8 @@ exports.readGroundnetXML = function (fDir, icao, force) {
 
                         polyline.begin = beginNode.attr('index');
                         polyline.end = endNode.attr('index');
+                        polyline.feature = { properties: { searchTerm:  'Arc ' + beginNode.attr('index') + '-' + endNode.attr('index')}};
+
                         // polyline.enableEdit();
 
                         // polyline.on('dblclick', function (event) { L.DomEvent.stop; polyline.toggleEdit; });
@@ -224,7 +252,7 @@ exports.readGroundnetXML = function (fDir, icao, force) {
                     }
                 }
             }).sort();
-
+            store.default.dispatch('setGroundnetLoaded', true);
 
             return layerGroup;
         });

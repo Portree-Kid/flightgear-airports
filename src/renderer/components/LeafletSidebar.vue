@@ -11,6 +11,7 @@ You should have received a copy of the GNU General Public License along with FG 
 -->
 <template>
 <div id="sidebar" class="leaflet-sidebar collapsed">
+    <Upload :visible.sync="uploadVisible" ref="upload"></Upload>
     <!-- Nav tabs -->
     <div class="leaflet-sidebar-tabs">
         <ul role="tablist"> <!-- top aligned tabs -->
@@ -37,10 +38,13 @@ You should have received a copy of the GNU General Public License along with FG 
                 <div class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></div>
             </h1>
           <ParkingEdit></ParkingEdit>
+          <ArcEditMulti></ArcEditMulti>
           <ArcEdit></ArcEdit>
+          <ThresholdEdit></ThresholdEdit>
+          <TowerEdit></TowerEdit>          
           <NodeEdit></NodeEdit>          
-          <ParkingGroupEdit ref="parkingGroupEdit"  @edit="(msg) => $emit('edit', msg)"></ParkingGroupEdit>
-          <AirportEdit  ref="airportEdit"></AirportEdit>
+          <ParkingGroupEdit ref="parkingGroupEdit"  @editParking="(msg) => $emit('editParking', msg)"></ParkingGroupEdit>
+          <AirportEdit  ref="airportEdit" @edit="$emit('edit', $event)"></AirportEdit>
         </div>
         <!--
         <div class="leaflet-sidebar-pane" id="parking">
@@ -73,22 +77,32 @@ You should have received a copy of the GNU General Public License along with FG 
   import L from 'leaflet'
   import AirportEdit from './AirportEdit'
   import ArcEdit from './ArcEdit'
+  import TowerEdit from './TowerEdit'
+  import ArcEditMulti from './ArcEditMulti'
   import CheckPanel from './CheckPanel'
   import FileSelect from './FileSelect'
   import Help from './Help'
   import NodeEdit from './NodeEdit'
+  import ThresholdEdit from './ThresholdEdit'
   import ParkingEdit from './ParkingEdit'
   import ParkingGroupEdit from './ParkingGroupEdit'
   // import ParkingList from './ParkingList'
   import RunScan from './RunScan'
   import SettingsPanel from './SettingsPanel'
   import Search from './Search'
+  import Upload from './Upload'
   import WorkInProgress from './WorkInProgress'
 
   export default {
     name: 'leaflet-sidebar',
-    components: { Help, AirportEdit, ArcEdit, CheckPanel, NodeEdit, ParkingEdit, ParkingGroupEdit, RunScan, FileSelect, SettingsPanel, Search, WorkInProgress },
+    components: { Help, AirportEdit, ArcEdit, ArcEditMulti, CheckPanel, NodeEdit, ParkingEdit, ParkingGroupEdit, RunScan, TowerEdit, ThresholdEdit, FileSelect, SettingsPanel, Search, Upload, WorkInProgress },
     props: [],
+    created () {
+      window.addEventListener('keydown', this.doCommand)
+    },
+    destroyed () {
+      window.removeEventListener('keydown', this.doCommand)
+    },
     mounted () {
       this.add()
     },
@@ -96,10 +110,17 @@ You should have received a copy of the GNU General Public License along with FG 
       this.remove()
     },
     data () {
-      return {
+      return { uploadVisible: false
       }
     },
     methods: {
+      doCommand (e) {
+        let cmd = String.fromCharCode(e.keyCode).toLowerCase()
+        if (e.keyCode === 46 /** DEL */ && e.target.type !== 'text') {
+          this.$parent.$parent.$refs.editLayer.deleteFeature()
+        }
+        console.log(cmd)
+      },
       deferredMountedTo (parent) {
         this.sidebar = L.control.sidebar({
           autopan: false, // whether to maintain the centered map point when opening the sidebar

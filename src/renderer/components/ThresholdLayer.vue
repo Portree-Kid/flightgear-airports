@@ -3,8 +3,10 @@
 <script lang="js">
   import { LMap, LMarker } from 'vue2-leaflet'
   import L from 'leaflet'
+  import leafletPattern from 'leaflet.pattern'
   import LEdit from 'leaflet-editable/src/Leaflet.Editable.js'
   import {readThresholdXML} from '../loaders/threshold_loader'
+  import {writeThresholdXML} from '../loaders/threshold_writer'
 
   export default {
     name: 'edit-layer',
@@ -12,10 +14,19 @@
     created () {
     },
     mounted () {
-      console.log(LMap)
-      console.log(LMarker)
-      console.log(L)
-      console.log(LEdit)
+      console.debug(LMap, LMarker, L, LEdit, leafletPattern)
+      this.$store.watch(
+        function (state) {
+          return state.Editable.data.threshold
+        },
+        () => { this.editedThreshold() }
+        ,
+        {
+          deep: true
+        }
+      )
+      var stripes = new L.StripePattern({color: 'yellow'})
+      stripes.addTo(this.$parent.mapObject)
     },
     beforeDestroy () {
       this.remove()
@@ -25,12 +36,37 @@
       }
     },
     methods: {
+      editedThreshold () {
+        if (this.$store.state.Editable.data.threshold) {
+          var rwy = this.$store.state.Editable.data.threshold.runway
+          var displacement = this.$store.state.Editable.data.threshold.displacement
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.Threshold) {
+              if (l.rwy === rwy) {
+                l.setDisplacement(displacement)
+              }
+            }
+          })
+        }
+      },
       getLayer () {
         return this.layerGroup
       },
       load (icao) {
+        this.$parent.mapObject.createPane('threshold-pane')
+        this.$parent.mapObject.getPane('threshold-pane').style.zIndex = 550
+        if (this.layerGroup) {
+          this.layerGroup.removeFrom(this.$parent.mapObject)
+        }
+        var stripes = new L.StripePattern({color: 'yellow'})
+        stripes.addTo(this.$parent.mapObject)
+
         // Callback for add
-        this.layerGroup = readThresholdXML(this.$store.state.Settings.settings.airportsDirectory, icao, this.read)
+        this.layerGroup = readThresholdXML(this.$store.state.Settings.settings.airportsDirectory, icao, this.read, stripes)
+        if (!this.layerGroup) {
+          console.warn('Threshold for ICAO not loaded ' + icao)
+          return
+        }
         this.layerGroup.addTo(this.$parent.mapObject)
         this.visible = true
         this.icao = icao
@@ -47,6 +83,24 @@
           this.deferredMountedTo(this.$parent.mapObject)
         }
       },
+      enableEdit () {
+        if (this.layerGroup) {
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.Threshold) {
+              l.setInteractive(true)
+            }
+          })
+        }
+      },
+      disableEdit () {
+        if (this.layerGroup) {
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.Threshold) {
+              l.setInteractive(false)
+            }
+          })
+        }
+      },
       setVisible (visible) {
         if (this.layerGroup !== undefined) {
           if (visible !== this.visible) {
@@ -58,13 +112,42 @@
             this.visible = visible
           }
         }
+      },
+      save () {
+        if (this.layerGroup) {
+          var list = {}
+
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.Threshold) {
+              var latitude = l.originLatLng[0].toFixed(6)
+              var longitude = l.originLatLng[1].toFixed(6)
+
+              if (list[l.index] === undefined) {
+                list[l.index] = []
+              }
+              var o = {latitude: latitude, longitude: longitude, index: l.index, rwy: l.rwy, heading: l.heading, displacement: l.displacement, stopw_m: l.stopw_m}
+              list[l.index].push(o)
+            }
+          })
+          writeThresholdXML(this.$store.state.Settings.settings.airportsDirectory, this.icao, list)
+        }
+      },
+      zoomUpdated () {
+        if (this.layerGroup) {
+          this.layerGroup.eachLayer(l => {
+            if (l instanceof L.Threshold) {
+              l.updateIcon(this.$parent.mapObject)
+            }
+          })
+        }
       }
+
     },
     computed: {
       edit: function () {
         console.log('Zoom : ' + this.$store.state.Settings.zoom)
         if (this.$store.state.Settings.zoom > 12) {
-          console.log()
+          console.log('Zoom above 12')
         }
       }
     }

@@ -22,6 +22,7 @@ You should have received a copy of the GNU General Public License along with FG 
   import L2 from 'leaflet-textpath'
   import Vue from 'vue'
   import { MessageBox } from 'element-ui';
+
   const turf = require('@turf/turf')
 
 
@@ -38,18 +39,17 @@ You should have received a copy of the GNU General Public License along with FG 
     components: {},
     props: [],
     created () {
-
-      console.log(LMap)
-      console.log(LMarker)
-      console.log(L)
-      console.log(LEdit)
-      console.log(L2)
-      console.log('Created Editlayer')
+      [LMap, LMarker, L, LEdit, L2]
+      console.debug('Created Editlayer')
       // console.log(LSymbol)
     },
     mounted () {
-      this.selectionLayerGroup = L.layerGroup();
-      this.selectionLayerGroup.addTo(this.$parent.mapObject)
+      this.$parent.mapObject.createPane('pushback-pane')
+      this.$parent.mapObject.getPane('pushback-pane').style.zIndex = 512
+
+      this.$parent.mapObject.createPane('route-pane')
+      this.$parent.mapObject.getPane('route-pane').style.zIndex = 511
+
       this.$store.watch(
         function (state) {
               return state.Editable.data.node;
@@ -65,6 +65,16 @@ You should have received a copy of the GNU General Public License along with FG 
               return state.Editable.data.arc;
           },
           () => { this.editedArc() }
+          ,
+          {
+            deep: true //add this if u need to watch object properties change etc.
+          }
+        );
+      this.$store.watch(
+        function (state) {
+              return state.Editable.data.multiarc;
+          },
+          () => { this.editedMultiArc() }
           ,
           {
             deep: true //add this if u need to watch object properties change etc.
@@ -96,10 +106,16 @@ You should have received a copy of the GNU General Public License along with FG 
     },
     data () {
       return {
-        maxId: 1, icao: String, checking: false, editing: false
+        maxId: 1, icao: '', checking: false, editing: false
       }
     },
     methods: {
+      getLayer () {
+        return this.groundnetLayerGroup;
+      },
+      getIdLayerGroup() {
+        return this.idLayerGroup;
+      },
       getParkings(ring) {
           var poly = turf.polygon(ring);
           var parkings = []
@@ -109,43 +125,52 @@ You should have received a copy of the GNU General Public License along with FG 
               var tp = turf.point([l.getLatLng().lat, l.getLatLng().lng]);
               if (turf.booleanPointInPolygon(tp, poly)) {
                 parkings.push(l);
-              }          
+              }
             }
          })
          this.selection = parkings;
          return parkings;
       },
-      load (icao, force) {        
+      load (icao, filename) {
         if (this.groundnetLayerGroup !== undefined) {
           this.groundnetLayerGroup.removeFrom(this.$parent.mapObject)
-        }        
+        }
         this.$parent.$parent.setIcao(icao)
         this.icao = icao
-        this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao, force)
+        var f = '';
+        if (!filename) {
+          var f = path.join(this.$store.state.Settings.settings.airportsDirectory, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml')
+          if (!fs.existsSync(f)) {
+            f = path.join(this.$store.state.Settings.settings.airportsDirectory, icao[0], icao[1], icao[2], icao + '.groundnet.xml')
+          }
+        } else {
+          f = path.join(this.$store.state.Settings.settings.airportsDirectory, icao[0], icao[1], icao[2], filename)
+        }
+
+        console.info(`Reload from : ${f}`)
+
+        this.groundnetLayerGroup = readGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, icao, f)
         if (this.groundnetLayerGroup === undefined) {
-          console.error('ICAO not loaded ' + icao)
+          console.warn('Groundnet for ICAO not loaded ' + icao)
           return
+        }
+        if (this.groundnetLayerGroup.getLayers().length === 0) {
+          console.warn('Groundnet for ICAO not loaded ' + icao)
         }
         this.groundnetLayerGroup.eachLayer(l => {
           if (l instanceof L.TaxiwaySegment) {
             l.addListeners()
           }
-        })
-        /*
-        this.groundnetLayerGroup.eachLayer(l => {
-          if (l instanceof L.TaxiwaySegment) {
-            var decorator = L.polylineDecorator(l, {
-              pattern: [
-              // defines a pattern of 10px-wide dashes, repeated every 20px on the line
-                {offset: 5, repeat: 50, symbol: L.Symbol.arrowHead({pixelSize: 15, pathOptions: {fillOpacity: 1, weight: 0}})}
-              ]
-            })
-            decorator.addTo(this.$parent.mapObject)
+          if (l.updateArrows !== undefined) {
+            l.updateArrows(this.$store.state.Settings.zoom)
           }
-        })
-        */
+          if (typeof l.setInteractive === 'function') {
+            l.setInteractive(false)
+          }
 
-        console.log(this.groundnetLayerGroup.maxId)
+        })
+        console.debug(`MaxId : ${this.groundnetLayerGroup.maxId}`)
+        this.buildLookup()
 
         this.groundnetLayerGroup.addTo(this.$parent.mapObject)
         this.icao = icao
@@ -190,7 +215,12 @@ You should have received a copy of the GNU General Public License along with FG 
             this.selection.forEach(element => {
               element.updateRadius(event.wingspan/2)
             });
-            break;        
+            break;
+          case 'parking-group-type':
+            this.selection.forEach(element => {
+              element.updateType(event.parking_type)
+            });
+            break;
           default:
             break;
         }
@@ -200,11 +230,13 @@ You should have received a copy of the GNU General Public License along with FG 
         this.editable = true
         this.editing = true
         this.$store.commit('SET_EDIT', true)
-        
+
         this.featureLookup = [];
+        if(!this.groundnetLayerGroup) {
+          return;
+        }
         this.groundnetLayerGroup.eachLayer(l => {
           l.enableEdit()
-          
           l.featureLookup = this.featureLookup;
           if (typeof l.extensions === 'function') {
             l.extensions(this)
@@ -212,13 +244,65 @@ You should have received a copy of the GNU General Public License along with FG 
           if (typeof l.bringToFront === 'function') {
             l.bringToFront()
           }
+          if (typeof l.updateStyle === 'function') {
+            l.updateStyle()
+          }
+          if (typeof l.setInteractive === 'function') {
+            l.setInteractive(true)
+          }
         })
-        this.$store.dispatch('addWip', {icao: this.icao});      },
+        this.$store.dispatch('addWip', {icao: this.icao});
+      },
+      showTooltips() {
+        this.groundnetLayerGroup.eachLayer(l => {
+          if (l instanceof L.Polyline) {
+            l.getLatLngs().forEach(l => {
+                if (this.$parent.mapObject.getBounds().contains(l)) {
+                  if (l.__vertex && !l.__vertex.getTooltip()) {
+                      l.__vertex.bindTooltip(l.glueindex, {permanent: true});
+                  }
+                }
+            });
+          }
+          if (l instanceof L.ParkingSpot) {
+            if (this.$parent.mapObject.getBounds().contains(l.getLatLng())) {
+              var parkingHub = l.glueindex + " " + l.options.attributes.name + " " + l.options.attributes.number;
+              if(l.box) {
+                l.box.bindTooltip(parkingHub, {permanent: true, direction: 'right'});
+              } else {
+                l.bindTooltip(parkingHub, {permanent: true, direction: 'right'});
+              }
+            }
+          }
+        });
+        setTimeout(this.closeTooltips.bind(this), 2000);
+      },
+      closeTooltips() {
+        this.groundnetLayerGroup.eachLayer(l => {
+          if (l instanceof L.Polyline) {
+            l.getLatLngs().forEach(l => {
+                if (l.__vertex && l.__vertex.getTooltip()) {
+                    l.__vertex.unbindTooltip();
+                }
+            });
+          }
+          if (l instanceof L.ParkingSpot) {
+            if(l.box) {
+              l.box.unbindTooltip();
+            } else {
+              l.unbindTooltip();
+            }
+          }
+        });
+      },
       disableEdit () {
         this.editable = false
         this.editing = false
         this.$store.commit('SET_EDIT', false)
         this.groundnetLayerGroup.eachLayer(l => {
+          if (typeof l.setInteractive === 'function') {
+            l.setInteractive(false)
+          }
           l.disableEdit()
         })
       },
@@ -240,11 +324,14 @@ You should have received a copy of the GNU General Public License along with FG 
             console.log('Remove : ' + this.$store.state.Editable.type)
         }
       },
+      isOnRunway(latlng) {
+        return this.$parent.$parent.$refs.pavementLayer.isOnRunway(latlng)
+      },
       findRouteToPushback (index) {
         if (this.featureLookup===undefined || this.featureLookup[index]===undefined) {
           return
         }
-        var parking = this.featureLookup[index].filter(n => n instanceof L.ParkingSpot)  
+        var parking = this.featureLookup[index].filter(n => n instanceof L.ParkingSpot)
         var walkedNodes = [index]
         var pushBackNodes = []
         this.walkPushbackRoute(index, walkedNodes, pushBackNodes)
@@ -270,29 +357,44 @@ You should have received a copy of the GNU General Public License along with FG 
           }
         });
       },
-      removeArc (arc) {        
-        console.log(arc);
+      removeArc (arc) {
+        console.debug('Remove Arc : ' + arc);
         var arcLayer = this.groundnetLayerGroup.getLayer(this.$store.state.Editable.index);
-        arcLayer.removeFrom(this.groundnetLayerGroup);        
+        arcLayer.removeFrom(this.groundnetLayerGroup);
       },
       removeParking (index) {
         if(this.featureLookup[index]===undefined) {
-          console.error("Lookup " + index + " failed ");          
+          console.error("Lookup " + index + " failed ");
           return;
         }
         this.featureLookup[index].forEach((element, i) => {
           if (element instanceof L.ParkingSpot) {
-            element.removeFrom(this.groundnetLayerGroup);                      
+            element.removeFrom(this.groundnetLayerGroup);
           }
         });
       },
       show (index) {
         if(Number.isNaN(index)) {
           return;
-        }        
-        if(this.featureLookup===undefined || this.featureLookup[index]===undefined) {
-          console.error("Lookup " + index + " failed ");          
-          this.buildLookup()
+        }
+        if (this.featureLookup===undefined || this.featureLookup[index]===undefined) {
+          var found = false;
+          this.groundnetLayerGroup.eachLayer((layer) => {
+            if (layer instanceof L.Polyline && layer._leaflet_id == index) {
+              layer.select();
+              this.$store.dispatch('setCenter', layer.getCenter());
+              found = true;
+            } else {
+              layer.deselect();
+            }
+          });
+          if (found) {
+            return;
+          } else {
+            console.error("Lookup " + index + " failed ");
+            this.buildLookup();
+            return;
+          }
         }
         if (Number(this.$store.state.Editable.index) >= 0 &&
           this.featureLookup[this.$store.state.Editable.index]!==undefined) {
@@ -304,8 +406,7 @@ You should have received a copy of the GNU General Public License along with FG 
         this.featureLookup[index].forEach((element, i) => {
           if (element instanceof L.Polyline) {
             element._latlngs.forEach((e1, index1) => {
-              console.log(e1);
-              if (e1.attributes.index===index) {
+              if (e1.attributes.index===Number(index)) {
                 var latlng = {};
                 latlng.lat =  e1.lat;
                 latlng.lng =  e1.lng;
@@ -360,12 +461,12 @@ You should have received a copy of the GNU General Public License along with FG 
             this.featureLookup[layer.glueindex].push(layer);
           } else {
             console.warn(layer)
-          }          
+          }
         })
       },
       getPointCoords (index) {
         if(this.featureLookup[index]===undefined) {
-          console.error("Lookup " + index + " failed ");          
+          console.error("Lookup " + index + " failed ");
           return;
         }
         return this.featureLookup[index].map((element, i) => {
@@ -395,14 +496,14 @@ You should have received a copy of the GNU General Public License along with FG 
         }).filter(n => n);
       },
       /**
-       * 
+       *
        */
       setPointCoords (index, coordinates) {
         var position = new Coordinates(coordinates);
 
         var latlng = {lat: position.latitude, lng: position.longitude };
         if(this.featureLookup[index]===undefined) {
-          console.error("Lookup " + index + " failed ");          
+          console.error("Lookup " + index + " failed ");
           return;
         }
         return this.featureLookup[index].map((element, i) => {
@@ -425,7 +526,7 @@ You should have received a copy of the GNU General Public License along with FG 
           else if (element instanceof L.Polyline) {
               element._latlngs.forEach((e1, index1) => {
               if (e1.attributes.index===index && (
-                    latlng.lat !== element.getLatLngs()[index1].lat ||  
+                    latlng.lat !== element.getLatLngs()[index1].lat ||
                     latlng.lng !== element.getLatLngs()[index1].lng
                   )
                   ) {
@@ -450,23 +551,12 @@ You should have received a copy of the GNU General Public License along with FG 
               element.editor.feature.setLatLngs(element.latlngs);
               element.editor.feature.updateMiddle();
             */
-          }    
+          }
         });
       },
-      /*
-      getParkings (){
-        var parkings = []
-        this.groundnetLayerGroup.eachLayer(l => {
-          if (l instanceof L.ParkingSpot) {
-            parkings.push(l)
-          }
-        })
-        return parkings
-      },
-      */
       refreshLookup(index) {
         //element.__vertex
-          this.featureLookup[index] = this.featureLookup[index].filter(item => { 
+          this.featureLookup[index] = this.featureLookup[index].filter(item => {
             return !(item instanceof L.Editable.VertexMarker && item.editor.__vertex === undefined)
             }
             );
@@ -479,15 +569,16 @@ You should have received a copy of the GNU General Public License along with FG 
       },
       removeNode (index) {
         if(this.featureLookup[index]===undefined) {
-          console.error("Lookup " + index + " failed ");          
+          console.error("Lookup " + index + " failed ");
           return;
         }
         try {
           this.featureLookup[index].forEach((element, i) => {
             if (element instanceof L.Polyline) {
-              console.log('Poly : ' + i + ' ' + element.attributes);
+              console.debug('Poly : ' + i + ' ' + element.attributes);
               // Complete poly with be removed
               if ( element._latlngs.length <= 3 ) {
+                console.debug('Remove short ' + element);
                 if(Number(element.begin) !== index) {
                   this.featureLookup[Number(element.begin)] = this.featureLookup[Number(element.begin)].filter(item => item !== element);
                   this.refreshLookup(Number(element.begin))
@@ -497,29 +588,30 @@ You should have received a copy of the GNU General Public License along with FG 
                   this.refreshLookup(Number(element.end))
                 }
                 element.removeFrom(this.groundnetLayerGroup);
+                element.removeFrom(this.$parent.mapObject);
               }
               else {
                 element.getLatLngs().forEach((e1, index1) => {
-                  console.log(index1 + ' ' + e1);
+                  console.debug('Remove Long' + index1 + ' ' + e1);
                   if (e1.attributes.index===index) {
-                    var splitOffNodes = element.getLatLngs().splice(index1); 
+                    var splitOffNodes = element.getLatLngs().splice(index1);
                     element.editor.refresh();
                     element.editor.reset();
                     splitOffNodes.splice(0, 1);
                     if( splitOffNodes.length>1) {
                         var polyline = new L.Polyline(splitOffNodes, { attributes: {} }).addTo(layerGroup);
                         extendTaxiSegment(polyline);
-                        polyline.addListeners();    
+                        polyline.addListeners();
                         polyline.setEditlayer(this);
                         polyline.enableEdit();
                         polyline.editor.refresh();
                         polyline.editor.reset();
-                        polyline.addTo(this.groundnetLayerGroup);                
+                        polyline.addTo(this.groundnetLayerGroup);
                         polyline.end = element.end;
                         // Remove from end lookup
                         this.featureLookup[element.options.attributes.end] = this.featureLookup[element.options.attributes.end].filter(item => item !== element);
                         // push to the end lookup
-                        this.featureLookup[element.options.attributes.end].push(polyline);                                                
+                        this.featureLookup[element.options.attributes.end].push(polyline);
                     }
                     if(element.getLatLngs().length === 1) {
                       this.featureLookup[index] = this.featureLookup[index].filter(item => item !== element);
@@ -536,8 +628,8 @@ You should have received a copy of the GNU General Public License along with FG 
               element.removeFrom(this.groundnetLayerGroup);
             } else {
               console.warn('WTF' + element);
-            }            
-          });          
+            }
+          });
         } catch (error) {
             console.error(error);
         }
@@ -574,10 +666,10 @@ You should have received a copy of the GNU General Public License along with FG 
         polyLine.addListeners()
 
         polyLine.on('editable:drawing:end', event => {
-          console.log(event)
+          console.debug(event)
           event.target.addTo(this.groundnetLayerGroup)
         })
-      },      
+      },
       drawPushbackPolyline () {
         var polyLine = this.$parent.mapObject.editTools.startPolyline()
         polyLine.addTo(this.groundnetLayerGroup)
@@ -592,10 +684,10 @@ You should have received a copy of the GNU General Public License along with FG 
         polyLine.addListeners()
 
         polyLine.on('editable:drawing:end', event => {
-          console.log(event)
+          console.debug(event)
           event.target.addTo(this.groundnetLayerGroup)
-          var pt = event.sourceTarget._latlngs[event.sourceTarget._latlngs.length-1];          
-          pt.attributes.holdPointType = 'PushBack'
+          var pt = event.sourceTarget._latlngs[event.sourceTarget._latlngs.length-1];
+          pt.attributes['holdPointType'] = 'PushBack'
           var nIndex = pt.attributes.index
           var fa_icon = "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-arrows-alt-h'></i>";
           const icon = new L.DivIcon({
@@ -608,6 +700,7 @@ You should have received a copy of the GNU General Public License along with FG 
           node.glueindex = nIndex;
           node.addTo(this.groundnetLayerGroup);
           node.featureLookup = this.featureLookup;
+          node['holdPointType'] = 'PushBack'
           this.featureLookup[nIndex].push(node);
           node.addListeners();
           node.extensions();
@@ -619,7 +712,7 @@ You should have received a copy of the GNU General Public License along with FG 
             this.featureLookup===undefined) {
           return
         }
-        console.log('Edited Parking : ' + this.$store.state.Editable.data.parking)
+        console.debug('Edited Parking : ' + this.$store.state.Editable.data.parking)
         //Notify list
         if (this.featureLookup[this.$store.state.Editable.index]===undefined) {
           return
@@ -627,33 +720,33 @@ You should have received a copy of the GNU General Public License along with FG 
         this.featureLookup[this.$store.state.Editable.index].forEach((element,index) => {
           if (element instanceof L.ParkingSpot) {
             element.options.attributes = Object.assign({}, this.$store.state.Editable.data.parking)
-            element.updateVertexFromDirection();     
-            element.updateWheelPos();     
-            element.updateBox(); 
+            element.updateVertexFromDirection();
+            element.updateWheelPos();
+            element.updateBox();
           }
         })
         if (this.$store.state.Editable.data.parking.coords) {
-          this.setPointCoords(this.$store.state.Editable.index, this.$store.state.Editable.data.parking.coords)                    
+          this.setPointCoords(this.$store.state.Editable.index, this.$store.state.Editable.data.parking.coords)
         }
       },
       editedParkings() {
         if (this.featureLookup===undefined) {
-          console.warn("Lookup undefinded");          
+          console.warn("Lookup undefined");
           this.buildLookup()
         }
         if (this.featureLookup===undefined) {
           return
         }
-        console.log('Edited Parkings : ' + this.$store.state.Parkings.items)
+        console.debug('Edited Parkings : ' + this.$store.state.Parkings.items)
         this.$store.state.Parkings.items.forEach( newElement => {
-          console.debug(newElement);
           if(this.featureLookup[newElement.index]) {
             this.featureLookup[newElement.index].forEach((element,index) => {
               if (element instanceof L.ParkingSpot) {
+                console.debug(element);
                 element.options.attributes.name = newElement.name
                 element.options.attributes.number = newElement.number
                 element.options.attributes.type = newElement.type
-                //element.updateVertexFromDirection();           
+                //element.updateVertexFromDirection();
               }
             })
           }
@@ -664,10 +757,10 @@ You should have received a copy of the GNU General Public License along with FG 
         this.featureLookup[this.$store.state.Editable.index].forEach((element,index) => {
           if (element instanceof L.ParkingSpot) {
             element.options.attributes = Object.assign({}, this.$store.state.Editable.data.parking)
-            element.updateVertexFromDirection();           
+            element.updateVertexFromDirection();
           }
         })
-*/        
+*/
       },
       editedArc() {
         if (!this.groundnetLayerGroup ||
@@ -677,12 +770,34 @@ You should have received a copy of the GNU General Public License along with FG 
             !this.editing) {
           return;
         }
+        console.debug("Edit Type : " + this.$store.state.type);
         var arc = this.groundnetLayerGroup.getLayer(this.$store.state.Editable.index);
         if (arc && arc instanceof L.Polyline) {
           console.log('Edited Arc : ' + this.$store.state.Editable.index);
           arc.options.attributes = Object.assign({}, this.$store.state.Editable.data.arc)
           arc.updateStyle();
-        }        
+        }
+      },
+      editedMultiArc() {
+        if (!this.groundnetLayerGroup ||
+            this.$store.state.Editable.data.multiarc === undefined ||
+            this.$store.state.Editable.data.multiarc.ids === undefined ||
+            this.featureLookup===undefined ||
+            !this.editing) {
+          return;
+        }
+        console.debug("Edit Type : " + this.$store.state.Editable.data.multiarc.ids + ' ' +  String(this.$store.state.Editable.data.multiarc.direction));
+        this.$store.state.Editable.data.multiarc.ids.forEach(id => {
+          console.debug(id);
+          var arc = this.groundnetLayerGroup.getLayer(id);
+          if (arc && arc instanceof L.Polyline) {
+            console.log('Edited Arc : ' + this.$store.state.Editable.index);
+            arc.options.attributes.direction = String(this.$store.state.Editable.data.multiarc.direction)
+            arc.options.attributes.name = String(this.$store.state.Editable.data.multiarc.name)
+            arc.options.attributes.isPushBackRoute = Number(this.$store.state.Editable.data.multiarc.isPushBackRoute)
+            arc.updateStyle();
+          }
+        });
       },
       //Update Node
       editedNode() {
@@ -691,11 +806,11 @@ You should have received a copy of the GNU General Public License along with FG 
             this.featureLookup===undefined ||
             !this.editing) {
           return;
-        }        
+        }
         var isOnRunway = Number(this.$store.state.Editable.data.node.isOnRunway);
         var isHoldPoint = this.$store.state.Editable.data.node.holdPointType !== 'none' &&
                           this.$store.state.Editable.data.node.holdPointType !== undefined;
-        var nIndex = this.$store.state.Editable.index; 
+        var nIndex = this.$store.state.Editable.index;
         var hasRunwayNode = false;
         var hasHoldPointNode = false;
         var latlng;
@@ -704,14 +819,14 @@ You should have received a copy of the GNU General Public License along with FG 
             if (isOnRunway === 0) {
               // We shouldn't have a RunwayNode
               element.removeFrom(this.groundnetLayerGroup);
-              this.featureLookup[nIndex].splice(index,1);              
+              this.featureLookup[nIndex].splice(index,1);
             }
             hasRunwayNode = true;
           } else if (element instanceof L.HoldNode) {
             if (!isHoldPoint) {
               // We shouldn't have a RunwayNode
               element.removeFrom(this.groundnetLayerGroup);
-              this.featureLookup[nIndex].splice(index,1);              
+              this.featureLookup[nIndex].splice(index,1);
             } else {
               var fa_icon;
               if (this.$store.state.Editable.data.node.holdPointType === 'PushBack') {
@@ -744,33 +859,20 @@ You should have received a copy of the GNU General Public License along with FG 
                 latlng = element._latlngs[1];
               }
           } else if (element instanceof L.Polyline) {
-              element._latlngs.forEach(element => {                
-                if(element.__vertex && Number(element.glueindex) === Number(nIndex)){                  
+              element._latlngs.forEach(element => {
+                if(element.__vertex && Number(element.glueindex) === Number(nIndex)){
                   if (this.$store.state.Editable.data.node.coords) {
-                    this.setPointCoords(this.$store.state.Editable.index, this.$store.state.Editable.data.node.coords)                    
+                    this.setPointCoords(this.$store.state.Editable.index, this.$store.state.Editable.data.node.coords)
                     var position = new Coordinates(this.$store.state.Editable.data.node.coords);
                     latlng = {lat: position.latitude, lng: position.longitude };
                   }
                 }
               });
-          }    
-    
+          }
+
         })
         if (!hasRunwayNode && isOnRunway && latlng !== undefined) {
-          this.$store.state.Editable.data.node.holdPointType
-          const icon = new L.DivIcon({
-              className: 'custom-div-icon',
-              html: "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-plane-departure'></i>",
-              iconSize: [30, 42],
-              iconAnchor: [15, 42]
-          });
-          const node = new L.RunwayNode(latlng, { icon: icon });
-          node.glueindex = nIndex;
-          node.addTo(this.groundnetLayerGroup);
-          this.featureLookup[nIndex].push(node);
-          node.featureLookup = this.featureLookup;
-          node.addListeners();
-          node.extensions();
+          this.addRunwayNode(latlng, nIndex)
         }
         if (!hasHoldPointNode && isHoldPoint) {
           var fa_icon = null;
@@ -795,6 +897,21 @@ You should have received a copy of the GNU General Public License along with FG 
           node.extensions();
         }
       },
+      addRunwayNode (latlng, nIndex) {
+        const icon = new L.DivIcon({
+            className: 'custom-div-icon',
+            html: "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-plane-departure'></i>",
+            iconSize: [30, 42],
+            iconAnchor: [15, 42]
+        });
+        const node = new L.RunwayNode(latlng, { icon: icon });
+        node.glueindex = nIndex;
+        node.addTo(this.groundnetLayerGroup);
+        this.featureLookup[nIndex].push(node);
+        node.featureLookup = this.featureLookup;
+        node.addListeners();
+        node.extensions();
+      },
       // Finde nearest node
       closestLayerSnap (eventLatlng, snap) {
         var layers = []
@@ -807,9 +924,11 @@ You should have received a copy of the GNU General Public License along with FG 
                   console.warn('No glueindex : ' + latlng.__vertex);
                 }
                 let distance = latlng.distanceTo(eventLatlng)
-                if (distance > 0 && distance < snap) {
+                if (distance >= 0 && distance < snap && latlng.glueindex >=0) {
                   layers.push({d: distance, l: layer, latlng: latlng.__vertex.latlng, glueindex: latlng.glueindex})
                 }
+              } else {
+                console.log(latlng);
               }
             })
           } else if (layer instanceof L.RunwayNode) {
@@ -829,7 +948,7 @@ You should have received a copy of the GNU General Public License along with FG 
             }
           } else {
             console.log(layer)
-          }          
+          }
         })
         layers.sort((l1, l2) => l1.d - l2.d)
         if (layers.length > 0) {
@@ -841,11 +960,11 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$parent.mapObject.on('click', this.addParking)
       },
       removeLayerClick (event) {
-        console.log(event)
+        console.debug(event)
         this.groundnetLayerGroup.removeLayer(event.target)
       },
       addParking (event) {
-        console.log(event.latlng)
+        console.debug(event.latlng)
         if (event.latlng === undefined) {
           return
         }
@@ -855,9 +974,12 @@ You should have received a copy of the GNU General Public License along with FG 
         circle.glueindex = circle.id
         circle.addTo(this.groundnetLayerGroup)
         circle.featureLookup = this.featureLookup
+        circle.addListeners()
         circle.enableEdit()
         circle.extensions()
-        circle.addListeners()
+        circle.updateVertexFromDirection();
+        circle.updateWheelPos();
+        circle.updateBox();
         if (Number(this.$store.state.Editable.index) >= 0 &&
           this.featureLookup[this.$store.state.Editable.index]!==undefined) {
               this.featureLookup[this.$store.state.Editable.index].forEach(element => {
@@ -874,12 +996,12 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$parent.mapObject.off('click', this.addParking)
         this.$parent.mapObject._container.style.cursor = ''
       },
-      reload (force) {
-        this.load(this.icao, force)
+      reload (filename) {
+        this.load(this.icao, filename)
       },
       link (index) {
         var layers = []
-        var centerLatLng = null        
+        var centerLatLng = null
         this.featureLookup[index].forEach(layer => {
             if (layer instanceof L.Polyline) {
             // console.log(layer._latlngs)
@@ -888,7 +1010,7 @@ You should have received a copy of the GNU General Public License along with FG 
                 if (Number.isNaN(latlng.glueindex)) {
                   console.warn('No glueindex : ' + latlng.__vertex);
                 }
-                
+
                 if (Number(latlng.glueindex) === index) {
                   centerLatLng = latlng;
                 }
@@ -913,9 +1035,11 @@ You should have received a copy of the GNU General Public License along with FG 
                   console.warn('No glueindex : ' + latlng.__vertex);
                 }
                 let distance = latlng.distanceTo(centerLatLng)
-                if (latlng.glueindex !== newIndex && distance < 10) {
+                if (Number(latlng.glueindex) !== Number(newIndex) && distance < 10) {
                   nearest.push({d: distance, l: layer, latlng: latlng.__vertex.latlng, glueindex: latlng.glueindex })
                 }
+              } else {
+                console.error("No __Vertex", latlng);
               }
             })
           }
@@ -957,18 +1081,17 @@ You should have received a copy of the GNU General Public License along with FG 
                 }
                 })
             }
-          })          
+          })
           featureLookup[glueindex] = [];
-        });        
+        });
       },
       save () {
         var xml = []
         this.groundnetLayerGroup.eachLayer(l => {
-          console.log(l)
+          //console.debug(l)
           xml.push(l)
         })
         writeGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, this.icao, xml)
-        this.load(this.icao, false)
       },
       //Copy to test directory
       test() {
@@ -979,14 +1102,21 @@ You should have received a copy of the GNU General Public License along with FG 
         try { fs.mkdirSync(path.join(this.$store.state.Settings.settings.testDirectory, 'Airports', this.icao[0], this.icao[1]), { recursive: true })} catch (err) { }
         try { fs.mkdirSync(path.join(this.$store.state.Settings.settings.testDirectory, 'Airports', this.icao[0], this.icao[1], this.icao[2]), { recursive: true })} catch (err) { }
 
-        fs.copyFileSync(f, fNew)
-        this.$message({
-          type: 'info',
-          message: `Copied to ${fNew}`
-        });
+        try {
+          fs.copyFileSync(f, fNew)
+          this.$message({
+            type: 'info',
+            message: `Copied to ${fNew}`
+          });
+        } catch (error) {
+          this.$message({
+            type: 'error',
+            message: `Copy error : ${error}`
+          });
+        }
       },
       setVisible(visible) {
-        if (this.layerGroup) {          
+        if (this.layerGroup) {
           if (visible) {
             this.layerGroup.addTo(this.$parent.mapObject)
           } else {

@@ -11,7 +11,7 @@ L.HoldNode = L.Marker.extend({
         if(this._icon!==null) {
             this._icon.childNodes[0].style['background-color'] = 'red';
         }
-    },    
+    },
     deselect() {
         if(this._icon!==null) {
             this._icon.childNodes[0].style['background-color'] = '#4838cc';
@@ -31,7 +31,7 @@ L.HoldNode = L.Marker.extend({
         this.featureLookup[this.glueindex].push(this);
     },
     /**
-     * 
+     *
      */
 
     follow(dragIndex, event) {
@@ -61,18 +61,18 @@ L.HoldNode = L.Marker.extend({
                         element.updateEndVertex(event.latlng);
                         element.updateMiddle();
                     }
-                } else if (element instanceof L.Editable.VertexMarker) {                    
+                } else if (element instanceof L.Editable.VertexMarker) {
                     console.log(element);
                     element.setLatLng(event.latlng);
                     element.latlngs.forEach((latlng, index) => {
-                        console.log(latlng);                        
+                        console.log(latlng);
                         if(latlng.__vertex === element) {
                           latlng.update(event.latlng);
                         }
                     });
                     element.editor.feature.setLatLngs(element.latlngs);
                     element.editor.feature.updateMiddle();
-                }    
+                }
             }
         })
     }
@@ -80,7 +80,7 @@ L.HoldNode = L.Marker.extend({
 
 var holdNode = function (n, layerGroup) {
     //console.log(n.attr('lat') + " " + n.attr('lon'));
-    var latlon = convert(n.attr('lat') + " " + n.attr('lon'));    
+    var latlon = convert(n.attr('lat') + " " + n.attr('lon'));
     var fa_icon = null;
     if (n.attr('holdPointType') === 'PushBack') {
         fa_icon = "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-arrows-alt-h'></i>";
@@ -93,8 +93,9 @@ var holdNode = function (n, layerGroup) {
         iconSize: [30, 42],
         iconAnchor: [15, 42]
     });
-    const node = new L.HoldNode([latlon.decimalLatitude, latlon.decimalLongitude], { icon: icon });
+    const node = new L.HoldNode([latlon.decimalLatitude, latlon.decimalLongitude], { icon: icon  });
     node.glueindex = n.attr('index');
+    node.feature =  { properties: { searchTerm: n.attr('index')}};
     node.holdPointType = n.attr('holdPointType');
     node.addTo(layerGroup);
     node.addListeners();

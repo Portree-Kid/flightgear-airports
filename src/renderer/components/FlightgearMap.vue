@@ -28,10 +28,8 @@ You should have received a copy of the GNU General Public License along with FG 
     </l-control>
     -->
     <!--<l-marker :lat-lng="marker"></l-marker>-->
-    <LeafletSidebar ref="sidebar" @edit="onEditSidebar"></LeafletSidebar>
-    <AiLayer ref="aiLayer"></AiLayer> 
-    <PavementLayer ref="pavementLayer"></PavementLayer>    
-    <ThresholdLayer ref="thresholdLayer"></ThresholdLayer>
+    <LeafletSidebar ref="sidebar" @editParking="onEditSidebar" @edit="onEdit($event)"></LeafletSidebar>
+    <AiLayer ref="aiLayer"></AiLayer>
     <l-layer-group layerType="overlay" name="airports" ref="airportLayer">
       <l-circle
         v-for="(item, index) in this.$store.state.Airports.airports"
@@ -44,31 +42,36 @@ You should have received a copy of the GNU General Public License along with FG 
       ></l-circle>
     </l-layer-group>
     <EditLayer ref="editLayer"></EditLayer>
+    <PavementLayer ref="pavementLayer"></PavementLayer>
+    <ThresholdLayer ref="thresholdLayer"></ThresholdLayer>
+    <TowerLayer ref="towerLayer"></TowerLayer>
     <ToolLayer ref="toolLayer" @select-poly="onSelectedPolygon"></ToolLayer>
-    <EditBar ref="editBar" @edit="onEdit"></EditBar>
+    <EditBar ref="editBar" @edit="onEdit($event)"></EditBar>
     <ToolBar ref="toolBar"></ToolBar>
   </l-map>
 </template>
 
 <script lang="js">
   import 'leaflet/dist/leaflet.css'
+  import 'leaflet-search/dist/leaflet-search.src.css'
   import '@/assets/button.css'
-  import { LMap, LTileLayer, LMarker, LCircle, LLayerGroup, LControl } from 'vue2-leaflet'
+  import { LMap, LTileLayer, LMarker, LCircle, LLayerGroup, LControl, LTooltip } from 'vue2-leaflet'
   import LeafletSidebar from './LeafletSidebar'
   import AiLayer from './AiLayer'
   import EditBar from './EditBar'
   import ToolBar from './ToolBar'
   import EditLayer from './EditLayer'
   import ToolLayer from './ToolLayer'
+  import TowerLayer from './TowerLayer'
   import PavementLayer from './PavementLayer'
   import ThresholdLayer from './ThresholdLayer'
 
   import { Loading } from 'element-ui'
   import L from 'leaflet'
+  import { LeafletSearch } from 'leaflet-search'
 
   // https://github.com/KoRiGaN/Vue2Leaflet/issues/103
   delete L.Icon.Default.prototype._getIconUrl
-
   L.Icon.Default.mergeOptions({
     iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
     iconUrl: require('leaflet/dist/images/marker-icon.png'),
@@ -76,8 +79,76 @@ You should have received a copy of the GNU General Public License along with FG 
   })
   export default {
     name: 'flightgear-map',
-    components: { LMap, LTileLayer, LMarker, LCircle, LeafletSidebar, AiLayer, EditBar, ToolBar, EditLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer, ToolLayer },
+    components: { LMap, LTileLayer, LMarker, LCircle, LTooltip, LeafletSidebar, AiLayer, EditBar, ToolBar, EditLayer, TowerLayer, PavementLayer, LLayerGroup, LControl, ThresholdLayer, ToolLayer, LeafletSearch },
     props: [],
+    created () {
+      this.loadingInstance = null
+      this.$store.watch(
+        function (state) {
+          return state.Loading.icao
+        },
+        (newValue, oldValue) => {
+          // debugger
+          console.log('setIcaoLoading ' + oldValue + ' => ' + newValue + ' groundnetLoaded ' + this.groundnetLoaded + ' pavementLoaded ' + this.pavementLoaded + ' ' + this.loadingInstance)
+          if (newValue !== oldValue && newValue !== '') {
+            this.groundnetLoaded = newValue
+            if ((this.loadingInstance === null || this.loadingInstance === undefined)) {
+              this.loadingInstance = Loading.service({ fullscreen: false })
+            }
+          }
+        }
+        ,
+        {
+          deep: false,
+          immediate: true
+        }
+      )
+      this.$store.watch(
+        function (state) {
+          return state.Loading.groundnetLoaded
+        },
+        (newValue, oldValue) => {
+          // debugger
+          console.log('groundnetLoaded ' + oldValue + ' => ' + newValue + ' groundnetLoaded ' + this.groundnetLoaded + ' pavementLoaded ' + this.pavementLoaded + ' ' + this.loadingInstance)
+          if (newValue !== oldValue) {
+            this.groundnetLoaded = newValue
+            if (this.groundnetLoaded &&
+                this.pavementLoaded &&
+                this.loadingInstance !== null) {
+              this.loadingInstance.close()
+              this.loadingInstance = null
+            }
+          }
+        }
+        ,
+        {
+          deep: false,
+          immediate: true
+        }
+      )
+      this.$store.watch(
+        function (state) {
+          return state.Loading.pavementLoaded
+        },
+        (newValue, oldValue) => {
+          console.log('pavementLoaded ' + oldValue + ' => ' + newValue + ' ' + this.groundnetLoaded + ' ' + this.pavementLoaded + ' ' + this.loadingInstance)
+          if (newValue !== oldValue) {
+            this.pavementLoaded = newValue
+            if (this.groundnetLoaded &&
+                this.pavementLoaded &&
+                this.loadingInstance !== null) {
+              this.loadingInstance.close()
+              this.loadingInstance = null
+            }
+          }
+        }
+        ,
+        {
+          deep: false,
+          immediate: true
+        }
+      )
+    },
     mounted () {
       this.$store.dispatch('getAirports')
       this.$store.subscribe((mutation, state) => {
@@ -88,13 +159,14 @@ You should have received a copy of the GNU General Public License along with FG 
             .filter(feature => this.visible(feature))
             .map(feature => feature.properties.icao)
           if (airportsToLoad.length > 0 && airportsToLoad[0] !== this.editingAirport && this.zoom > 12) {
-            let loadingInstance = Loading.service({ fullscreen: true })
-
+            this.$store.dispatch('setIcaoLoading', airportsToLoad[0])
             this.$nextTick(() => { // Loading should be closed asynchronously
               this.$refs.pavementLayer.load(airportsToLoad[0])
               this.$refs.editLayer.load(airportsToLoad[0])
               this.$refs.thresholdLayer.load(airportsToLoad[0])
-              loadingInstance.close()
+              if (this.$refs.towerLayer) {
+                this.$refs.towerLayer.load(airportsToLoad[0])
+              }
               this.editingAirport = airportsToLoad[0]
             })
           }
@@ -104,13 +176,15 @@ You should have received a copy of the GNU General Public License along with FG 
           if (this.$refs.airportLayer) {
             this.$refs.airportLayer.setVisible(this.zoom < 12)
           }
-
           // console.log(this.groundnet)
         }
       })
     },
     data () {
       return {
+        loadingInstance: Object,
+        groundnetLoaded: false,
+        pavementLoaded: false,
         url: 'https://a.tile.openstreetmap.de/{z}/{x}/{y}.png',
         attribution: '<A href="https://github.com/Portree-Kid/flightgear-airports" target="_blank">Flightgear Airports ' + require('electron').remote.app.getVersion() +
         '</A> <A href="https://www.electronjs.org/" target="_blank">Electron</A> ' +
@@ -124,7 +198,6 @@ You should have received a copy of the GNU General Public License along with FG 
     },
     methods: {
       ready (e) {
-        console.log(e)
         e.on('layeradd', this.onLayerAdd)
       },
       onLayerAdd (e) {
@@ -140,15 +213,45 @@ You should have received a copy of the GNU General Public License along with FG 
         if (this.$refs.pavementLayer.getLayer() === e.layer) {
           // debugger
           var l = this.layersControl._layers.filter(l => l.name === 'APT Layer')
+          if (l.length > 0 && l[0].layer !== this.$refs.pavementLayer.getLayer()) {
+            this.layersControl.removeLayer(l[0].layer)
+            this.layersControl.addOverlay(this.$refs.pavementLayer.getLayer(), 'APT Layer')
+          }
           if (l.length === 0) {
             this.layersControl.addOverlay(this.$refs.pavementLayer.getLayer(), 'APT Layer')
           }
         }
-        if (this.$refs.thresholdLayer.getLayer() === e.layer) {
+        if (this.$refs.thresholdLayer !== undefined && this.$refs.thresholdLayer.getLayer() === e.layer) {
           l = this.layersControl._layers.filter(l => l.name === 'Threshold Layer')
+          if (l.length > 0 && l[0].layer !== this.$refs.thresholdLayer.getLayer()) {
+            this.layersControl.removeLayer(l[0].layer)
+            this.layersControl.addOverlay(this.$refs.thresholdLayer.getLayer(), 'Threshold Layer')
+          }
           if (l.length === 0) {
             this.layersControl.addOverlay(this.$refs.thresholdLayer.getLayer(), 'Threshold Layer')
           }
+          this.$refs.thresholdLayer.zoomUpdated()
+        }
+        if (this.$refs.towerLayer !== undefined && this.$refs.towerLayer.getLayer() === e.layer) {
+          l = this.layersControl._layers.filter(l => l.name === 'Tower Layer')
+          if (l.length > 0 && l[0].layer !== this.$refs.towerLayer.getLayer()) {
+            this.layersControl.removeLayer(l[0].layer)
+            this.layersControl.addOverlay(this.$refs.towerLayer.getLayer(), 'Tower Layer')
+          }
+          if (l.length === 0) {
+            this.layersControl.addOverlay(this.$refs.towerLayer.getLayer(), 'Tower Layer')
+          }
+          this.$refs.towerLayer.zoomUpdated()
+        }
+        if (this.$refs.editLayer !== undefined && this.searchControl === undefined && this.$refs.editLayer.getLayer() === e.layer) {
+          this.searchControl = new L.Control.Search({
+            layer: this.$refs.editLayer.getLayer(),
+            position: 'topleft',
+            propertyName: 'searchTerm',
+            marker: {animate: false},
+            initial: false
+          })
+          this.searchControl.addTo(this.$refs.map.mapObject)
         }
       },
       onSelectedPolygon (ring) {
@@ -160,10 +263,17 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$refs.sidebar.setData(parkings)
       },
       onEdit (event) {
-        this.$refs.map.mapObject.options.minZoom = 13
+        if (event) {
+          this.$refs.map.mapObject.options.minZoom = 13
+        } else {
+          this.$refs.map.mapObject.options.minZoom = 1
+        }
         this.$refs.editLayer.enableEdit()
-        this.$refs.toolBar.setEdit(this.$refs.editBar.isEditing)
-        this.$refs.sidebar.setEditing(this.$refs.editBar.isEditing)
+        this.$refs.towerLayer.enableEdit()
+        this.$refs.thresholdLayer.enableEdit()
+        this.$refs.editBar.setEditing(event)
+        this.$refs.toolBar.setEditing(event)
+        this.$refs.sidebar.setEditing(event)
       },
       onEditSidebar (event) {
         this.$refs.editLayer.onEdit(event)
@@ -226,6 +336,7 @@ You should have received a copy of the GNU General Public License along with FG 
         event.target.airport = item
         // console.log(event, item)
         this.normalStyle(event.target)
+        event.target.bindTooltip(event.target.airport.properties.icao + ' ' + event.target.airport.properties.name)
       },
       onClick (event, item) {
         console.log(item)
@@ -244,13 +355,38 @@ You should have received a copy of the GNU General Public License along with FG 
         if (zoom !== this.$store.state.Settings.zoom) {
           this.$store.dispatch('setZoom', zoom)
           this.$refs.airportLayer.setVisible(zoom < 12)
+          if (this.$refs.towerLayer) {
+            this.$refs.towerLayer.setVisible(this.zoom >= 12)
+          }
+          if (this.$refs.thresholdLayer) {
+            this.$refs.thresholdLayer.setVisible(this.zoom >= 12)
+          }
           this.$refs.pavementLayer.setVisible(zoom >= 12)
+        }
+        if (this.$refs.editLayer.groundnetLayerGroup) {
+          this.$refs.editLayer.groundnetLayerGroup.eachLayer(function (layer) {
+            if (layer.updateArrows !== undefined) {
+              layer.updateArrows(zoom)
+            }
+          })
+        }
+        if (this.$refs.thresholdLayer) {
+          this.$refs.thresholdLayer.zoomUpdated()
+        }
+        if (this.$refs.towerLayer) {
+          this.$refs.towerLayer.zoomUpdated()
         }
       },
       async centerUpdated (center) {
         if (center !== this.$store.state.Settings.center) {
-          this.$store.dispatch('setCenter', center)
+          this.$store.dispatch('setCenter', {lat: Number(center.lat), lng: Number(center.lng)})
           this.$refs.airportLayer.setVisible(this.zoom < 12)
+          if (this.$refs.thresholdLayer) {
+            this.$refs.thresholdLayer.setVisible(this.zoom >= 12)
+          }
+          if (this.$refs.towerLayer) {
+            this.$refs.towerLayer.setVisible(this.zoom >= 12)
+          }
           this.$refs.pavementLayer.setVisible(this.zoom >= 12)
         }
       },

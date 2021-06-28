@@ -1,9 +1,24 @@
+/*
+Copyright 2020 Keith Paterson
+
+This file is part of FG Airports.
+
+FG Airports is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+FG Airports is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with FG Airports. If not, see http://www.gnu.org/licenses/.
+*/
 /* eslint-disable */
 const lineReader = require('readline');
 const zlib = require('zlib');
-// const geodesy = require('geodesy');
 const LatLonEllipsoidal = require('geodesy/latlon-ellipsoidal-vincenty.js').default;
 const fs = require('fs');
+
+const store = require('../store');
+
+const buildRunwayPoly = require('../leaflet/Runway.js');
+const buildTaxiwayPoly = require('../leaflet/Taxiway.js');
 
 /**
  * 
@@ -25,12 +40,12 @@ function bezier(line, icao, layerGroup, currentFeature) {
         var startPoint = [Number(previous[0]), Number(previous[1])];
         var endPoint = [Number(line[1]), Number(line[2])];
 
-        if(module.exports.debug) {
-          L.polyline([startPoint, endPoint], { color: 'fuchsia' }).addTo(layerGroup);
-          var marker = new L.marker(endPoint, { title: 'endpoint', color: 'fuchsia' });
-          marker.bindTooltip(String(currentFeature.slice(-1)[0].length + ' ' + line), { className: "my-label", offset: [0, 0] });
-          marker.addTo(layerGroup);
-}
+        if (module.exports.debug) {
+            L.polyline([startPoint, endPoint], { color: 'fuchsia' }).addTo(layerGroup);
+            var marker = new L.marker(endPoint, { title: 'endpoint', color: 'fuchsia' });
+            marker.bindTooltip(String(currentFeature.slice(-1)[0].length + ' ' + line), { className: "my-label", offset: [0, 0] });
+            marker.addTo(layerGroup);
+        }
 
         var control = [Number(line[3]), Number(line[4])];
         if (!isNaN(control[0]) && control[0] !== undefined && !isNaN(control[1]) && control[1] !== undefined) {
@@ -55,7 +70,7 @@ function bezier(line, icao, layerGroup, currentFeature) {
                     L.polyline([startPoint, controlReflected, endPoint], { color: 'purple' }).addTo(layerGroup);
 
                     var marker = new L.marker(controlReflected, { title: 'control First' });
-                    marker.bindTooltip(String(currentFeature.slice(-1)[0].length + ' ' + line), {className: "my-label", offset: [0, 0] });
+                    marker.bindTooltip(String(currentFeature.slice(-1)[0].length + ' ' + line), { className: "my-label", offset: [0, 0] });
                     marker.addTo(layerGroup);
                 }
                 points = deCasteljau([
@@ -66,13 +81,13 @@ function bezier(line, icao, layerGroup, currentFeature) {
                 if (module.exports.debug) {
                     L.polyline([startPoint, exports.bezierPoint, controlReflected, endPoint], { color: 'purple' }).addTo(layerGroup);
                     var marker = new L.marker(exports.bezierPoint, { title: 'exports.bezierPoint' }).addTo(layerGroup);
-                    marker.bindTooltip(String(currentFeature.slice(-1)[0].length + ' ' + line), {className: "my-label", offset: [0, 10] });
+                    marker.bindTooltip(String(currentFeature.slice(-1)[0].length + ' ' + line), { className: "my-label", offset: [0, 10] });
                     marker.addTo(layerGroup);
-                    
+
                     var marker1 = new L.marker(controlReflected, { title: 'controlReflected' }).addTo(layerGroup);
-                    marker1.bindTooltip(String(currentFeature.slice(-1)[0].length + ' ' + line), {className: "my-label", offset: [0, -10] });
+                    marker1.bindTooltip(String(currentFeature.slice(-1)[0].length + ' ' + line), { className: "my-label", offset: [0, -10] });
                     marker1.addTo(layerGroup);
-                    
+
                 }
                 points = deCasteljau([
                     [Number(previous[0]), Number(previous[1])],
@@ -253,35 +268,57 @@ function createLineString(currentFeature, layerGroup) {
     }
 }
 
-module.exports.readPavement = function (f, icao, cb) {
+module.exports.readPavement = function (f, icao, callback) {
     console.log(f);
     var pavementLayerGroup = L.layerGroup();
     var currentFeature;
 
-    lineReader.createInterface({
-        input: fs.createReadStream(f).pipe(zlib.createGunzip())
-    }).on('line', function (line) {
-        var fields = line.split(/[ ]+/);
-        // var fields = line.match('([0-9]+)');
-        if (fields == null)
-            return;
-        var scanMethod = scanMethods[fields[0]];
-        if (scanMethod != null) {
-            currentFeature = scanMethod(fields, icao, pavementLayerGroup, currentFeature);
-        }
-        else {
-            if (fields[0] == '99') {
-                lineReader.close();
+    store.default.dispatch('setPavementLoaded', false);
+
+    if (!fs.existsSync(f)) {
+        store.default.dispatch('setPavementLoaded', true);
+        callback();
+        return;
+    }
+    try {
+        fs.accessSync(f, fs.constants.R_OK);
+        lineReader.createInterface({
+            input: fs.createReadStream(f).pipe(zlib.createGunzip())
+        }).on('line', function (line) {
+            try {
+                var fields = line.split(/[ ]+/);
+                // var fields = line.match('([0-9]+)');
+                if (fields == null)
+                    return;
+                var scanMethod = scanMethods[fields[0]];
+                if (scanMethod != null) {
+                    currentFeature = scanMethod(fields, icao, pavementLayerGroup, currentFeature);
+                }
+                else {
+                    if (fields[0] == '99') {
+                        lineReader.close();
+                    }
+                    // console.log('Ignored:', line);
+                }
+            } catch (error) {
+                console.error('Error reading : ' + line + error);
             }
-            // console.log('Ignored:', line);
-        }
-    }).on('error', function (err) {
-        console.error(err);
-        lr.close();
-    }).on('close', function () {
-        console.log("End");
-        cb(pavementLayerGroup);
-    });
+        }).on('error', function (err) {
+            store.default.dispatch('setPavementLoaded', true);
+            console.error(err);
+            lr.close();
+            callback();
+        }).on('close', function () {
+            store.default.dispatch('setPavementLoaded', true);
+            console.log("End");
+            callback(pavementLayerGroup);
+        });
+    } catch (err) {
+        console.error('no access!');
+        store.default.dispatch('setPavementLoaded', true);
+        callback();
+        return;
+    }
 }
 
 module.exports.debug = false;
@@ -304,33 +341,24 @@ var scanMethods = {
     // APTDAT 715 Segment
     10: (line, icao, layerGroup) => {
         if (module.exports.isScanning) {
-          //var marker = new L.marker([line[1], line[2]], { title: '10 Point', color: 'fuchsia' });
-          //marker.bindTooltip(String(line), { className: "my-label", offset: [0, 0] });
-          //marker.addTo(layerGroup);
-          var pointMiddle = new LatLonEllipsoidal(Number(line[1]), Number(line[2]));
-          var point1 = pointMiddle.destinationPoint(line[5]/6.562, line[4]);
-          var point2 = pointMiddle.destinationPoint(line[5]/6.562, line[4]-180);
+            var pointMiddle = new LatLonEllipsoidal(Number(line[1]), Number(line[2]));
+            var point1 = pointMiddle.destinationPoint(line[5] / 6.562, line[4]);
+            var point2 = pointMiddle.destinationPoint(line[5] / 6.562, line[4] - 180);
 
-          //var runwayPoly2 = new L.Polygon([point1, point2]);
-          //var marker2 = new L.marker(point2, { title: '10 Point 2', color: 'fuchsia' });
-          //marker2.bindTooltip(String(line), { className: "my-label", offset: [0, 0] });
-          //marker2.addTo(layerGroup);
-          //runwayPoly2.setStyle({ color: 'red', interactive: false });
-          //runwayPoly2.addTo(layerGroup);
-          var runwayPoints = [];
+            var runwayPoints = [];
 
-          var bearing = point1.initialBearingTo(point2);
-          var runwayWidth = Number(line[8])/3.281;
+            var bearing = point1.initialBearingTo(point2);
+            // Width in ft
+            var runwayWidth = Number(line[8]) / 3.281;
 
-          runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing + 90)));
-          runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (bearing + 90)));
-          runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (bearing - 90)));
-          runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing - 90)));            
+            runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing + 90)));
+            runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (bearing + 90)));
+            runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (bearing - 90)));
+            runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing - 90)));
 
-          var runwayPoly = new L.Polygon(runwayPoints);
-          runwayPoly.setStyle({ color: 'grey', fillColor: 'grey', opacity: 0.5, fillOpacity: 0.5, interactive: false });
-          runwayPoly.addTo(layerGroup);
-      }
+            var runwayPoly = buildTaxiwayPoly(runwayPoints);
+            runwayPoly.addTo(layerGroup);
+        }
     },
     // Runway
     100: (line, icao, layerGroup) => {
@@ -348,26 +376,25 @@ var scanMethods = {
             runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing + 90)));
             runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (bearing + 90)));
             runwayPoints.push(point2.destinationPoint(runwayWidth / 2, (bearing - 90)));
-            runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing - 90)));            
+            runwayPoints.push(point1.destinationPoint(runwayWidth / 2, (bearing - 90)));
 
-            var runwayPoly = new L.Polygon(runwayPoints);
-            runwayPoly.setStyle({ color: 'grey', interactive: false });
+            var runwayPoly = buildRunwayPoly(runwayPoints);
             runwayPoly.addTo(layerGroup);
 
             var displacedEnd1 = point1.destinationPoint(Number(line[20]), bearing)
-            var displacedEnd2 = point2.destinationPoint(Number(line[20]), bearing-180)
+            var displacedEnd2 = point2.destinationPoint(Number(line[20]), bearing - 180)
 
             var runwayLine = new L.Polyline([displacedEnd1, displacedEnd2]);
-            runwayLine.setStyle({ color: 'yellow', stroke: true, dashArray: [50,50] });
+            runwayLine.setStyle({ color: 'yellow', stroke: true, dashArray: [50, 50] });
             runwayLine.addTo(layerGroup);
-            
-            var t1 = new L.Polyline([displacedEnd1.destinationPoint(runwayWidth / 2, (bearing - 90)), 
-                displacedEnd1.destinationPoint(runwayWidth / 2, (bearing + 90))]);
+
+            var t1 = new L.Polyline([displacedEnd1.destinationPoint(runwayWidth / 2, (bearing - 90)),
+            displacedEnd1.destinationPoint(runwayWidth / 2, (bearing + 90))]);
             t1.setStyle({ color: 'yellow' });
             t1.addTo(layerGroup);
 
-            var t2 = new L.Polyline([displacedEnd2.destinationPoint(runwayWidth / 2, (bearing - 90)), 
-                displacedEnd2.destinationPoint(runwayWidth / 2, (bearing + 90))]);
+            var t2 = new L.Polyline([displacedEnd2.destinationPoint(runwayWidth / 2, (bearing - 90)),
+            displacedEnd2.destinationPoint(runwayWidth / 2, (bearing + 90))]);
             t2.setStyle({ color: 'yellow' });
             t2.addTo(layerGroup);
 
@@ -413,8 +440,8 @@ var scanMethods = {
         console.debug(line);
         var previous = currentFeature.slice(-1)[0].slice(-1)[0];
         if (previous !== undefined &&
-            previous !== null && 
-            previous[0] === line[1] && 
+            previous !== null &&
+            previous[0] === line[1] &&
             previous[1] === line[2]) {
             module.exports.bezierPoint = null;
         } else {

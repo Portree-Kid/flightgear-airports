@@ -1,15 +1,14 @@
 {
   "name": "flightgear-airports",
-  "version": "0.0.20",
+  "version": "0.0.34",
   "author": "portree_kid <keith.paterson@gmx.de>",
   "description": "An software to design Flightgear groundnets",
-  "license": "GPL v3",
+  "license": "GPL-3.0",
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
-    "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
     "dev": "SET NODE_ENV=development&& node .electron-vue/dev-runner.js",
     "e2e": "npm run pack && mocha test/e2e",
     "lint": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter src test",
@@ -18,6 +17,7 @@
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "test": "npm run unit && npm run e2e",
+    "mocha": "SET NODE_ENV=mocha&& mocha test/mocha/**/*.js",
     "unit": "karma start test/unit/karma.conf.js",
     "postinstall": ""
   },
@@ -70,30 +70,35 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "icon": "build/icons/icon.icns",
+      "publish": []
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "icon": "build/icons/icon.ico",
+      "publish": []
     },
     "nsis": {
       "oneClick": false,
+      "perMachine": true,
       "allowToChangeInstallationDirectory": true
     },
     "linux": {
       "icon": "build/icons",
-      "target": "AppImage"
+      "target": "AppImage",
+      "publish": []
     }
   },
   "dependencies": {
     "@turf/intersect": "^6.1.3",
     "@turf/turf": "^5.1.6",
-    "axios": "^0.18.1",
+    "axios": "^0.21.1",
     "coordinate-parser": "^1.0.3",
     "dijkstrajs": "^1.0.1",
     "electron-debug": "^3.0.1",
-    "element-ui": "^2.13.2",
+    "element-ui": "^2.15.1",
     "file-url": "^3.0.0",
     "fs": "0.0.1-security",
+    "fs-extra": "^9.0.1",
     "geo-coordinates-parser": "^1.2.4",
     "geodesy": "^2.2.0",
     "idb": "^4.0.5",
@@ -101,11 +106,14 @@
     "leaflet": "^1.5.1",
     "leaflet-editable": "^1.2.0",
     "leaflet-polylinedecorator": "^1.6.0",
+    "leaflet-search": "^2.9.9",
     "leaflet-sidebar-v2": "^3.2.1",
     "leaflet-textpath": "^1.2.0",
+    "leaflet.pattern": "^0.1.0",
     "lokijs": "^1.5.8",
     "mathjs": "^6.2.5",
     "path": "^0.12.7",
+    "tiny-worker": "^2.3.0",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
     "vue-idb": "^0.2.0",
@@ -134,7 +142,7 @@
     "babel-register": "^6.26.0",
     "babili-webpack-plugin": "^0.1.2",
     "cfonts": "^2.1.2",
-    "chai": "^4.1.2",
+    "chai": "^4.2.0",
     "chalk": "^2.4.1",
     "copy-webpack-plugin": "^4.5.1",
     "cross-env": "^5.1.6",
@@ -142,7 +150,7 @@
     "del": "^3.0.0",
     "devtron": "^1.4.0",
     "electron": "^7.2.4",
-    "electron-builder": "^21.2.0",
+    "electron-builder": "^22.10.4",
     "electron-devtools-installer": "^2.2.4",
     "eslint": "^4.19.1",
     "eslint-config-standard": "^11.0.0",
@@ -168,7 +176,7 @@
     "mocha": "^5.2.0",
     "multispinner": "^0.2.1",
     "node-loader": "^0.6.0",
-    "node-sass": "^4.9.2",
+    "node-sass": "^4.14.1",
     "require-dir": "^1.0.0",
     "sass-loader": "^7.0.3",
     "spectron": "^3.8.0",

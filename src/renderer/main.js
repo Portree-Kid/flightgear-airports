@@ -14,6 +14,10 @@ Vue.config.productionTip = false
 
 Vue.use(ElementUI)
 
+Vue.config.errorHandler = (err, vm, info) => {
+  console.error(err)
+}
+
 /* eslint-disable no-new */
 new Vue({
   components: { App },

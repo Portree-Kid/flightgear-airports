@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License along with FG 
  * @param {*} callback 
  */
 
+const { Debugger } = require("electron");
+
 async function asyncForEach(array, callback) {
   logger('info', "AsyncForEach Len " + array.length);
   for (let index = 0; index < array.length; index++) {
@@ -46,7 +48,7 @@ async function scanGroundnetFiles(p, features) {
     try {
       logger('info', 'Start Groundnets ' + p);
       var files = traverseDir(p);
-      this.postMessage(['max', files.length]);
+      this.postMessage(['max', files.length*2]);
       logger('info', files);
 
       asyncForEach(files, async f => {
@@ -184,6 +186,9 @@ function scanTrafficIntoDB(p, features) {
 
 function traverseDir(dir) {
   var result = [];
+  if(!fs.existsSync(dir)) {
+    return result;
+  }
   fs.readdirSync(dir).forEach(file => {
     let fullPath = path.join(dir, file);
     if (fs.lstatSync(fullPath).isDirectory()) {
@@ -239,26 +244,57 @@ function readAI(f, apts) {
         resolve();
         return;
       }
+      const aircraftLookup = {};
+      
+      dat.trafficlist.aircraft.map(n => {
+        try {
+          if(aircraftLookup[n['required-aircraft']] === undefined) {
+            aircraftLookup[n['required-aircraft']] = [];
+          }
+          aircraftLookup[n['required-aircraft']].push(n.airline);
+          aircraftLookup[n['required-aircraft']] = aircraftLookup[n['required-aircraft']].filter((v, i, a) => a.indexOf(v) === i);            
+        } catch (error) {
+          reject(error);
+        }
+        //debugger;
+      });
+           
 
       logger('info', 'Traffic', dat.trafficlist.flight);
 
       logger('info', "Departure flights " + dat.trafficlist.flight.length);
 
-      var merged = new Array();
+      // Flat list. Each flight departing or landing counts as one. 
+      var merged = [];
+
+      var airports = {};
+
 
       dat.trafficlist.flight.map(n => {
-        merged.push(n.departure.port);
+        merged.push(n.departure.port);        
         merged.push(n.arrival.port);
+
+        if(airports[n.departure.port] === undefined) {
+          airports[n.departure.port] = [];
+        }
+        if(airports[n.arrival.port] === undefined) {
+          airports[n.arrival.port] = [];
+        }
+        airports[n.departure.port] = airports[n.departure.port].concat(aircraftLookup[n['required-aircraft']]);
+        airports[n.departure.port] = airports[n.departure.port].filter((v, i, a) => a.indexOf(v) === i)
+        airports[n.arrival.port] = airports[n.arrival.port].concat(aircraftLookup[n['required-aircraft']]);
+        airports[n.arrival.port] = airports[n.arrival.port].filter((v, i, a) => a.indexOf(v) === i)
       }).sort();
 
+      //debugger;
       var counts = {};
       for (var i = 0; i < merged.length; i++) {
         counts[merged[i]] = 1 + (counts[merged[i]] || 0);
       }
 
-      asyncForEach(Object.keys(counts), async key => {
-        logger('info', key);
-        await store(key, airline[1], counts[key]);
+      asyncForEach(Object.keys(counts), async icao => {
+        logger('info', icao);
+        await store(icao, airports[icao], counts[icao]);
       }).then(t => {
         logger('info', "Finished");
         resolve();
@@ -290,7 +326,7 @@ function readAI(f, apts) {
  * @param {*} value 
  */
 
-function store(icao, airline, value) {
+function store(icao, airlines, value) {
   var promise = new Promise(function (resolve, reject) {
     logger('info', "Airport " + icao + " has " + value + " new flights");
     // Make a request to get a record by key from the object store
@@ -300,18 +336,18 @@ function store(icao, airline, value) {
     var objectStoreRequest = index.get(icao);
 
     objectStoreRequest.onsuccess = function (event) {
-      logger('info', 'Stored ', event);
+      logger('info', 'Store Request', event);
       var feature = objectStoreRequest.result;
       if (!feature) {
         feature = createFeature(icao);
       }
       feature.properties.flights += value;
-      logger('info', "Airline : ", airline);
-      if (!feature.properties.airlines.includes(airline)) {
-        feature.properties.airlines.push(airline);
-        feature.properties.airlines.sort();
-      }
       logger('info', "ICAO : " + feature.properties.icao + " Flights : " + feature.properties.flights);
+      logger('info', "Airlines : ", JSON.stringify(airlines));
+      //debugger;
+      feature.properties.airlines = feature.properties.airlines.concat(airlines);
+      feature.properties.airlines = feature.properties.airlines.filter((v, i, a) => a.indexOf(v) === i)
+      feature.properties.airlines.sort()
       // Create another request that inserts the item back into the database
       var updateAirportRequest = objectStore.put(feature);
 
@@ -320,16 +356,16 @@ function store(icao, airline, value) {
 
       // When this new request succeeds, run the displayData() function again to update the display
       updateAirportRequest.onsuccess = function (event) {
-        logger('info', "Stored", event);
+        logger('info', "Updated Success", event);
         resolve();
       };
       updateAirportRequest.onerror = function (event) {
-        logger('info', "Error storing ",  event);
+        logger('info', "Error updating ",  event);
         reject(event);
       };
     };
     objectStoreRequest.onerror = function (event) {
-      logger('info', "Error " + event);
+      logger('info', "Error reading" + event);
       reject(event);
     };
   });
@@ -345,6 +381,7 @@ function store(icao, airline, value) {
 async function readGroundnet(f, features) {
   var promise = new Promise(function (resolve, reject) {
     try {
+      var thisPostMessage = this.postMessage;
       var filename = path.basename(f).match('^([^.]+)\\.([^.]+)(\\.new)?\\.([^.]+)');
       if (filename == null) {
         resolve("File didn't match");
@@ -439,12 +476,10 @@ async function readGroundnet(f, features) {
                   }
                   if(filename [3] === '.new') {
                     feature['properties']['wipgroundnet'] = nodes && nodes.node ? nodes.node.length : 0;
-                    //debugger;
                     feature['properties']['wipparking'] = parkingnodes && parkingnodes.Parking ? parkingnodes.Parking.length : 0;
   
                   } else {
                     feature['properties']['groundnet'] = nodes && nodes.node ? nodes.node.length : 0;
-                    //debugger;
                     feature['properties']['parking'] = parkingnodes && parkingnodes.Parking ? parkingnodes.Parking.length : 0;  
                   }
                 }
@@ -459,6 +494,7 @@ async function readGroundnet(f, features) {
               // report on the success of the transaction completing, when everything is done
               transaction.oncomplete = function (event) {
                 logger('info', 'Write Transaction complete ' + event);
+                thisPostMessage(['progress', 1]);
                 resolve("Stored " + filename[1]);
               };
 
@@ -481,7 +517,7 @@ async function readGroundnet(f, features) {
               };
             }
             objectStoreRequest.onerror = function (event) {
-              logger('info', "Read Errpr : " + event);
+              logger('info', "Read Error : " + event);
               resolve(event);
             }
           }

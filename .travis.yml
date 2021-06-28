@@ -4,14 +4,14 @@ dist: xenial
 language: node_js
 workspaces:
   use:
-    - binaries
+  - binaries
 cache:
   directories:
   - node_modules
   - "$HOME/.electron"
-  - "$HOME/.cache" 
-addons: 
-before_install: 
+  - "$HOME/.cache"
+addons:
+before_install:
 install:
 - source ~/.bashrc
 - npm install -g xvfb-maybe
@@ -23,64 +23,60 @@ jobs:
     - stage: Build binaries
       os: windows
       script:
-        - npm run build
-        - mkdir windows-binaries
-        - mv -v build/flightgear-airports* windows-binaries/
-        - ls -l windows-binaries
+      - npm run build
+      - mkdir windows-binaries
+      - mv -v build/flightgear-airports* windows-binaries/
+      - ls -l windows-binaries
       workspaces:
         create:
           name: windows-binaries
           paths: windows-binaries
     - os: linux
       script:
-        - npm run build
-        - mkdir linux-binaries
-        - mv -v build/flightgear-airports* linux-binaries/
-        - ls -l linux-binaries
+      - npm run build
+      - mkdir linux-binaries
+      - mv -v build/flightgear-airports* linux-binaries/
+      - ls -l linux-binaries
       workspaces:
         create:
           name: linux-binaries
           paths: linux-binaries
     - os: osx
       script:
-        - npm run build
-        - mkdir osx-binaries
-        - mv -v build/flightgear-airports* osx-binaries/
-        - ls -l osx-binaries
+      - npm run build
+      - mkdir osx-binaries
+      - mv -v build/flightgear-airports* osx-binaries/
+      - ls -l osx-binaries
       workspaces:
         create:
           name: osx-binaries
           paths: osx-binaries
     - stage: Deploy
       install:
-        - pwd 
-        - tar -xzf ${CASHER_DIR}/osx-binaries-fetch.tgz
-        - find -name flightgear-airports*
-#        - find -name windows-binaries
-#        - find -name osx-binaries
-#        - find -name linux-binaries
-#        - ls -l | grep "^d"
-#        - ls -l "C:"
-        - cp ./Users/travis/build/Portree-Kid/flightgear-airports/osx-binaries/*.dmg build/
-        - cp ./C:/Users/travis/build/Portree-Kid/flightgear-airports/windows-binaries/*.exe build/
-        - cp ./linux-binaries/*.AppImage build/
-        - ls -l "build/"
+      - pwd
+      - find -name *osx-binaries*
+      - tar -xzf ${CASHER_DIR}/osx-binaries-fetch.tgz
+      - find -name flightgear-airports*
+      - cp ./Users/travis/build/Portree-Kid/flightgear-airports/osx-binaries/*.dmg build/
+      - cp ./C:/Users/travis/build/Portree-Kid/flightgear-airports/windows-binaries/*.exe build/
+      - cp ./linux-binaries/*.AppImage build/
+      - ls -l "build/"
       script: skip
       workspaces:
         use:
-          - windows-binaries
-          - linux-binaries
-          - osx-binaries
+        - windows-binaries
+        - linux-binaries
+        - osx-binaries
       deploy:
         skip_cleanup: true
         overwrite: true
         draft: true
-        name: '0.0.20'
+        name: '0.0.33'
         provider: releases
         api_key:
           secure: ECdYNrvCA7+qSnbktJPstwXrluqKZTWDD7K3X/dyoxRO4+ZL/K19r60LXF9g90troWgdZSN3tFxNktkGeIOuTo83Q3B6qjXnKtdW3JhefvztlHQadUIf2p8Ype2spicNAl2629Mwr7ksqJuV0rR0T4zYT1SIFWkuwGYhR+tmS94m6QmnocGPzjset3y23lJ/rczJiiWIkaLrOfeCj5VjWtSaVQEWWlolmuji0qGHvOT/mq1X+jfI9RIlJTpV2ZNYaa3fr+M+8tIreaHDjbKrYAuIA/JzpDxmXtWGnxkxLbDxonp6OhzcJ7z9hpdkg38HKxNTL9Bdv0LpZKCTo2C+0G6yR3kQqXhoIzbfFeTX0G6d7I8oYxL1JGCsrnmU3OyhCLMRcOWL294hhDIUMWveBRNVRGVaOzeXRphO4nnMhGNd4KxwxvRPBMNeguhL/ZBwjcw6puYL3m86UT5iwjMuYvcbEVEDXwHSyi96zjHzolkMUn8hPOIUfgmCOIsqIMMpbCXJqdyha0pu9x1qKrXbF+hQ5JXPvTN8/ZG4dLXhvsZJdD50vZu+GW33vU96c+mwIkCz0CS5t+vuHfdT/OOuBN7HV46q/9WrZMSlz5ZD+A2dY57QVL+CucjMZlVoU/iJhfRpV5XPYvLlYI+tpH0yX5JQqtcRdZJzKsYknwZNj5o=
         file_glob: true    
         file: build/*
         on:
-          branches: '0.0.20'
+          branches: '0.0.33'
           repo: Portree-Kid/flightgear-airports

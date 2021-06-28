@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, Menu } from 'electron'
 
 const { ipcMain } = require('electron')
 ipcMain.on('OpenDebugger', (event, arg) => {
@@ -20,6 +20,7 @@ const winURL = process.env.NODE_ENV === 'development'
   : `file://${__dirname}/index.html`
 
 function createWindow () {
+  Menu.setApplicationMenu(null)
   /**
    * Initial window options
    */
@@ -30,6 +31,7 @@ function createWindow () {
       nodeIntegration: true,
       nodeIntegrationInWorker: true
     },
+    closable: true,
     width: 1000
   })
   mainWindow.loadURL(winURL)

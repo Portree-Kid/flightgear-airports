@@ -12,6 +12,12 @@ You should have received a copy of the GNU General Public License along with FG 
 <template>
   <div id="ToolBar">
     <ToolButton
+      icon="far fa-eye"
+      v-on:click="showTooltips"
+      :show="editing"
+      tooltip="Show Tooltips"
+    ></ToolButton>
+    <ToolButton
       icon="fas fa-draw-polygon"
       v-on:click="drawPolyline"
       :show="editing"
@@ -23,7 +29,7 @@ You should have received a copy of the GNU General Public License along with FG 
 <script lang="js">
 /* eslint-disable */
   import ToolButton from './ToolButton'
-  import Vue from 'vue'  
+  import Vue from 'vue'
 
   import fileUrl from 'file-url'
   const path = require('path')
@@ -42,7 +48,10 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$parent.$parent.$refs.toolLayer.stopDrawing()
         this.$parent.$parent.$refs.toolLayer.drawPolyline()
       },
-      setEdit (edit) {
+      showTooltips () {
+        this.$parent.$parent.$refs.editLayer.showTooltips()
+      },
+      setEditing (edit) {
         this.isEditing = edit;
         if(!this.isEditing) {
           this.$parent.$parent.$refs.toolLayer.stopDrawing()

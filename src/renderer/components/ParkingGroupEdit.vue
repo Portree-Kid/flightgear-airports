@@ -11,7 +11,7 @@
           radius: 18
           type: "gate"
     -->
-  <!--    
+  <!--
     <el-row>
       <el-col :span="4">
         <span class="label">Name :</span>
@@ -74,7 +74,7 @@
       <el-col :span="7">
         <span class="label">Heading :</span>
       </el-col>
-      <el-col :span="17">
+      <el-col :span="13">
         <el-input-number
           v-model="avgHeading" @change="headingChange"
           :min="-361"
@@ -84,14 +84,18 @@
           :disabled="!editing"
         ></el-input-number>
       </el-col>
+      <el-col :span="4">
+          <el-button @click="rotate" class="button">
+            <i class="fas fa-ruler-combined"></i>
+          </el-button>
+      </el-col>
     </el-row>
-    <!--
     <el-row>
       <el-col :span="7">
         <span class="label">Parking Type :</span>
       </el-col>
       <el-col :span="17">
-        <el-select v-model="parking_type" placeholder="Select" :disabled="!editing">
+        <el-select v-model="parking_type" @change="typeChange" placeholder="Select" :disabled="!editing">
           <el-option
             v-for="type in options"
             :key="type.value"
@@ -102,6 +106,7 @@
         </el-select>
       </el-col>
     </el-row>
+    <!--
     <el-row>
       <el-col :span="7">
         <span class="label">Airline :</span>
@@ -123,25 +128,36 @@
 
 <script lang="js">
 /* eslint-disable */
-  import Vue from 'vue'  
+  import Vue from 'vue'
 
 const convert = require('geo-coordinates-parser');
   const Coordinates = require('coordinate-parser');
 
-  export default {    
+  export default {
     data () {
       return {
-        data: Object, avgHeading: 5, editing: Boolean, wingspan: 0
+        data: Object, avgHeading: 5, editing: Boolean, wingspan: 0, parking_type: ''
       }
     },
 
     methods: {
+      rotate() {
+        this.avgHeading = this.avgHeading + 90;
+        while (this.avgHeading>=360) {
+          this.avgHeading -= 360
+        }
+        while (this.avgHeading<0) {
+          this.avgHeading += 360
+        }
+        this.headingChange(this.avgHeading);
+      },
       show (idx) {
         this.$parent.$parent.$parent.$refs.editLayer.show(idx)
-      }, 
+      },
       setData (data) {
         this.data = data;
         this.setAvgHeading();
+        this.setAvgType();
       },
       setEditing(editing) {
         this.editing = editing
@@ -149,18 +165,29 @@ const convert = require('geo-coordinates-parser');
       setAvgHeading() {
           if( this.data === null || this.data === undefined) {
             return 0
-          }          
+          }
           this.avgHeading = Number( this.data.reduce(function (r, parking) {
             r.sum = r.sum + parking.options.attributes.heading;
             r.avg = r.sum / ++r.count;
            return r;
-          }, { sum: 0, count: 0, avg: 0 }).avg);        
-      }, 
+          }, { sum: 0, count: 0, avg: 0 }).avg);
+      },
+      setAvgType() {
+          if( this.data === null || this.data === undefined) {
+            return 0
+          }
+          var types = this.data.map(parking => parking.options.attributes.type).filter((v, i, a) => a.indexOf(v) === i);
+          if (types.length == 1) {
+            this.parking_type = types[0];
+          } else {
+            this.parking_type = '';
+          }
+      },
       wingspanChange( newValue ) {
           if ( newValue ) {
-            this.$emit('edit', {type: 'parking-group-wingspan', wingspan: newValue} )
+            this.$emit('editParking', {type: 'parking-group-wingspan', wingspan: newValue} )
           }
-      }, 
+      },
       headingChange( newValue ) {
           while (newValue>=360) {
             newValue -= 360
@@ -169,11 +196,16 @@ const convert = require('geo-coordinates-parser');
             newValue += 360
           }
           if ( newValue ) {
-            this.$emit('edit', {type: 'parking-group-angle', angle: newValue} )
+            this.$emit('editParking', {type: 'parking-group-angle', angle: newValue} )
+          }
+      },
+      typeChange( newValue ) {
+          if ( newValue ) {
+            this.$emit('editParking', {type: 'parking-group-type', parking_type: newValue} )
           }
       }
     },
-    computed: {      
+    computed: {
       parking: function () {
         return this.data !== null && this.$store.state.Editable.type === 'parking-group'
 
@@ -194,7 +226,7 @@ const convert = require('geo-coordinates-parser');
       },
       airlineCodes: {
       // getter
-        get: function () {          
+        get: function () {
         },
         // setter
         set: function (newValue) {
@@ -256,19 +288,6 @@ const convert = require('geo-coordinates-parser');
           {value: 'mil-fighter', label: 'military fighter'},
           {value: 'mil-cargo', label: 'military cargo'}
         ]
-      },
-      parking_type: {
-      // getter
-        get: function () {
-          if (this.$store.state.Editable.data.parking.type === undefined) {
-            return 'none'
-          }
-          return this.$store.state.Editable.data.parking.type
-        },
-        // setter
-        set: function (newValue) {
-          this.$store.commit('SET_EDIT_PARKING_TYPE', newValue)
-        }
       }
     }
   }
