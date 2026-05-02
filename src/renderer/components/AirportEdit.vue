@@ -115,59 +115,59 @@ You should have received a copy of the GNU General Public License along with FG 
       </el-row>
     </div>
     <el-tabs v-model="activeTab">
-      <el-tab-pane label="Frequencies" name="first">
-        <div>
-          <el-row v-for="f in frequencyList" :key="f.index">
-            <Frequency :frequency="f"></Frequency>
-          </el-row>
-          <el-button @click="addFrequency" v-if="editing">Add</el-button>
-        </div>
-      </el-tab-pane>
-      <el-tab-pane label="Parkings" name="second">
-        <ParkingList></ParkingList>
-      </el-tab-pane>
-      <el-tab-pane label="Statistics" name="third">
-        <el-row
-          ><el-col :span="8"
-            ><span class="label">Traffic :</span></el-col
-          ></el-row
-        >
-        <el-row>
-          <el-col :span="8">Flights :</el-col>
-          <el-col :span="4">{{ flights }}</el-col>
-          <el-col :span="8"></el-col>
-          <el-col :span="4"></el-col>
-        </el-row>
-        <el-row
-          ><el-col :span="16"
-            ><span class="label">GIT/Terrasync :</span></el-col
-          ></el-row
-        >
-        <el-row>
-          <el-col :span="8">Parking Positions :</el-col>
-          <el-col :span="4">{{ parking }}</el-col>
-          <el-col :span="8">Groundnet Nodes :</el-col>
-          <el-col :span="4">{{ groundnet }}</el-col>
-        </el-row>
-        <el-row
-          ><el-col :span="8"><span class="label">Work :</span></el-col></el-row
-        >
-        <el-row v-if="wip">
-          <el-col :span="8">Work Parking Positions :</el-col>
-          <el-col :span="4">{{ wipparking }}</el-col>
-          <el-col :span="8">Work Groundnet Nodes :</el-col>
-          <el-col :span="4">{{ wipgroundnet }}</el-col>
-        </el-row>
-        <el-row v-if="wip">
-          <el-col :span="4">Saved :</el-col>
-          <el-col :span="8" class="text">{{ date }}</el-col>
-          <el-col :span="4">Uploaded :</el-col>
-          <el-col :span="8" class="text">{{ upload_date }}</el-col>
-        </el-row>
-      </el-tab-pane>
-      <el-tab-pane label="Traffic" name="fourth">
-        <TrafficList></TrafficList>
-      </el-tab-pane>
+        <el-tab-pane label="Frequencies" name="first">
+            <div>
+                <el-row v-for="f in frequencyList" :key="f.index">
+                    <Frequency :frequency="f"></Frequency>
+                </el-row>
+                <el-button @click="addFrequency" v-if="editing">Add</el-button>
+            </div>
+        </el-tab-pane>
+        <el-tab-pane label="Parkings" name="second">
+            <ParkingList></ParkingList>
+        </el-tab-pane>
+        <el-tab-pane label="RunwayUse" name="third">
+            <RunwayList :icao=icao></RunwayList>
+        </el-tab-pane>
+        <el-tab-pane label="Procedures" name="fourth">
+            <ProceduresList :icao=icao></ProceduresList>
+        </el-tab-pane>
+        <el-tab-pane label="Statistics" name="fifth">
+            <el-row>
+                <el-col :span="8"><span class="label">Traffic :</span></el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="8">Flights :</el-col>
+                <el-col :span="4">{{ flights }}</el-col>
+                <el-col :span="8"></el-col>
+                <el-col :span="4"></el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="16"><span class="label">GIT/Terrasync :</span></el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="8">Parking Positions :</el-col>
+                <el-col :span="4">{{ parking }}</el-col>
+                <el-col :span="8">Groundnet Nodes :</el-col>
+                <el-col :span="4">{{ groundnet }}</el-col>
+            </el-row>
+            <el-row><el-col :span="8"><span class="label">Work :</span></el-col></el-row>
+            <el-row v-if="wip">
+                <el-col :span="8">Work Parking Positions :</el-col>
+                <el-col :span="4">{{ wipparking }}</el-col>
+                <el-col :span="8">Work Groundnet Nodes :</el-col>
+                <el-col :span="4">{{ wipgroundnet }}</el-col>
+            </el-row>
+            <el-row v-if="wip">
+                <el-col :span="4">Saved :</el-col>
+                <el-col :span="8" class="text">{{ date }}</el-col>
+                <el-col :span="4">Uploaded :</el-col>
+                <el-col :span="8" class="text">{{ upload_date }}</el-col>
+            </el-row>
+        </el-tab-pane>
+        <el-tab-pane label="Traffic" name="sixth">
+            <TrafficList></TrafficList>
+        </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -177,6 +177,8 @@ You should have received a copy of the GNU General Public License along with FG 
   import FileSelect from './FileSelect'
   import Frequency from './Frequency'
   import ParkingList from './ParkingList'
+  import RunwayList from './RunwayList'
+  import ProceduresList from './ProceduresList'
   import TrafficList from './TrafficList'
   import Upload from './Upload'
 
@@ -188,7 +190,7 @@ export default {
       return {showImportFile: false, activeTab: 'first', editing: false, uploadVisible: false, dialogVisible: false, airlineCode: '', fileImport: null}
     },
     components: {
-      EditButton, FileSelect, Frequency, ParkingList, TrafficList, Upload
+      EditButton, FileSelect, Frequency, ParkingList, RunwayList, ProceduresList, TrafficList, Upload
     },
     methods: {
       fileImportFileName (f) {
@@ -275,6 +277,9 @@ export default {
       },
       parking: function () {
         return this.$store.state.Airports.currentAirport.parking
+      },
+      rwyuse: function () {
+        return this.$store.state.Airports.currentAirport.rwyuse
       },
       wipgroundnet: function () {
         return this.$store.state.Airports.currentAirport.wipgroundnet

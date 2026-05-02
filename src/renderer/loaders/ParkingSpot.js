@@ -168,6 +168,10 @@ L.ParkingSpot = L.Circle.extend({
             var leftBack = turf.destination(back, radiusKM, left, options);
             var rightBack = turf.destination(back, radiusKM, right, options);
 
+            if (turf.distance(leftBack, rightBack, options) === 0) {
+                console.error("Invalid parking spot radius, cannot create box");
+            }
+
             var leftMiddle = turf.destination(start, radiusKM, left, options);
             var rightMiddle = turf.destination(start, radiusKM, right, options);
 
@@ -178,10 +182,17 @@ L.ParkingSpot = L.Circle.extend({
             var rightIntermediate = turf.destination(rightFront, halfRadiusKM, backwards, options);
 
             if(this.box === undefined) {
+                var latlngs2 = [leftBack, rightBack, rightMiddle, rightIntermediate, rightFront, leftFront, leftIntermediate, leftMiddle];
                 var latlngs = [leftBack, rightBack, rightMiddle, rightIntermediate, rightFront, leftFront, leftIntermediate, leftMiddle].map(l => this.turfToLatLng(l));
+//                console.debug(util.inspect(latlngs2));
+//                console.debug(util.inspect(latlngs));
                 this.box = L.polygon(latlngs);
                 //this.box.addTo(this.editor.editLayer);
                 this.box._parkingSpot = this;
+//                this.box.on('pm:edit', (e)=>{
+//                   console.log(e);
+//                });
+//
                 this.box.on('click', function (event) {
                     console.debug("Click Parking Box : " + event.target);
                     if (Number(store.default.state.Editable.index) >= 0 &&
@@ -200,9 +211,15 @@ L.ParkingSpot = L.Circle.extend({
                 }
             }
             if(this.box!==undefined) {
-                var latlngs = [leftBack, rightBack, rightMiddle, rightIntermediate, rightFront, leftFront, leftIntermediate, leftMiddle].map(l => this.turfToLatLng(l));
-                console.debug(latlngs);
+                var latlngs2 = [leftBack, rightBack, rightMiddle, rightIntermediate, rightFront, leftFront, leftIntermediate, leftMiddle];
+                var latlngs = [leftBack, rightBack, rightMiddle, rightIntermediate, rightFront, leftFront, leftIntermediate, leftMiddle].map(l => this.turfToLatLng(l)).map(l => [l.lat, l.lng]);
+//                console.debug(util.inspect(latlngs2));
+//                console.debug(util.inspect(latlngs));
+
                 this.box.setLatLngs(latlngs);
+//                console.debug("Test " + util.inspect(this.box.getBounds()));
+                var bounds = this.box.getBounds();
+//                console.debug("Test " + (bounds.getWest() === bounds.getEast()) + " " + (bounds.getNorth() === bounds.getSouth()));
             }
         }
     },
@@ -244,9 +261,9 @@ L.ParkingSpot = L.Circle.extend({
         } else if(this.options.attributes.type == 'gate') {
             style['color'] = '#3388ff';
         } else if(this.options.attributes.type == 'mil-fighter') {
-            style['color'] = 'red';
+            style['color'] = 'teal';
         } else if(this.options.attributes.type == 'mil-cargo') {
-            style['color'] = 'DarkRed';
+            style['color'] = 'DarkOliveGreen';
         } else {
             style['color'] = '#3388ff';
         }
@@ -306,7 +323,7 @@ L.ParkingSpot = L.Circle.extend({
           event.target.setInteractive(false);
         });
         this.on('remove', function (event) {
-            console.debug(event);
+            console.debug(util.inspect(event));
             if(event.target.box !== undefined) {
                 event.target.box.removeFrom(event.target._map);
             }
@@ -328,15 +345,17 @@ L.ParkingSpot = L.Circle.extend({
         });
         this.on('click', function (event) {
             console.debug("Click Parking : " + event.target);
-            if (Number(store.default.state.Editable.index) >= 0 &&
-            this.featureLookup[store.default.state.Editable.index]!==undefined) {
-                this.featureLookup[store.default.state.Editable.index].forEach(element => {
-                    if(element.deselect !== undefined) {
-                        element.deselect();
-                    }
-                });
+            if (this.featureLookup !== undefined) {
+                if (Number(store.default.state.Editable.index) >= 0 &&
+                this.featureLookup[store.default.state.Editable.index]!==undefined) {
+                    this.featureLookup[store.default.state.Editable.index].forEach(element => {
+                        if(element.deselect !== undefined) {
+                            element.deselect();
+                        }
+                    });
+                }
+                event.target.select();
             }
-            event.target.select();
         });
         this.on('editable:vertex:clicked', function (event) {
             console.debug(this.featureLookup[event.vertex.glueindex]);
@@ -447,7 +466,7 @@ L.ParkingSpot = L.Circle.extend({
 
 });
 
-var parkingSpot = function (n, layerGroup) {
+var createParkingSpot = function (n, layerGroup) {
     //console.log(n.attr('lat') + " " + n.attr('lon'));
     var latlon = convert(n.attr('lat') + " " + n.attr('lon'));
     //console.log(latlon.decimalLatitude);
@@ -489,4 +508,4 @@ airlineCodes="VIR,KAL,DAL,KLM" />
     return parking;
 }
 
-module.exports = parkingSpot;
+export default createParkingSpot;

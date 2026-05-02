@@ -203,6 +203,7 @@ async function checkGroundnet(data) {
             var multiplePushbackRoutes = {};
             parkings.forEach(parkingNode => {
                 pushbackNodes.forEach(pushbackNode => {
+                    console.log(`Checking route from parking ${parkingNode} to pushback ${pushbackNode}`);
                     var numRoutes = checkRoute(noPushbackGraph, parkingNode, pushbackNode);
                     if (numRoutes === 0) {
                         if (multiplePushbackRoutes[parkingNode] === undefined &&
@@ -333,7 +334,7 @@ async function checkGroundnet(data) {
             // Check for intersecting radii
             parkingNodes.forEach(parkingNode => {
                 parkingNodes.forEach(parkingNode1 => {
-                    console.log(parkingNode, parkingNode1);
+                    console.log(parkingNode['index'], parkingNode1['index']);
                     if (parkingNode.index !== parkingNode1.index) {
                         var d = distance([parkingNode.lng, parkingNode.lat],
                             [parkingNode1.lng, parkingNode1.lat]);

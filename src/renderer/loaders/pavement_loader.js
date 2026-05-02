@@ -269,7 +269,7 @@ function createLineString(currentFeature, layerGroup) {
 }
 
 module.exports.readPavement = function (f, icao, callback) {
-    console.log(f);
+    console.log(f, icao);
     var pavementLayerGroup = L.layerGroup();
     var currentFeature;
 
@@ -309,6 +309,8 @@ module.exports.readPavement = function (f, icao, callback) {
             lr.close();
             callback();
         }).on('close', function () {
+            store.default.dispatch('addRunway', [icao, exports.runways]);
+
             store.default.dispatch('setPavementLoaded', true);
             console.log("End");
             callback(pavementLayerGroup);
@@ -326,6 +328,7 @@ module.exports.isScanning = false;
 module.exports.colour = 'grey';
 module.exports.type = 0;
 module.exports.bezierPoint = null;
+module.exports.runways = [];
 
 
 var scanMethods = {
@@ -364,6 +367,8 @@ var scanMethods = {
     100: (line, icao, layerGroup) => {
         if (module.exports.isScanning) {
             console.debug('Runway ', line);
+            module.exports.runways.push(line[8]);
+            module.exports.runways.push(line[17]);
             var point1 = new LatLonEllipsoidal(Number(line[9]), Number(line[10]));
             var point2 = new LatLonEllipsoidal(Number(line[18]), Number(line[19]));
 

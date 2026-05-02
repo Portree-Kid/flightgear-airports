@@ -4,7 +4,7 @@ const path = require('path');
 var xamel = require('xamel');
 const convert = require('geo-coordinates-parser');
 
-const parkingSpot = require('./ParkingSpot.js');
+const createParkingSpot = require('./ParkingSpot.js');
 const runwayNode = require('./RunwayNode.js');
 const holdNode = require('./HoldNode.js');
 const extendTaxiSegment = require('./TaxiwaySegmentExtender').extendTaxiSegment;
@@ -72,7 +72,7 @@ exports.readGroundnetXML = function (fDir, icao, f) {
         xamel.parse(xmlGroundnet, function (err, xml) {
             console.debug("parsed " + path.basename(f));
             if (err !== null) {
-                console.error("Error in " + airline);
+                console.error("Error in " + f);
                 throw err;
             }
             // <frequencies>
@@ -110,7 +110,8 @@ exports.readGroundnetXML = function (fDir, icao, f) {
 
 
             parkingNodes.map(n => {
-                var circle = parkingSpot(n, layerGroup);
+                var functionType = typeof createParkingSpot === 'function';
+                var circle = functionType ? createParkingSpot(n, layerGroup) : createParkingSpot.default(n, layerGroup);
                 nodesLookup[n.attr('index')] = n;
                 featureLookup[n.attr('index')] = new Array();
                 featureLookup[n.attr('index')].push(circle);

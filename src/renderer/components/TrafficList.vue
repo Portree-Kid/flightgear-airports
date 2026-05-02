@@ -10,46 +10,56 @@ FG Airports is distributed in the hope that it will be useful, but WITHOUT ANY W
 You should have received a copy of the GNU General Public License along with FG Airports. If not, see http://www.gnu.org/licenses/.
 -->
 <template>
-  <div>
-    <el-radio-group v-model="direction">
-      <el-radio :label="departure"
-        ><i class="fas fa-plane-departure"></i
-      ></el-radio>
-      <el-radio :label="arrival"><i class="fas fa-plane-arrival"></i></el-radio>
-    </el-radio-group>
-    <el-collapse v-model="activeName" accordion ref="collapse">
-      <el-collapse-item
-        v-for="a in airlines"
-        v-bind:key="a.index"
-        class="row"
-        :title="a.label"
-        :name="a.label"
-      >
-        <AirlineItem :airline="a" ref="airline"></AirlineItem>
-      </el-collapse-item>
-    </el-collapse>
-    <el-popover
-      placement="top-start"
-      title="Add Test Traffic"
-      width="200"
-      trigger="hover"
-      content="Generate Testtraffic"
-    >
-      <el-button @click="generate" class="button" slot="reference">
-        <i class="fas fa-notes-medical"></i>
-      </el-button>
-    </el-popover>
-  </div>
+    <div>
+        <el-radio-group v-model="direction">
+            <el-radio :label="departure">
+                <i class="fas fa-plane-departure"></i>
+            </el-radio>
+            <el-radio :label="arrival"><i class="fas fa-plane-arrival"></i></el-radio>
+        </el-radio-group>
+        <el-button @click="generate" class="button" slot="reference">
+            <i class="fas fa-notes-medical"></i>
+        </el-button>
+        <el-collapse v-model="activeName" accordion ref="collapse">
+            <el-collapse-item v-for="a in airlines"
+                              v-bind:key="a.index"
+                              class="row"
+                              :title="a.label"
+                              :name="a.label">
+                <AirlineItem :airline="a" ref="airline"></AirlineItem>
+            </el-collapse-item>
+        </el-collapse>
+        <el-popover placement="top-start"
+                    title="Add Test Traffic"
+                    width="200"
+                    trigger="hover"
+                    content="Generate Testtraffic">
+        </el-popover>
+    </div>
 </template>
 
 <script lang="js">
   import AirlineItem from './AirlineItem'
   import {writeTrafficXML} from '../loaders/traffic_writer'
+  import {readTraffic} from '../loaders/traffic_loader'
 
   export default {
     name: 'traffic-list',
     components: {AirlineItem},
-    props: [],
+    props: {},
+    async mounted () {
+      console.debug('mounted traffic list')
+      this.$store.watch(
+        function (state) {
+          return state.Airports.currentAirport.icao
+        },
+        () => { readTraffic(this.$store.state.Settings.settings.flightgearDirectory_traffic) }
+        ,
+        {
+          deep: true //  add this if u need to watch object properties change etc.
+        }
+      )
+    },
     data () {
       return {
         activeName: '',

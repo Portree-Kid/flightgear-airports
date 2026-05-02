@@ -331,6 +331,18 @@ const extendTaxiSegment = function (taxiwaySegment) {
                 });
             }
             if (!this.editor.map.editTools.drawing()) {
+                if (this.featureLookup[event.vertex.latlng.glueindex]===undefined) {
+                    console.error('GlueIndex not found : ', event.vertex.latlng.glueindex);
+                    editLayer.groundnetLayerGroup.eachLayer(layer => {
+                        if (layer instanceof L.Polyline) {
+                            layer.getLatLngs().forEach(latlng => {
+                                console.debug(latlng);
+
+                            });
+                        }
+                      }
+                    );
+                }
                 var hold = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.HoldNode);
                 if (hold.length > 0) {
                     hold[0].select();
@@ -362,6 +374,18 @@ const extendTaxiSegment = function (taxiwaySegment) {
                 });
             }
             if (!this.editor.map.editTools.drawing()) {
+                if (this.featureLookup[event.vertex.latlng.glueindex]===undefined) {
+                    console.error('GlueIndex not found : ', event.vertex.latlng.glueindex);
+                    editLayer.groundnetLayerGroup.eachLayer(layer => {
+                        if (layer instanceof L.Polyline) {
+                            layer.getLatLngs().forEach(latlng => {
+                                console.debug(latlng);
+
+                            });
+                        }
+                      }
+                    );
+                }
                 var hold = this.featureLookup[event.vertex.latlng.glueindex].filter(n => n instanceof L.HoldNode);
                 if (hold.length > 0) {
                     hold[0].select();

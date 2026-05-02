@@ -83,9 +83,9 @@ var holdNode = function (n, layerGroup) {
     var latlon = convert(n.attr('lat') + " " + n.attr('lon'));
     var fa_icon = null;
     if (n.attr('holdPointType') === 'PushBack') {
-        fa_icon = "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-arrows-alt-h'></i>";
+        fa_icon = "<div style='background-color:#4838cc;' class='marker-pin' id='" + n.attr('index') + "' ></div><i class='fas fa-arrows-alt-h'></i>";
     } else if (n.attr('holdPointType') === 'normal') {
-        fa_icon = "<div style='background-color:#4838cc;' class='marker-pin'></div><i class='fas fa-hand-paper'></i>";
+        fa_icon = "<div style='background-color:#4838cc;' class='marker-pin'  id='" + n.attr('index') + "' ></div><i class='fas fa-hand-paper'></i>";
     }
     const icon = new L.DivIcon({
         className: 'custom-div-icon',

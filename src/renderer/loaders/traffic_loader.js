@@ -18,14 +18,21 @@ const store = require('../store');
 
 const util = require('util');
 
-exports.readTrafficXML = function (f) {
+exports.readTraffic = function(dir) {
+    if (!fs.existsSync(dir)) {
+        return;
+    }
+    scanDir(dir);
+};
+
+function readTrafficXML(f) {
     try {
         var ret = [];
         var xmlTraffic = fs.readFileSync(f, 'utf8').toString();
         xamel.parse(xmlTraffic, function (err, xml) {
             console.debug("parsed " + path.basename(f));
             if (err !== null) {
-                console.error("Error in " + airline);
+                console.error("Error in " + f + " : " + err);
                 throw err;
             }
 
@@ -63,6 +70,18 @@ exports.readTrafficXML = function (f) {
     <repeat>WEEK</repeat>
   </flight>
 */
+
+function scanDir (dir) {
+    fs.readdirSync(dir).forEach(file => {
+        let fullPath = path.join(dir, file)
+        if (fs.lstatSync(fullPath).isDirectory()) {
+            scanDir(fullPath);
+        } else {
+            readTrafficXML(fullPath);
+        }
+    });
+
+}
 
 function flightMapper(params) {
     return {

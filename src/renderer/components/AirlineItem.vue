@@ -19,7 +19,6 @@ You should have received a copy of the GNU General Public License along with FG 
 </template>
 
 <script lang="js">
-  import {readTrafficXML} from '../loaders/traffic_loader'
   import ParkingItem from './ParkingItem'
   const fs = require('fs')
   const path = require('path')
@@ -63,9 +62,10 @@ export default {
         }
       },
       trafficFile: function () {
-        return readTrafficXML(this.filename)
+        return ''
       },
       traffic: function () {
+        /*
         if (this.filename) {
           var aircraftLookup = this.trafficFile.filter(a => a['required-aircraft'])
             .reduce((req, acc) => {
@@ -79,6 +79,7 @@ export default {
             .filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i)
           return ret
         }
+       */
       },
       aircraft: function () {
         if (this.filename) {

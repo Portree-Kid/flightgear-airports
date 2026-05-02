@@ -31,7 +31,11 @@
       // getter
         get: function () {
           if (this.$store.state.Parkings.items !== undefined) {
-            return this.$store.state.Parkings.items
+            return this.$store.state.Parkings.items.sort((a, b) => {
+              var aKey = a['name'] + a['number'].padStart(3, '0')
+              var bKey = b['name'] + b['number'].padStart(3, '0')
+              return aKey.localeCompare(bKey)
+            })
           }
         },
         // setter

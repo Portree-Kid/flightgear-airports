@@ -23,6 +23,12 @@ const mutations = {
   },
   SET_PAVEMENT_LOADED (state, loaded) {
     Vue.set(state, 'pavementLoaded', loaded)
+  },
+  SET_RWYUSE_LOADED (state, loaded) {
+    Vue.set(state, 'rwyuseLoaded', loaded)
+  },
+  SET_PROCEDURES_LOADED (state, loaded) {
+    Vue.set(state, 'proceduresLoaded', loaded)
   }
 }
 
@@ -41,6 +47,18 @@ const actions = {
       console.error('Not Boolean')
     }
     context.commit('SET_PAVEMENT_LOADED', p)
+  },
+  async setRwyUseLoaded (context, p) {
+    if (typeof p !== 'boolean') {
+      console.error('Not Boolean')
+    }
+    context.commit('SET_RWYUSE_LOADED', p)
+  },
+  async setProceduresLoaded (context, p) {
+    if (typeof p !== 'boolean') {
+      console.error('Not Boolean')
+    }
+    context.commit('SET_PROCEDURES_LOADED', p)
   }
 }
 

@@ -1,5 +1,5 @@
 /* eslint-disable */
-import idb from '../api/airports';
+import {default as idb} from '../api/airports';
 import Vue from 'vue';
 
 const ADD_AIRPORT = 'ADD_AIRPORT';
@@ -67,6 +67,33 @@ const actions = {
       if (airport[0] !== undefined && !airport[0].properties.airlines.includes(airlineCode)) {
         airport[0].properties.airlines.push(airlineCode);
         airport[0].properties.airlines.sort();
+      }
+      context.commit(UPDATE_CURRENT_AIRPORT, airport[0]);            
+    } catch (error) {
+      console.error(error);      
+    }
+  },
+  async addRunway(context, runwayDesignator) {
+    try {
+      console.log(runwayDesignator);
+      console.log(idb);
+      let airports = await idb.getAirports();
+      let searchRegex = new RegExp(runwayDesignator[0], 'i');
+      let airport = airports
+      .filter(point => typeof point.geometry.coordinates !== "undefined" )
+      .filter(a => searchRegex.test(a.properties.icao));
+      if (airport[0] !== undefined) {
+          if (airport[0].properties['runways'] == undefined) {
+              airport[0].properties['runways'] = [];
+          }
+          airport[0].properties.runways = [];
+          console.log(airport[0].properties.runways);
+          runwayDesignator[1].forEach( r => {
+              if (!airport[0].properties.runways.includes(r)) {
+                airport[0].properties.runways.push(r);
+                airport[0].properties.runways.sort();
+              }
+          } );
       }
       context.commit(UPDATE_CURRENT_AIRPORT, airport[0]);            
     } catch (error) {

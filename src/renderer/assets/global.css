@@ -4,12 +4,36 @@
     border-radius: 50% 50% 50% 0;
     background: #c30b82;
     position: absolute;
-    transform: rotate(-45deg);
     left: 50%;
     top: 50%;
     margin: -15px 0 0 -15px;
   }
-  
+
+    .marker-pin::before {
+        /* needed - do not touch */
+        content: attr(id);
+        position: absolute;
+        opacity: 0;
+        /* customizable */
+        transition: all 0.15s ease;
+        padding: 10px;
+        color: #333;
+        border-radius: 5px;
+        border: thin solid black;  
+        box-shadow: 2px 2px 1px silver;
+    }
+
+    .marker-pin:hover::before {
+        opacity: 1;
+        background: white;
+        margin-top: -50px;
+        margin-left: 20px;
+    }
+
+    .marker-pin:not([data-tooltip-persistent])::before {
+        pointer-events: none;
+    }
+
   .marker-pin::after {
       content: '';
       width: 24px;
@@ -34,4 +58,3 @@
      margin: 8px auto;
      font-size: 12px;
   }
-  

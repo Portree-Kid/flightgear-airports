@@ -236,7 +236,7 @@ You should have received a copy of the GNU General Public License along with FG 
           return;
         }
         this.groundnetLayerGroup.eachLayer(l => {
-          l.enableEdit()
+          l.enableEdit();
           l.featureLookup = this.featureLookup;
           if (typeof l.extensions === 'function') {
             l.extensions(this)
@@ -301,9 +301,9 @@ You should have received a copy of the GNU General Public License along with FG 
         this.$store.commit('SET_EDIT', false)
         this.groundnetLayerGroup.eachLayer(l => {
           if (typeof l.setInteractive === 'function') {
-            l.setInteractive(false)
+            l.setInteractive(false);
           }
-          l.disableEdit()
+          l.disableEdit();
         })
       },
       deleteFeature () {
@@ -971,12 +971,12 @@ You should have received a copy of the GNU General Public License along with FG 
         const newIndex = (++this.groundnetLayerGroup.maxId)
         const circle = new L.ParkingSpot(event.latlng, {attributes: {index: newIndex, radius: 26, heading: 0, type: 'gate'}})
         circle.id = newIndex
-        circle.glueindex = circle.id
-        circle.addTo(this.groundnetLayerGroup)
-        circle.featureLookup = this.featureLookup
-        circle.addListeners()
-        circle.enableEdit()
-        circle.extensions()
+        circle.glueindex = circle.id;
+        circle.addTo(this.groundnetLayerGroup);
+        circle.featureLookup = this.featureLookup;
+        circle.addListeners();
+        circle.enableEdit();
+        circle.extensions();
         circle.updateVertexFromDirection();
         circle.updateWheelPos();
         circle.updateBox();
@@ -990,8 +990,8 @@ You should have received a copy of the GNU General Public License along with FG 
         }
         this.$store.dispatch('setParking', circle.options.attributes);
         this.$store.dispatch('setParkingCoords', circle.getLatLng().lat.toFixed(6) + ' ' + circle.getLatLng().lng.toFixed(6));
-        circle.select()
-        addFeature(circle)
+        circle.select();
+        addFeature(circle);
         // console.log(this.groundnetLayerGroup)
         this.$parent.mapObject.off('click', this.addParking)
         this.$parent.mapObject._container.style.cursor = ''
@@ -1089,7 +1089,7 @@ You should have received a copy of the GNU General Public License along with FG 
         var xml = []
         this.groundnetLayerGroup.eachLayer(l => {
           //console.debug(l)
-          xml.push(l)
+          xml.push(l);
         })
         writeGroundnetXML(this.$store.state.Settings.settings.airportsDirectory, this.icao, xml)
       },

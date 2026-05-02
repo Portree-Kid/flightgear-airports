@@ -75,6 +75,8 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         for (let index = 1; index <= store.default.state.Settings.settings.numberOfSaves; index++) {
             fileNames.push(path.join(fDir, icao[0], icao[1], icao[2], icao + `.groundnet.bak.${index}.xml`));
         }
+        var fOld = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.xml');
+
         var f = path.join(fDir, icao[0], icao[1], icao[2], icao + '.groundnet.new.xml');
 
         if( fs.existsSync(f) ) {
@@ -251,6 +253,9 @@ exports.writeGroundnetXML = function (fDir, icao, featureList) {
         xmlString = builder.create(xmlObj).end({ pretty: true });
         fs.writeFileSync(f, xmlString);
         console.debug(xmlString);
+        if (!fs.existsSync(fOld)) {
+            fs.writeFileSync(fOld, xmlString);
+        }
     } catch (error) {
         console.error(error);
     }
